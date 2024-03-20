@@ -1,42 +1,92 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+@import url('https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&family=Space+Grotesk:wght@300..700&display=swap');
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Space Grotesk';
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+body {
+  font-family: 'Lexend Deca';
+  color: #004423;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+header {
+  background-color: #00844E;
+  color: #E9F7EE;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.colored {
+  color: #004423;
+  background-color: #E9F7EE;
+  border-radius: 40px;
+  padding: 2px 24px;
 }
 
-.card {
-  padding: 2em;
+.btn {
+  background-color: #004423;
+  color: #E9F7EE;
+  font-family: 'Space Grotesk';
+  font-weight: bold;
+  padding: 16px 40px;
+  border-radius: 32px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
 }
 
-.read-the-docs {
-  color: #888;
+.btn__secondary {
+  font-family: 'Space Grotesk';
+  text-decoration: none;
+  font-weight: bold; 
+}
+
+.btn__inverse {
+  font-family: 'Space Grotesk';
+  padding: 14px 48px;
+  border-radius: 25px;
+  color: #004423;
+  background-color: #E9F7EE;
+  font-weight: bold;
+}
+
+.steps {
+  background-color: #004423;
+}
+
+.step__active,
+.step-container {
+  background-color: #E9F7EE;
+}
+
+.step {
+  font-family: 'Space Grotesk';
+  text-decoration: none;
+  color: #E9F7EE;
+}
+
+.step__active {
+  color: #004423;
+}
+
+.target,
+.persona {
+  background-color: #BFE6CE;
+}
+
+.persona {
+  color: #E9F7EE;
+}
+
+.opinion {
+  background-color: #E9F7EE;
+  font-family: 'Space Grotesk';
+}
+
+.title {
+  color: #95D4AF;
+}
+
+footer {
+  background-color: #00592F;
+  color: #E9F7EE;
 }
