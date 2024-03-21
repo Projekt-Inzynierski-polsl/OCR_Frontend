@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&family=Space+Grotesk:wght@300..700&display=swap');
+
+body {
+  font-family: 'Lexend Deca';
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: "Space Grotesk";
+}
+
+header {
+  background-color: #00844e;
+  color: #e9f7ee;
+}
+
+.colored {
+  color: #004423;
+  background-color: #e9f7ee;
+  border-radius: 40px;
+  padding: 2px 24px;
+}
+
+.btn {
+  background-color: #004423;
+  color: #e9f7ee;
+  font-family: "Space Grotesk";
+  font-weight: bold;
+  padding: 16px 40px;
+  border-radius: 32px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn__secondary {
+  font-family: "Space Grotesk";
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.btn__inverse {
+  font-family: "Space Grotesk";
+  padding: 14px 48px;
+  border-radius: 25px;
+  color: #004423;
+  background-color: #e9f7ee;
+  font-weight: bold;
+}
+
+.steps {
+  background-color: #004423;
+}
+
+.step__active,
+.step-container {
+  background-color: #e9f7ee;
+}
+
+.step {
+  font-family: "Space Grotesk";
+  text-decoration: none;
+  color: #e9f7ee;
+}
+
+.step__active {
+  color: #004423;
+}
+
+.target,
+.persona {
+  background-color: #bfe6ce;
+}
+
+.persona {
+  color: #e9f7ee;
+}
+
+.opinion {
+  background-color: #e9f7ee;
+  font-family: "Space Grotesk";
+}
+
+.title {
+  color: #95d4af;
+}
+
+footer {
+  background-color: #00592f;
+  color: #e9f7ee;
+}
