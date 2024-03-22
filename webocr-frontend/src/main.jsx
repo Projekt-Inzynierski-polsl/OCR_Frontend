@@ -4,12 +4,14 @@ import App from './App.jsx'
 import './index.css'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
+import FirstNote from "@/src/pages/FirstNote.jsx";
 
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
 import Home from './pages/Home.jsx'
+
 
 
 const router = createBrowserRouter([
@@ -24,6 +26,10 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <Register />,
+  },
+  {
+    path: "/hello",
+    element: <FirstNote />,
   },
 ]);
 

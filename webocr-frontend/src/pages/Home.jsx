@@ -1,5 +1,4 @@
 import "../common/Home.css";
-import Navbar from "../components/Navbar.jsx";
 import styled from 'styled-components';
 
 const HeroHeader = styled.h1`
@@ -7,11 +6,22 @@ const HeroHeader = styled.h1`
 
 `;
 
+const HomeNavbar = styled.header`
+  background-color: #00844e;
+  color: #e9f7ee;
+`;
+
 function Home() {
   return (
     <>
-      <header>
-        <Navbar></Navbar>
+      <HomeNavbar>
+        <nav className='flex flex-row items-center justify-between px-96 pt-8'>
+          <img src="/logo.svg" alt=""/>
+          <div className="button-container flex flex-row items-center gap-8">
+            <a href="/login" className='text-lg btn__secondary'>Zaloguj się</a>
+            <a href="/register" className="text-lg btn__inverse">Zarejestruj się</a>
+          </div>
+        </nav>
         <div className="hero w-screen flex flex-col justify-center items-center py-24">
           <HeroHeader className="text-6xl font-bold">
             cyfrowy dom dla <span className="colored">Twoich notatek.</span>
@@ -22,10 +32,10 @@ function Home() {
           </p>
           <a href="" className="btn text-xl mt-16">
             Sprawdź platformę
-            <img src="/arrow.svg" alt="" />
+            <img src="/arrow.svg" alt=""/>
           </a>
         </div>
-      </header>
+      </HomeNavbar>
       <main>
         <div className="content ml-64 mt-32 grid grid-cols-2 gap-16">
           <div className="text">
