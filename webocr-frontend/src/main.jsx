@@ -5,6 +5,7 @@ import './index.css'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import FirstNote from "@/src/pages/FirstNote.jsx";
+import Sidebar from "@/src/components/Sidebar.jsx";
 
 import {
   createBrowserRouter,
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
   {
     path: "/hello",
     element: <FirstNote />,
+  },
+  {
+    path: "/dashboard",
+    element: <Sidebar />,
   },
 ]);
 
