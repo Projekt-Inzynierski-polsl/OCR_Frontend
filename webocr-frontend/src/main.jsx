@@ -17,6 +17,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import Home from './pages/Home.jsx'
+import EditProfile from "@/src/pages/EditProfile.jsx";
 
 
 
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
   {
     path: "/check-error",
     element: <CheckScanError />,
+  },
+  {
+    path: "/edit-profile",
+    element: <EditProfile />,
   },
 ]);
 
