@@ -9,6 +9,7 @@ import Note from "@/src/pages/Note.jsx";
 import AdminDashboard from "@/src/pages/AdminDashboard.jsx";
 import UserManagement from "@/src/pages/UserManagement.jsx";
 import ScanErrors from "@/src/pages/ScanErrors.jsx";
+import CheckScanError from "@/src/pages/CheckScanError.jsx";
 
 
 import {
@@ -51,6 +52,10 @@ const router = createBrowserRouter([
   {
     path: "/errors",
     element: <ScanErrors />,
+  },
+  {
+    path: "/check-error",
+    element: <CheckScanError />,
   },
 ]);
 

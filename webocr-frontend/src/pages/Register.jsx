@@ -40,14 +40,14 @@ function Register() {
           <img src="./logo_black.png" alt="" />
           <LoginHeader className="text-4xl mt-24">Stwórz darmowe konto </LoginHeader>
           <p className="mt-2">Masz już konto?
-            <span class="ml-1">
+            <span className="ml-1">
             <a href="" className="underline">Zaloguj się!</a>
             </span>
           </p>
-          <Input type="text" placeholder="Nazwa użytkownika" className="mt-12 py-6 w-2/3" />
-          <Input type="email" placeholder="Adres email" className="mt-6 py-6 w-2/3" />
-          <Input type="password" placeholder="Hasło" className="mt-6 py-6 w-2/3" />
-          <Input type="password" placeholder="Powtórz hasło" className="mt-6 py-6 w-2/3" />
+          <Input type="text" placeholder="Nazwa użytkownika" className="mt-12 py-6 w-2/3 border-slate-300" />
+          <Input type="email" placeholder="Adres email" className="mt-6 py-6 w-2/3 border-slate-300" />
+          <Input type="password" placeholder="Hasło" className="mt-6 py-6 w-2/3 border-slate-300" />
+          <Input type="password" placeholder="Powtórz hasło" className="mt-6 py-6 w-2/3 border-slate-300" />
           <p className="mt-6 text-sm">Kontynuując proces rejestracji, akceptujesz postanowienia Regulaminu.</p>
           <RegisterButton className="text-md mt-16">
             Zarejestruj się

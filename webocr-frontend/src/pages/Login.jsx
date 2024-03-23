@@ -31,12 +31,12 @@ function Login() {
           <img src="./logo_black.png" alt="" />
           <LoginHeader className="text-4xl mt-24">Zaloguj się do platformy</LoginHeader>
           <p className="mt-2">Nie masz jeszcze konta? 
-            <span class="ml-1">
+            <span className="ml-1">
             <a href="" className="underline">Zarejestruj się za darmo!</a>
             </span>
           </p>
-          <Input type="text" placeholder="Adres email lub nazwa użytkownika" className="mt-12 py-6 w-2/3" />
-          <Input type="password" placeholder="Hasło" className="mt-6 py-6 w-2/3" />
+          <Input type="text" placeholder="Adres email lub nazwa użytkownika" className="mt-12 py-6 w-2/3 border-slate-300" />
+          <Input type="password" placeholder="Hasło" className="mt-6 py-6 w-2/3 border-slate-300" />
           <LoginButton className="text-md mt-10">
             Zaloguj się
         </LoginButton>
