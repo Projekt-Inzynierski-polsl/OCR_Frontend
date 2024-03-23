@@ -11,7 +11,6 @@ const SidebarBody = styled.div`
     color: #374151;
     height: 100vh;
     padding-top: 64px;
-    width: 385px;
     font-family: 'Space Grotesk';
 `;
 
