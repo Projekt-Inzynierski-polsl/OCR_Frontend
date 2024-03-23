@@ -7,6 +7,7 @@ import Register from './pages/Register.jsx'
 import FirstNote from "@/src/pages/FirstNote.jsx";
 import Note from "@/src/pages/Note.jsx";
 import AdminDashboard from "@/src/pages/AdminDashboard.jsx";
+import UserManagement from "@/src/pages/UserManagement.jsx";
 
 
 import {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: "/admin",
     element: <AdminDashboard />,
+  },
+  {
+    path: "/users",
+    element: <UserManagement />,
   },
 ]);
 
