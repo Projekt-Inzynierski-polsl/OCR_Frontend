@@ -8,6 +8,7 @@ import FirstNote from "@/src/pages/FirstNote.jsx";
 import Note from "@/src/pages/Note.jsx";
 import AdminDashboard from "@/src/pages/AdminDashboard.jsx";
 import UserManagement from "@/src/pages/UserManagement.jsx";
+import ScanErrors from "@/src/pages/ScanErrors.jsx";
 
 
 import {
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
   {
     path: "/users",
     element: <UserManagement />,
+  },
+  {
+    path: "/errors",
+    element: <ScanErrors />,
   },
 ]);
 
