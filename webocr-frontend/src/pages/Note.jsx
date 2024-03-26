@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import Navbar from "../components/Navbar.jsx";
 import Sidebar from "../components/Sidebar.jsx";
 import {
@@ -54,8 +54,6 @@ const NoteHeader = styled.h1`
   word-break: break-word;
   width: 100%;
   max-width: 100%;
-
-  
 `;
 
 const DialogButton = styled.button`
@@ -71,7 +69,6 @@ const DialogButton = styled.button`
 const SelectWithIcon = styled.div`
   font-family: "Space Grotesk";
 `;
-
 
 function Note() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -91,8 +88,13 @@ function Note() {
     if (e.target.innerText.trim() === "") {
       e.target.innerText = "";
     }
-  }
+  };
 
+  const [shareType, setShareType] = useState("only-user");
+
+  const handleShareTypeChange = (e) => {
+    setShareType(e.target.value);
+  };
 
   return (
     <>
@@ -183,41 +185,51 @@ function Note() {
                       <p className="mb-6">
                         Zdecyduj, czy Twoja notatka ma być widoczna dla innych.
                       </p>
-                      <Select>
+                      <Select onValueChange={(value) => setShareType(value)}>
                         <SelectTrigger className="w-[320px] py-6 border-slate-400">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
                           <SelectItem
                             className="bg-white focus:bg-slate-200"
-                            value="pdf"
+                            value="only-user"
                           >
-                            <SelectWithIcon className="flex flex-row gap-5">
+                            <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
                               <img src="/lock.svg" alt="" />
                               <p className="font-bold">Tylko dla Ciebie</p>
                             </SelectWithIcon>
                           </SelectItem>
-                          <SelectItem>
-                            <SelectWithIcon className="flex flex-row gap-5">
+                          <SelectItem
+                            className="bg-white focus:bg-slate-200"
+                            value="all-users"
+                          >
+                            <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
                               <img src="/globe.svg" alt="" />
                               <p className="font-bold">Dostęp dla każdego</p>
                             </SelectWithIcon>
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                      <p className="font-bold text-sm mt-6">Link do notatki</p>
-                      <div className="share-url-container flex flex-row">
-                        
-                      <Input
-                        type="text"
-                        placeholder="https://webocr.pl/r194-ret-testowa"
-                        className="mt-4 py-6 w-[300px] border-slate-300"
-                        readonly="true"
-                      />
-                      <button className="mt-4 ml-2 border border-slate-900 inline-flex items-center justify-center h-12 px-3">
-                        <img src="/copy.svg" alt="" />
-                      </button>
-                      </div>
+
+                      {shareType === "all-users" && (
+                        <Fragment>
+                          <p className="font-bold text-sm mt-6">
+                            Link do notatki
+                          </p>
+                          <div className="share-url-container flex flex-row">
+                            <Input
+                              type="text"
+                              value="https://webocr.pl/r194-ret-testowa"
+                              className="mt-4 py-6 w-[300px] border-slate-300"
+                              readonly="true"
+                            />
+                            <button className="mt-4 ml-2 border border-slate-900 inline-flex items-center justify-center h-12 px-3">
+                              <img src="/copy.svg" alt="" />
+                            </button>
+                          </div>
+                        </Fragment>
+                      )}
+
                       <DialogButton onClick={shareNoteHandler}>
                         Zamknij
                       </DialogButton>
