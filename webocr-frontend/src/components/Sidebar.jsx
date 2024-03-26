@@ -6,6 +6,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { PopoverClose } from "@radix-ui/react-popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 import { Input } from "@/components/ui/input";
 
@@ -19,6 +25,10 @@ const SidebarBody = styled.div`
 
 const FolderHint = styled.p`
   color: #9ca3af;
+`;
+
+const PopoverHeader = styled.p`
+  font-family: "Space Grotesk";
 `;
 
 import {
@@ -48,8 +58,23 @@ const DialogButton = styled.button`
 `;
 
 function Sidebar() {
-    const [newFolderName, setNewFolderName] = useState("");
-    const [addNewFolderDialogOpen, setAddNewFolderDialogOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [addNewFolderDialogOpen, setAddNewFolderDialogOpen] = useState(false);
+  const [availableIcons, setAvailableIcons] = useState([
+    {
+      id: 1,
+      src: "/home.png",
+    },
+    {
+      id: 2,
+      src: "/home_active.png",
+    },
+    {
+      id: 3,
+      src: "/folder.png",
+    },
+  ]);
+
   const [userFolders, setUserFolders] = useState([
     {
       id: 1,
@@ -72,6 +97,7 @@ function Sidebar() {
           url: "/note-3",
         },
       ],
+      icon: "/folder.png",
     },
     {
       id: 2,
@@ -84,6 +110,7 @@ function Sidebar() {
           url: "/note-2",
         },
       ],
+      icon: "/folder.png",
     },
     {
       id: 3,
@@ -96,6 +123,7 @@ function Sidebar() {
           url: "/note-3",
         },
       ],
+      icon: "/folder.png",
     },
   ]);
 
@@ -109,6 +137,14 @@ function Sidebar() {
     });
     setNewFolderName("");
     setUserFolders(folders);
+  };
+
+  const editFolderIcon = (folderId, icon) => {
+    const folders = [...userFolders];
+    const folder = folders.find((folder) => folder.id === folderId);
+    folder.icon = icon;
+    setUserFolders(folders);
+    setChangeIconPopoverOpen(false);
   };
 
   return (
@@ -151,11 +187,12 @@ function Sidebar() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <Dialog open={addNewFolderDialogOpen} onOpenChange={setAddNewFolderDialogOpen}>
+                    <Dialog
+                      open={addNewFolderDialogOpen}
+                      onOpenChange={setAddNewFolderDialogOpen}
+                    >
                       <DialogTrigger asChild>
-                        <button
-                          className="p-2 hover:bg-neutral-200 mr-1"
-                        >
+                        <button className="p-2 hover:bg-neutral-200 mr-1">
                           <img src="/plus.svg" alt="" />
                         </button>
                       </DialogTrigger>
@@ -171,10 +208,13 @@ function Sidebar() {
                               className="mt-4 py-6 w-[300px] border-slate-300"
                               onChange={(e) => setNewFolderName(e.target.value)}
                             />
-                            <DialogButton className="mt-2" onClick={() => {
+                            <DialogButton
+                              className="mt-2"
+                              onClick={() => {
                                 handleAddFolder(newFolderName);
                                 setAddNewFolderDialogOpen(false);
-                            }}>
+                              }}
+                            >
                               Dodaj
                             </DialogButton>
                           </DialogDescription>
@@ -203,14 +243,38 @@ function Sidebar() {
                           <img src="/arr.svg" alt="" />
                         </button>
                       </CollapsibleTrigger>
-
                       <TooltipProvider>
                         <Tooltip>
-                          <TooltipTrigger>
-                            <button className="p-2 hover:bg-neutral-200 mr-1">
-                              <img src="/folder.png" alt="" />
-                            </button>
-                          </TooltipTrigger>
+                          <Popover>
+                            <TooltipTrigger>
+                              <PopoverTrigger>
+                                <button className="p-2 hover:bg-neutral-200 mr-1">
+                                  <img src={folder.icon} alt="" />
+                                </button>
+                              </PopoverTrigger>
+                            </TooltipTrigger>
+                            <PopoverContent className="bg-slate-200 p-4">
+                              <PopoverHeader className="font-bold">
+                                Wybierz ikonę folderu
+                              </PopoverHeader>
+                              <div className="grid grid-cols-4 gap-2 mt-4">
+                                {availableIcons.map((icon) => (
+                                  <>
+                                    <PopoverClose>
+                                      <button
+                                        className="p-2 hover:bg-neutral-200 mr-1 inline-flex items-center justify-center"
+                                        onClick={() =>
+                                          editFolderIcon(folder.id, icon.src)
+                                        }
+                                      >
+                                        <img src={icon.src} alt="" />
+                                      </button>
+                                    </PopoverClose>
+                                  </>
+                                ))}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                           <TooltipContent>
                             <p>Zmień ikonę folderu</p>
                           </TooltipContent>
