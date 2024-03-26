@@ -1,9 +1,8 @@
 import "../common/Home.css";
-import styled from 'styled-components';
+import styled from "styled-components";
 
 const HeroHeader = styled.h1`
-  font-family: 'Space Grotesk';
-
+  font-family: "Space Grotesk";
 `;
 
 const HomeNavbar = styled.header`
@@ -11,15 +10,21 @@ const HomeNavbar = styled.header`
   color: #e9f7ee;
 `;
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 function Home() {
   return (
     <>
       <HomeNavbar>
-        <nav className='flex flex-row items-center justify-between px-96 pt-8'>
-          <img src="/logo.svg" alt=""/>
+        <nav className="flex flex-row items-center justify-between px-96 pt-8">
+          <img src="/logo.svg" alt="" />
           <div className="button-container flex flex-row items-center gap-8">
-            <a href="/login" className='text-lg btn__secondary'>Zaloguj się</a>
-            <a href="/register" className="text-lg btn__inverse">Zarejestruj się</a>
+            <a href="/login" className="text-lg btn__secondary">
+              Zaloguj się
+            </a>
+            <a href="/register" className="text-lg btn__inverse">
+              Zarejestruj się
+            </a>
           </div>
         </nav>
         <div className="hero w-screen flex flex-col justify-center items-center py-24">
@@ -32,7 +37,7 @@ function Home() {
           </p>
           <a href="" className="btn text-xl mt-16">
             Sprawdź platformę
-            <img src="/arrow.svg" alt=""/>
+            <img src="/arrow.svg" alt="" />
           </a>
         </div>
       </HomeNavbar>
@@ -52,26 +57,56 @@ function Home() {
           </div>
           <img src="/alexander-sinn_ai-heart.png" alt="" />
         </div>
-        <div className="features text-center mt-32 mb-64 relative flex flex-col items-center">
-          <h2 className="font-bold text-5xl mt-2 mb-24">notuj w trzech krokach!</h2>
-          <div className="steps mt-16 rounded-3xl absolute top-12 left-1/5 px-4 py-6">
-            <a href="" className="step step__active py-2 px-4 font-bold text-md rounded-full">Zrób zdjęcie</a>
-            <a href="" className="step py-2 px-4 font-bold text-md rounded-full">Zeskanuj tekst</a>
-            <a href="" className="step py-2 px-4 font-bold text-md rounded-full">Edytuj notatkę</a>
-          </div>
-          <div className="step-container grid grid-cols-2 p-32 gap-8 mx-72">
-            <div className="step-container__text-container">
-              <h3 className="text-4xl font-bold text-left">
-                zrób zdjęcie swoim aparatem
-              </h3>
-              <p className="text-left mt-2">
-                wystarczy wyłącznie jedno zdjęcie, by zeskanować Twoją notatkę.
-                ułatwisz pracę naszemu systemowi, jeżeli zadbasz o dobre
-                oświetlenie Twojego zdjęcia i jego ostrość. dzięki temu
-                dokładność będzie znacznie wyższa.
-              </p>
-            </div>
-          </div>
+        <div className="features text-center mt-32 mb-64 relative flex flex-col items-center justify-center">
+          <h2 className="font-bold text-5xl mt-2 mb-24">
+            notuj w trzech krokach!
+          </h2>
+          <Tabs defaultValue="photo" className="" data-orientation="vertical">
+              <TabsList className="mt-16 rounded-3xl absolute top-12 px-4 py-6 bg-[#004423] left-[38%]">
+                <TabsTrigger value="photo" className="step data-[state=active]:bg-[#e9f7ee] py-2 px-4 font-bold text-md rounded-full">Zrób zdjęcie</TabsTrigger>
+                <TabsTrigger value="scan" className="step data-[state=active]:bg-[#e9f7ee] py-2 px-4 font-bold text-md rounded-full">Zeskanuj tekst</TabsTrigger>
+                <TabsTrigger value="edit" className="step data-[state=active]:bg-[#e9f7ee] py-2 px-4 font-bold text-md rounded-full">Edytuj notatkę</TabsTrigger>
+              </TabsList>
+              <TabsContent value="photo">
+                <div className="step-container grid grid-cols-2 p-32 gap-8 mx-72">
+                  <div className="step-container__text-container">
+                    <h3 className="text-4xl font-bold text-left">
+                      zrób zdjęcie swoim aparatem
+                    </h3>
+                    <p className="text-left mt-2">
+                      wystarczy wyłącznie jedno zdjęcie, by zeskanować Twoją
+                      notatkę. ułatwisz pracę naszemu systemowi, jeżeli zadbasz
+                      o dobre oświetlenie Twojego zdjęcia i jego ostrość. dzięki
+                      temu dokładność będzie znacznie wyższa.
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="scan">
+                <div className="step-container grid grid-cols-2 p-32 gap-8 mx-72">
+                  <div className="step-container__text-container">
+                    <h3 className="text-4xl font-bold text-left">
+                      zeskanuj notatkę korzystając z OCR
+                    </h3>
+                    <p className="text-left mt-2">
+                      wykorzystaj nasz algorytm, by przekształcić zdjęcie w tekst. nasz system rozpozna pismo odręczne i przekształci je w cyfrowy dokument, który możesz edytować.
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="edit">
+                <div className="step-container grid grid-cols-2 p-32 gap-8 mx-72">
+                  <div className="step-container__text-container">
+                    <h3 className="text-4xl font-bold text-left">
+                      edytuj uzyskaną notatkę
+                    </h3>
+                    <p className="text-left mt-2">
+                      po zeskanowaniu, możesz edytować swoją notatkę tak, jakbyś pracował na zwykłym dokumencie. dodawaj, usuwaj, formatuj i zapisuj swoje notatki w jednym miejscu.
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
         </div>
         <div className="target flex flex-col items-center">
           <h3 className="tracking-widest uppercase font-bold text-md text-center pt-10">
@@ -193,7 +228,9 @@ function Home() {
           <img src="/logo.svg" alt="" className="w-32" />
           <p className="mt-4">projektowany z myślą o Tobie</p>
         </div>
-        <p className="text-center pb-4">wykonano w 2024 przez avenq, undefined i zerdzinskiego</p>
+        <p className="text-center pb-4">
+          wykonano w 2024 przez avenq, undefined i zerdzinskiego
+        </p>
       </footer>
     </>
   );
