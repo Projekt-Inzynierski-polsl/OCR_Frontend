@@ -134,6 +134,7 @@ function Sidebar() {
       name: name,
       notesCount: 0,
       notes: [],
+      icon: "/folder.png",
     });
     setNewFolderName("");
     setUserFolders(folders);
