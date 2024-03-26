@@ -7,6 +7,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { Input } from "@/components/ui/input";
+
 const SidebarBody = styled.div`
   background-color: #f3f4f6;
   color: #374151;
@@ -20,15 +22,37 @@ const FolderHint = styled.p`
 `;
 
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { NavLink } from "react-router-dom";
 
+const DialogButton = styled.button`
+  background-color: #004423;
+  color: #e9f7ee;
+  font-family: "Space Grotesk";
+  font-weight: bold;
+  padding: 12px 48px;
+  border-radius: 5px;
+  margin-top: 32px;
+`;
+
 function Sidebar() {
+    const [newFolderName, setNewFolderName] = useState("");
+    const [addNewFolderDialogOpen, setAddNewFolderDialogOpen] = useState(false);
   const [userFolders, setUserFolders] = useState([
     {
+      id: 1,
       name: "Przyroda",
       notesCount: 4,
       notes: [
@@ -38,18 +62,19 @@ function Sidebar() {
           url: "/note",
         },
         {
-            name: "Notatka 2",
-            content: "Treść notatki 2",
-            url: "/note-2",
+          name: "Notatka 2",
+          content: "Treść notatki 2",
+          url: "/note-2",
         },
         {
-            name: "Notatka 3",
-            content: "Treść notatki 3",
-            url: "/note-3",
+          name: "Notatka 3",
+          content: "Treść notatki 3",
+          url: "/note-3",
         },
       ],
     },
     {
+      id: 2,
       name: "Matematyka",
       notesCount: 4,
       notes: [
@@ -61,6 +86,7 @@ function Sidebar() {
       ],
     },
     {
+      id: 3,
       name: "Informatyka",
       notesCount: 4,
       notes: [
@@ -72,6 +98,18 @@ function Sidebar() {
       ],
     },
   ]);
+
+  const handleAddFolder = (name) => {
+    const folders = [...userFolders];
+    folders.push({
+      id: folders.length + 1,
+      name: name,
+      notesCount: 0,
+      notes: [],
+    });
+    setNewFolderName("");
+    setUserFolders(folders);
+  };
 
   return (
     <>
@@ -113,9 +151,36 @@ function Sidebar() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <button className="p-2 hover:bg-neutral-200 mr-1">
-                      <img src="/plus.svg" alt="" />
-                    </button>
+                    <Dialog open={addNewFolderDialogOpen} onOpenChange={setAddNewFolderDialogOpen}>
+                      <DialogTrigger asChild>
+                        <button
+                          className="p-2 hover:bg-neutral-200 mr-1"
+                        >
+                          <img src="/plus.svg" alt="" />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-white p-8 max-w-[720px]">
+                        <DialogHeader>
+                          <DialogTitle className="text-xl mb-2">
+                            Podaj nazwę nowego folderu
+                          </DialogTitle>
+                          <DialogDescription>
+                            <Input
+                              type="text"
+                              placeholder="Nowy folder"
+                              className="mt-4 py-6 w-[300px] border-slate-300"
+                              onChange={(e) => setNewFolderName(e.target.value)}
+                            />
+                            <DialogButton className="mt-2" onClick={() => {
+                                handleAddFolder(newFolderName);
+                                setAddNewFolderDialogOpen(false);
+                            }}>
+                              Dodaj
+                            </DialogButton>
+                          </DialogDescription>
+                        </DialogHeader>
+                      </DialogContent>
+                    </Dialog>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Stwórz nowy folder</p>
@@ -125,7 +190,7 @@ function Sidebar() {
             </div>
             <div className="user-notes">
               {userFolders.map((folder) => (
-                <Fragment key={folder.name}>
+                <Fragment key={folder.id}>
                   <Collapsible>
                     <div className="folder pl-10 mt-2 flex flex-row hover:bg-slate-200 py-1.5 mx-4 items-center">
                       <CollapsibleTrigger>
