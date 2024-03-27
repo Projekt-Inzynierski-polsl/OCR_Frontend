@@ -96,7 +96,7 @@ function AdminSidebar() {
             }}
           </NavLink>
           <NavLink
-            to="/model"
+            to="/upload-model"
             style={({ isActive }) => {
               return {
                 backgroundColor: isActive

@@ -11,6 +11,7 @@ import UserManagement from "@/src/pages/UserManagement.jsx";
 import ScanErrors from "@/src/pages/ScanErrors.jsx";
 import CheckScanError from "@/src/pages/CheckScanError.jsx";
 import SelectBoundingBoxes from "@/src/pages/SelectBoundingBoxes.jsx";
+import UploadModel from "@/src/pages/UploadModel.jsx";
 
 
 import {
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
   {
     path: "/select-boxes",
     element: <SelectBoundingBoxes />,
+  },
+  {
+    path: "/upload-model",
+    element: <UploadModel />,
   },
 ]);
 
