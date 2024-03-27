@@ -10,6 +10,7 @@ import AdminDashboard from "@/src/pages/AdminDashboard.jsx";
 import UserManagement from "@/src/pages/UserManagement.jsx";
 import ScanErrors from "@/src/pages/ScanErrors.jsx";
 import CheckScanError from "@/src/pages/CheckScanError.jsx";
+import SelectBoundingBoxes from "@/src/pages/SelectBoundingBoxes.jsx";
 
 
 import {
@@ -64,6 +65,10 @@ const router = createBrowserRouter([
   {
     path: "/edit-profile",
     element: <EditProfile />,
+  },
+  {
+    path: "/select-boxes",
+    element: <SelectBoundingBoxes />,
   },
 ]);
 

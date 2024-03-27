@@ -1,6 +1,27 @@
 import "../common/Login.css";
 import styled from "styled-components";
 import { Input } from "@/components/ui/input";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import React, { Fragment, useState } from "react";
+import axios from "axios";
+
+const formSchema = z
+  .object({
+    nickname: z
+      .string()
+      .min(2, { message: "Nazwa użytkownika jest za krótka" }),
+    password: z.string(),
+  });
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 
 const LoginHeader = styled.h2`
   font-family: "Lexend Deca";
@@ -26,6 +47,10 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+  });
 
   const setAuthToken = (token) => {
     document.cookie = `authToken=${token}; HttpOnly; Path=/`;
@@ -70,31 +95,54 @@ function Login() {
           <p className="mt-2">
             Nie masz jeszcze konta?
             <span className="ml-1">
-              <a href="" className="underline">
+              <a href="/register" className="underline">
                 Zarejestruj się za darmo!
               </a>
             </span>
           </p>
-          <form action="" method="post" onSubmit={handleSubmit}>
-            <Input
-              type="text"
-              placeholder="Adres email lub nazwa użytkownika"
-              className="mt-12 py-6 w-2/3 border-slate-300"
-              name="username"
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <Input
-              type="password"
-              placeholder="Hasło"
-              className="mt-6 py-6 w-2/3 border-slate-300"
-              name="password"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <LoginButton type="submit" className="text-md mt-10">
+          {errorMessage }
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="nickname"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        placeholder="Nazwa użytkownika"
+                        className="mt-12 py-6 w-2/3 border-slate-300"
+                        onChange={(e) => setUsername(e.target.value)}
+                        {...field}
+                      />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Hasło"
+                        className="mt-6 py-6 w-2/3 border-slate-300"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-700" />
+                  </FormItem>
+                )}
+              />
+              <LoginButton type="submit" className="text-md mt-10">
               Zaloguj się
             </LoginButton>
-          </form>
-          { errorMessage }
+            </form>
+          </Form>
         </div>
         <RightPanel>
           <h1 className="mt-8 font-bold text-5xl">
