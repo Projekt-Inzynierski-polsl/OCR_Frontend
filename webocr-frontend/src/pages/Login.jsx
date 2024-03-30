@@ -9,9 +9,7 @@ import axios from "axios";
 
 const formSchema = z
   .object({
-    nickname: z
-      .string()
-      .min(2, { message: "Nazwa użytkownika jest za krótka" }),
+    email: z.string().email({ message: "Niepoprawny adres email" }),
     password: z.string(),
   });
 
@@ -44,7 +42,7 @@ const LoginButton = styled.button`
 `;
 
 function Login() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -67,22 +65,19 @@ function Login() {
     return null;
   };
   
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const token = getAuthToken;
+  if (token) {
+    window.location.href = "/dashboard";
+  }
+  function onSubmit(values) {
     try {
-      const response = await axios.post("/api/login", {
-        username,
-        password,
-      });
-
-      setAuthToken(response.data.token);
+      const response = axios.post("http://localhost:8051/api/account/login", values);
+      setAuthToken(response.body);
       window.location.href = "/";
     } catch (error) {
-      setErrorMessage(error.response.data.message);
+      console.error(error);
     }
-  };
+  }
 
   return (
     <>
@@ -102,15 +97,15 @@ function Login() {
           </p>
           {errorMessage }
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
-                name="nickname"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
                       <Input
-                        placeholder="Nazwa użytkownika"
+                        placeholder="Adres email"
                         className="mt-12 py-6 w-2/3 border-slate-300"
                         onChange={(e) => setUsername(e.target.value)}
                         {...field}

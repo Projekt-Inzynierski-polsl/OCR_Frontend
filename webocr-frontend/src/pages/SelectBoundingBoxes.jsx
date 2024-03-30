@@ -1,8 +1,9 @@
 import Navbar from "../components/Navbar.jsx";
 import styled from "styled-components";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BBoxAnnotator from 'react-bbox-annotator';
-import React, { Fragment, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
+import { Annotorious } from '@recogito/annotorious';
+
+import '@recogito/annotorious/dist/annotorious.min.css';
 
 const FirstNoteHero = styled.div`
   background-color: #bfe6ce;
@@ -24,59 +25,73 @@ const NextButton = styled.button`
 
 function SelectBoundingBoxes() {
   const [selectedTab, setSelectedTab] = useState("notatka");
-  const labels = ['Mama cow', 'Baby cow'];
-    const [entries, setEntries] = useState([]);
+  const imgEl = useRef();
+  const [ anno, setAnno ] = useState();
+  const [createdAnnotations, setCreatedAnnotations] = useState([])
+  useEffect(() => {
+    let annotorious = null;
+
+    if (imgEl.current) {
+      annotorious = new Annotorious({
+        image: imgEl.current,
+        widgets: [],
+        allowEmpty: true,
+        disableEditor: true,
+      });
+
+      annotorious.on('createAnnotation', annotation => {
+        console.log(annotation);
+        setCreatedAnnotations([...createdAnnotations, {
+          id: annotation.id,
+          value: annotation.target.selector.value
+        }])
+        console.log(createdAnnotations);
+      });
+      
+      // z nieznanych powodów, updateAnnotation usuwa boxa przy zmianie rozmiaru
+      // dlatego musimy dodać go ponownie z innymi wartościami
+      annotorious.on('updateAnnotation', (annotation) => {
+        setCreatedAnnotations([...createdAnnotations, {
+          id: annotation.id,
+          value: annotation.target.selector.value
+        }]);
+      });
+
+      annotorious.on('deleteAnnotation', annotation => {
+        setCreatedAnnotations(createdAnnotations.filter(a => a.id !== annotation.id));
+      });
+    }
+    setAnno(annotorious);
+    return () => annotorious.destroy();
+  }, []);
+
+  const handleContinue = () => {
+    console.log(createdAnnotations);
+  }
+
   return (
     <>
       <header>
         <Navbar></Navbar>
       </header>
-      <div style={{ width: '60%' }}>
-                <BBoxAnnotator
-                    url="https://pandoxeio.files.wordpress.com/2044/12/bigstock-cows-mother-and-baby-3998546.jpg"
-                    inputMethod="select"
-                    labels={labels}
-                    onChange={(e) => setEntries(e)}
-                />
-            </div>
-            <pre>{JSON.stringify(entries)}</pre>
-      {/* <main className="flex flex-col items-center pb-16">
+      <main className="flex flex-col items-center pb-16">
         <FirstNoteHero className="py-16 w-full">
-          <h1 className="text-5xl font-bold">Zaznacz, co chciałbyś zachować</h1>
+          <h1 className="text-5xl font-bold">Zaznacz, co chcesz zachować</h1>
           <p className="max-w-3xl text-center mt-4 text-md">
             Twoja notatka została zeskanowana i przetworzona. Jeżeli to
             potrzebne, zaznacz na zdjęciu części tekstu i innych elementów.
           </p>
         </FirstNoteHero>
         <div className="bound-container border border-[#D1D5DB] w-60% mt-8">
-          <Tabs
-            className="float-right mr-4 mt-2"
-            value={selectedTab}
-            onValueChange={setSelectedTab}
-          >
-            <TabsList>
-              <TabsTrigger
-                className="data-[state=active]:bg-[#e9f7ee]"
-                value="notatka"
-              >
-                Notatka
-              </TabsTrigger>
-              <TabsTrigger
-                className="data-[state=active]:bg-[#e9f7ee]"
-                value="obrazek"
-              >
-                Obrazek
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="notatka"></TabsContent>
-            <TabsContent value="obrazek"></TabsContent>
-          </Tabs>
-          
+          <img src="boxtest.png" alt="Example" ref={imgEl}/>
         </div>
-        
-        <pre>{JSON.stringify(entries)}</pre>
-        <NextButton className="mt-16 w-1/3"> Przejdź dalej &gt;</NextButton>
-      </main> */}
+
+        <NextButton className="mt-16 w-1/3"
+          onClick={handleContinue}
+        >
+          Przejdź dalej &gt;
+        </NextButton>
+      </main>
     </>
   );
 }
