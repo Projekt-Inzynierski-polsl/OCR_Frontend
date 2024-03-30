@@ -9,23 +9,43 @@ const HomeNavbar = styled.header`
   background-color: #00844e;
   color: #e9f7ee;
 `;
-
+import Cookies from "js-cookie";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function Home() {
+  const handleLogout = () => {
+    Cookies.remove("authToken", { path: "/" });
+  };
+
   return (
     <>
       <HomeNavbar>
         <nav className="flex flex-row items-center justify-between px-96 pt-8">
           <img src="/logo.svg" alt="" />
-          <div className="button-container flex flex-row items-center gap-8">
-            <a href="/login" className="text-lg btn__secondary">
-              Zaloguj się
-            </a>
-            <a href="/register" className="text-lg btn__inverse">
-              Zarejestruj się
-            </a>
-          </div>
+          {Cookies.get("authToken") ? (
+            <div className="user-container flex flex-row items-center">
+              <div className="user ml-4">
+                <p className="user text-lg">Test</p>
+                <p className="email text-sm">test@gmail.com</p>
+              </div>
+              <button
+                className="flex flex-row items-center ml-10 gap-2"
+                onClick={handleLogout}
+              >
+                <img src="/log-out.svg" alt="" />
+                Wyloguj się
+              </button>
+            </div>
+          ) : (
+            <div className="button-container flex flex-row items-center gap-8">
+              <a href="/login" className="text-lg btn__secondary">
+                Zaloguj się
+              </a>
+              <a href="/register" className="text-lg btn__inverse">
+                Zarejestruj się
+              </a>
+            </div>
+          )}
         </nav>
         <div className="hero w-screen flex flex-col justify-center items-center py-24">
           <HeroHeader className="text-6xl font-bold">
@@ -35,7 +55,7 @@ function Home() {
             skanuj swoje notatki z zeszytu szybko i sprawnie. nie musisz
             przepisywać ich ręcznie.
           </p>
-          <a href="" className="btn text-xl mt-16">
+          <a href="/notes" className="btn text-xl mt-16">
             Sprawdź platformę
             <img src="/arrow.svg" alt="" />
           </a>
@@ -62,51 +82,70 @@ function Home() {
             notuj w trzech krokach!
           </h2>
           <Tabs defaultValue="photo" className="" data-orientation="vertical">
-              <TabsList className="mt-16 rounded-3xl absolute top-12 px-4 py-6 bg-[#004423] left-[38%]">
-                <TabsTrigger value="photo" className="step data-[state=active]:bg-[#e9f7ee] py-2 px-4 font-bold text-md rounded-full">Zrób zdjęcie</TabsTrigger>
-                <TabsTrigger value="scan" className="step data-[state=active]:bg-[#e9f7ee] py-2 px-4 font-bold text-md rounded-full">Zeskanuj tekst</TabsTrigger>
-                <TabsTrigger value="edit" className="step data-[state=active]:bg-[#e9f7ee] py-2 px-4 font-bold text-md rounded-full">Edytuj notatkę</TabsTrigger>
-              </TabsList>
-              <TabsContent value="photo">
-                <div className="step-container grid grid-cols-2 p-32 gap-8 mx-72">
-                  <div className="step-container__text-container">
-                    <h3 className="text-4xl font-bold text-left">
-                      zrób zdjęcie swoim aparatem
-                    </h3>
-                    <p className="text-left mt-2">
-                      wystarczy wyłącznie jedno zdjęcie, by zeskanować Twoją
-                      notatkę. ułatwisz pracę naszemu systemowi, jeżeli zadbasz
-                      o dobre oświetlenie Twojego zdjęcia i jego ostrość. dzięki
-                      temu dokładność będzie znacznie wyższa.
-                    </p>
-                  </div>
+            <TabsList className="mt-16 rounded-3xl absolute top-12 px-4 py-6 bg-[#004423] left-[38%]">
+              <TabsTrigger
+                value="photo"
+                className="step data-[state=active]:bg-[#e9f7ee] py-2 px-4 font-bold text-md rounded-full"
+              >
+                Zrób zdjęcie
+              </TabsTrigger>
+              <TabsTrigger
+                value="scan"
+                className="step data-[state=active]:bg-[#e9f7ee] py-2 px-4 font-bold text-md rounded-full"
+              >
+                Zeskanuj tekst
+              </TabsTrigger>
+              <TabsTrigger
+                value="edit"
+                className="step data-[state=active]:bg-[#e9f7ee] py-2 px-4 font-bold text-md rounded-full"
+              >
+                Edytuj notatkę
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="photo">
+              <div className="step-container grid grid-cols-2 p-32 gap-8 mx-72">
+                <div className="step-container__text-container">
+                  <h3 className="text-4xl font-bold text-left">
+                    zrób zdjęcie swoim aparatem
+                  </h3>
+                  <p className="text-left mt-2">
+                    wystarczy wyłącznie jedno zdjęcie, by zeskanować Twoją
+                    notatkę. ułatwisz pracę naszemu systemowi, jeżeli zadbasz o
+                    dobre oświetlenie Twojego zdjęcia i jego ostrość. dzięki
+                    temu dokładność będzie znacznie wyższa.
+                  </p>
                 </div>
-              </TabsContent>
-              <TabsContent value="scan">
-                <div className="step-container grid grid-cols-2 p-32 gap-8 mx-72">
-                  <div className="step-container__text-container">
-                    <h3 className="text-4xl font-bold text-left">
-                      zeskanuj notatkę korzystając z OCR
-                    </h3>
-                    <p className="text-left mt-2">
-                      wykorzystaj nasz algorytm, by przekształcić zdjęcie w tekst. nasz system rozpozna pismo odręczne i przekształci je w cyfrowy dokument, który możesz edytować.
-                    </p>
-                  </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="scan">
+              <div className="step-container grid grid-cols-2 p-32 gap-8 mx-72">
+                <div className="step-container__text-container">
+                  <h3 className="text-4xl font-bold text-left">
+                    zeskanuj notatkę korzystając z OCR
+                  </h3>
+                  <p className="text-left mt-2">
+                    wykorzystaj nasz algorytm, by przekształcić zdjęcie w tekst.
+                    nasz system rozpozna pismo odręczne i przekształci je w
+                    cyfrowy dokument, który możesz edytować.
+                  </p>
                 </div>
-              </TabsContent>
-              <TabsContent value="edit">
-                <div className="step-container grid grid-cols-2 p-32 gap-8 mx-72">
-                  <div className="step-container__text-container">
-                    <h3 className="text-4xl font-bold text-left">
-                      edytuj uzyskaną notatkę
-                    </h3>
-                    <p className="text-left mt-2">
-                      po zeskanowaniu, możesz edytować swoją notatkę tak, jakbyś pracował na zwykłym dokumencie. dodawaj, usuwaj, formatuj i zapisuj swoje notatki w jednym miejscu.
-                    </p>
-                  </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="edit">
+              <div className="step-container grid grid-cols-2 p-32 gap-8 mx-72">
+                <div className="step-container__text-container">
+                  <h3 className="text-4xl font-bold text-left">
+                    edytuj uzyskaną notatkę
+                  </h3>
+                  <p className="text-left mt-2">
+                    po zeskanowaniu, możesz edytować swoją notatkę tak, jakbyś
+                    pracował na zwykłym dokumencie. dodawaj, usuwaj, formatuj i
+                    zapisuj swoje notatki w jednym miejscu.
+                  </p>
                 </div>
-              </TabsContent>
-            </Tabs>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
         <div className="target flex flex-col items-center">
           <h3 className="tracking-widest uppercase font-bold text-md text-center pt-10">
@@ -217,7 +256,7 @@ function Home() {
             zapomnij o jednym zeszycie do wszystkiego. zorganizuj swoje notatki
             już teraz!
           </h2>
-          <a href="" className="btn text-xl mt-16">
+          <a href="/notes" className="btn text-xl mt-16">
             Sprawdź platformę
             <img src="/arrow.svg" alt="" />
           </a>

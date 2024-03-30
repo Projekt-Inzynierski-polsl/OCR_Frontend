@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import Cookies from 'js-cookie'
 
 const formSchema = z
   .object({
@@ -62,19 +63,19 @@ function Register() {
     },
   });
 
-  const setAuthToken = (token) => {
-    document.cookie = `authToken=${token}; HttpOnly; Path=/`;
-  };
-
-  function onSubmit(values) {
-    try {
-      const response = axios.post("http://localhost:8051/api/account/register", values);
-      setAuthToken(response.data.token);
-      window.location.href = "/";
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  const onSubmit = async (values) => {
+    await axios.post(
+      "http://localhost:8051/api/account/register",
+      values
+    ).then((response) => {
+      if (response.status === 200) {
+        Cookies.set("authToken", response.body, { path: "/" })
+        window.location.href = "/notes";
+      }
+    }).catch((error) => {
+      setErrorMessage(error)
+    });
+}
 
   return (
     <>

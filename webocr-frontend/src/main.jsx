@@ -12,8 +12,8 @@ import ScanErrors from "@/src/pages/ScanErrors.jsx";
 import CheckScanError from "@/src/pages/CheckScanError.jsx";
 import SelectBoundingBoxes from "@/src/pages/SelectBoundingBoxes.jsx";
 import UploadModel from "@/src/pages/UploadModel.jsx";
-
-
+import { Toaster } from "@/components/ui/toaster"
+import { CookiesProvider } from 'react-cookie';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -44,7 +44,7 @@ const router = createBrowserRouter([
     element: <FirstNote />,
   },
   {
-    path: "/dashboard",
+    path: "/notes",
     element: <Note />,
   },
   {
@@ -80,6 +80,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <RouterProvider router={router} />
-    <App />
+    <CookiesProvider defaultSetOptions={{ path: '/' }}>
+      <Toaster />
+      <App />
+    </CookiesProvider>
   </React.StrictMode>
 );
