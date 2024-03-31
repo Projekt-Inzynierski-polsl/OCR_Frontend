@@ -78,7 +78,7 @@ const DeleteAccountButton = styled.button`
   border-radius: 16px;
 `;
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 function EditProfile() {
   const form = useForm({
@@ -87,6 +87,7 @@ function EditProfile() {
 
   const adminChecked = useRef(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [userActions, setUserActions] = useState([]);
   const onSubmit = async (values) => {
     if (adminChecked.current.ariaChecked === "true") {
       values.roleId = 1;
@@ -131,6 +132,26 @@ function EditProfile() {
         setErrorMessage(error.response.data.message);
       });
   }
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8051/api/user/1", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          // todo: zmienic response w sytuacji kiedy bedzie wiadomo co bedzie wysylane i jak
+          //setUserActions(response.data);
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      })
+      .catch((error) => {
+        setErrorMessage(error.response.data.message);
+      });
+  });
 
   return (
     <>
@@ -259,54 +280,14 @@ function EditProfile() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        31 marca 2024 14:12
-                      </TableCell>
-                      <TableCell>Poprawne zalogowanie do konta</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        31 marca 2024 14:12
-                      </TableCell>
-                      <TableCell>Poprawne zalogowanie do konta</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        31 marca 2024 14:12
-                      </TableCell>
-                      <TableCell>Poprawne zalogowanie do konta</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        31 marca 2024 14:12
-                      </TableCell>
-                      <TableCell>Poprawne zalogowanie do konta</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        31 marca 2024 14:12
-                      </TableCell>
-                      <TableCell>Poprawne zalogowanie do konta</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        31 marca 2024 14:12
-                      </TableCell>
-                      <TableCell>Poprawne zalogowanie do konta</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        31 marca 2024 14:12
-                      </TableCell>
-                      <TableCell>Poprawne zalogowanie do konta</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        31 marca 2024 14:12
-                      </TableCell>
-                      <TableCell>Poprawne zalogowanie do konta</TableCell>
-                    </TableRow>
+                    {userActions.map((action) => (
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          {action.date}
+                        </TableCell>
+                        <TableCell>{action.action}</TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
