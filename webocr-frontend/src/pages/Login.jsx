@@ -56,11 +56,11 @@ function Login() {
         values
       ).then((response) => {
         if (response.status === 200) {
-          Cookies.set("authToken", response.body, { path: "/" })
+          Cookies.set("authToken", response.data, { path: "/" })
           window.location.href = "/notes";
         }
-        else {
-          setErrorMessage("Niepoprawne dane logowania")
+        else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.")
         }
       }).catch((error) => {
         setErrorMessage("Niepoprawne dane logowania")

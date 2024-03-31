@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import axios from "axios";
 
 const NoteBody = styled.div`
   font-family: "Space Grotesk";
@@ -73,6 +74,7 @@ const SelectWithIcon = styled.div`
 function Note() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+
 
   const exportNoteHandler = () => {
     setExportDialogOpen(false);

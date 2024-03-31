@@ -69,7 +69,7 @@ function Register() {
       values
     ).then((response) => {
       if (response.status === 200) {
-        Cookies.set("authToken", response.body, { path: "/" })
+        Cookies.set("authToken", response.data, { path: "/" })
         window.location.href = "/notes";
       }
     }).catch((error) => {

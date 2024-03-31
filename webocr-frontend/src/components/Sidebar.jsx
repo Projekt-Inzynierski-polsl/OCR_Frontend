@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -12,6 +12,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 import { Input } from "@/components/ui/input";
 
@@ -58,6 +60,25 @@ const DialogButton = styled.button`
 `;
 
 function Sidebar() {
+
+  useEffect(() => {
+    if(Cookies.get("authToken")) {
+      axios.get("http://localhost:8051/api/user/folder", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        }
+      }).then(
+        (response) => {
+          setUserFolders(response.data)
+        }
+      ).catch(
+        (error) => {
+          console.log(error);
+        }
+      )
+    }
+  }, []);
+
   const [newFolderName, setNewFolderName] = useState("");
   const [addNewFolderDialogOpen, setAddNewFolderDialogOpen] = useState(false);
   const [availableIcons, setAvailableIcons] = useState([
@@ -75,57 +96,10 @@ function Sidebar() {
     },
   ]);
 
-  const [userFolders, setUserFolders] = useState([
-    {
-      id: 1,
-      name: "Przyroda",
-      notesCount: 4,
-      notes: [
-        {
-          name: "Notatka 1",
-          content: "Treść notatki 1",
-          url: "/note",
-        },
-        {
-          name: "Notatka 2",
-          content: "Treść notatki 2",
-          url: "/note-2",
-        },
-        {
-          name: "Notatka 3",
-          content: "Treść notatki 3",
-          url: "/note-3",
-        },
-      ],
-      icon: "/folder.png",
-    },
-    {
-      id: 2,
-      name: "Matematyka",
-      notesCount: 4,
-      notes: [
-        {
-          name: "Notatka 1",
-          content: "Treść notatki 1",
-          url: "/note-2",
-        },
-      ],
-      icon: "/folder.png",
-    },
-    {
-      id: 3,
-      name: "Informatyka",
-      notesCount: 4,
-      notes: [
-        {
-          name: "Notatka 1",
-          content: "Treść notatki 1",
-          url: "/note-3",
-        },
-      ],
-      icon: "/folder.png",
-    },
-  ]);
+  const [userFolders, setUserFolders] = useState([]);
+  
+
+  
 
   const handleAddFolder = (name) => {
     const folders = [...userFolders];
@@ -250,7 +224,7 @@ function Sidebar() {
                             <TooltipTrigger>
                               <PopoverTrigger>
                                 <button className="p-2 hover:bg-neutral-200 mr-1">
-                                  <img src={folder.icon} alt="" />
+                                  <img src={folder.iconPath} alt="" />
                                 </button>
                               </PopoverTrigger>
                             </TooltipTrigger>

@@ -24,33 +24,19 @@ const AcceptedFiles = styled.div`
   margin-top: 32px;
 `;
 
-function Dropzone() {
+function Dropzone({handleDrop}) {
+  const onDrop = useCallback(acceptedFiles => {
+    handleDrop(acceptedFiles);
+  }, [])
+
     const {
         acceptedFiles,
         fileRejections,
         getRootProps,
         getInputProps
-      } = useDropzone({
-        accept: {
-          'image/jpeg': [],
-          'image/png': []
-        },
-        maxFiles: 1,
-        maxSize: 10485760,
-      });
+      } = useDropzone({onDrop});
     
-    
-      const fileRejectionItems = fileRejections.map(({ file, errors }) => (
-        <li key={file.path}>
-          {file.path} - {file.size} bytes
-          <ul>
-            {errors.map(e => (
-              <li key={e.code}>{e.message}</li>
-            ))}
-          </ul>
-        </li>
-      ));
-
+      
   return (
     <>
     { fileRejections.length > 0 && 
