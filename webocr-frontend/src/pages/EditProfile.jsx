@@ -89,8 +89,10 @@ function EditProfile() {
   const [errorMessage, setErrorMessage] = useState("");
   const onSubmit = async (values) => {
     if (adminChecked.current.ariaChecked === "true") {
+      values.roleId = 1;
+    }
+    else {
       values.roleId = 2;
-      console.log(values)
     }
     await axios
       .put("http://localhost:8051/api/user/1", values, {
@@ -110,6 +112,25 @@ function EditProfile() {
         setErrorMessage(error.response.data.message);
       });
   };
+
+  const handleDelete = async () => {
+    await axios
+      .delete("http://localhost:8051/api/user/2", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 204) {
+          window.location.href = "/user-management";
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      })
+      .catch((error) => {
+        setErrorMessage(error.response.data.message);
+      });
+  }
 
   return (
     <>
@@ -211,7 +232,7 @@ function EditProfile() {
                       </DialogTitle>
                       <DialogDescription>
                         <p className="mb-6">Tej czynności nie można cofnąć!</p>
-                        <DeleteAccountButton className="mt-2">
+                        <DeleteAccountButton className="mt-2" onClick={handleDelete}>
                           Usuń konto użytkownika
                         </DeleteAccountButton>
                       </DialogDescription>
