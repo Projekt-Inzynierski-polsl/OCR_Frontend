@@ -1,6 +1,31 @@
 import styled from "styled-components";
 import Navbar from "../components/Navbar.jsx";
 import Sidebar from "../components/AdminSidebar.jsx";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import axios from "axios";
+import Cookies from "js-cookie";
+
+const formSchema = z
+  .object({
+    nickname: z
+      .string()
+      .min(2, { message: "Nazwa użytkownika jest za krótka" }),
+    email: z.string().email({ message: "Niepoprawny adres email" }),
+  })
+  .refine((data) => data.password === data.confirmedPassword, {
+    message: "Hasła nie są takie same",
+    path: ["confirmedPassword"],
+  });
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 
 const MainLayout = styled.div`
   background-color: #f9fafb;
@@ -53,7 +78,39 @@ const DeleteAccountButton = styled.button`
   border-radius: 16px;
 `;
 
+import { useState, useRef } from "react";
+
 function EditProfile() {
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+  });
+
+  const adminChecked = useRef(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const onSubmit = async (values) => {
+    if (adminChecked.current.ariaChecked === "true") {
+      values.roleId = 2;
+      console.log(values)
+    }
+    await axios
+      .put("http://localhost:8051/api/user/1", values, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          Cookies.set("authToken", response.data, { path: "/" });
+          window.location.href = "/notes";
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      })
+      .catch((error) => {
+        setErrorMessage(error.response.data.message);
+      });
+  };
+
   return (
     <>
       <Navbar></Navbar>
@@ -65,34 +122,70 @@ function EditProfile() {
           </h1>
           <div className="dashboard-info gap-4 mt-8 mx-32">
             <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-3/5">
-              <CardContent className="pb-6 pl-16 pt-6 mr-64">
-                <div className="text-inputs grid grid-cols-2 gap-16">
-                  <div className="input-container">
-                    <p className="font-bold text-lg mb-2">Nazwa użytkownika</p>
-                    <Input
-                      type="text"
-                      className="py-6 border-slate-300"
-                      value="toster"
-                    />
-                  </div>
-                  <div className="input-container">
-                    <p className="font-bold text-lg mb-2">Adres e-mail</p>
-                    <Input
-                      type="email"
-                      className="py-6 border-slate-300"
-                      value="tester"
-                    />
-                  </div>
-                </div>
-                <p className="text-xl font-bold mt-8">Konto użytkownika</p>
-                <div className="flex items-center space-x-4 mt-6">
-                  <Checkbox id="admin" />
-                  <Label htmlFor="admin">Ma uprawnienia administratora</Label>
-                </div>
-                <SaveChangesButton className="float-right mt-8">
-                  Zapisz zmiany
-                </SaveChangesButton>
-              </CardContent>
+              <Form {...form}>
+                <CardContent className="pb-6 pl-16 pt-6 mr-64">
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-8"
+                  >
+                    <p className="font-bold text-red-700 mb-4 mt-6">{errorMessage}</p>
+                    <div className="text-inputs grid grid-cols-2 gap-16">
+                      <div className="input-container">
+                        <p className="font-bold text-lg mb-2">
+                          Nazwa użytkownika
+                        </p>
+                        <FormField
+                          control={form.control}
+                          name="nickname"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  type="text"
+                                  className="py-6 border-slate-300"
+                                  {...field}
+                                />
+                              </FormControl>
+
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="input-container">
+                        <p className="font-bold text-lg mb-2">Adres e-mail</p>
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  type="email"
+                                  className="py-6 border-slate-300"
+                                  {...field}
+                                />
+                              </FormControl>
+
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xl font-bold mt-8">Konto użytkownika</p>
+                    <div className="flex items-center space-x-4 mt-6">
+                      <Checkbox id="admin" ref={adminChecked} />
+                      <Label htmlFor="admin">
+                        Ma uprawnienia administratora
+                      </Label>
+                    </div>
+                    <SaveChangesButton className="float-right mt-8" type="submit">
+                      Zapisz zmiany
+                    </SaveChangesButton>
+                  </form>
+                </CardContent>
+              </Form>
             </Card>
             <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-3/5 mt-8">
               <CardHeader className="text-left ml-2 space-y-0 pt-3 pb-5 pl-14">
@@ -117,13 +210,10 @@ function EditProfile() {
                         Czy na pewno chcesz usunąć konto użytkownika?
                       </DialogTitle>
                       <DialogDescription>
-                        <p className="mb-6">
-                          Tej czynności nie można cofnąć!
-                        </p>
+                        <p className="mb-6">Tej czynności nie można cofnąć!</p>
                         <DeleteAccountButton className="mt-2">
-                            Usuń konto użytkownika
+                          Usuń konto użytkownika
                         </DeleteAccountButton>
-                        
                       </DialogDescription>
                     </DialogHeader>
                   </DialogContent>
