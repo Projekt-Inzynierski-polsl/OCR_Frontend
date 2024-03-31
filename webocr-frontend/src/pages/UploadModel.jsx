@@ -4,20 +4,20 @@ import Sidebar from "../components/AdminSidebar.jsx";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import axios from "axios";
 
 const ACCEPTED_MODEL_TYPE = [
   "application/x-python-code",
   "application/x-pytorch",
 ];
 
-const formSchema = z.object({
-    model: z.instanceof(File)
-})
-.refine((file) => file.type === "application/x-pytorch", {
+const formSchema = z
+  .object({
+    model: z.instanceof(File),
+  })
+  .refine((file) => file.type === "application/x-pytorch", {
     message: "Plik musi być w formacie .pt",
-    path: ["model"]
-});
+    path: ["model"],
+  });
 
 import {
   Form,
@@ -60,23 +60,61 @@ const ModelButton = styled.button`
   border-radius: 16px;
 `;
 
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
 import { Input } from "@/components/ui/input";
 
 function UploadModel() {
-
-    const form = useForm({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            model: new File([], "")
-        },
-    });
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      model: new File([], ""),
+    },
+  });
   function onSubmit(values) {
-    try {
-        console.log(values)
-    } catch (error) {
-      console.error(error);
-    }
+    const formData = new FormData();
+    formData.append("model", values.model);
+    axios
+      .post("http://localhost:8051/api/model/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          //todo: implement toast when uploaded
+          console.log("wysłany!")
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
+
+  const [modelUpdates, setModelUpdates] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8051/api/model/updates", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          // todo: zmienic response w sytuacji kiedy bedzie wiadomo co bedzie wysylane i jak
+          //setModelUpdates(response.data);
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  });
+
   return (
     <>
       <Navbar></Navbar>
@@ -112,7 +150,8 @@ function UploadModel() {
                     <DialogHeader>
                       <DialogTitle>Wrzuć nowy plik modelu</DialogTitle>
                       <DialogDescription>
-                        Wybierz plik modelu, który chcesz wrzucić na serwer. Plik musi być w formacie .pt.
+                        Wybierz plik modelu, który chcesz wrzucić na serwer.
+                        Plik musi być w formacie .pt.
                       </DialogDescription>
                     </DialogHeader>
                     <Form {...form}>
@@ -126,11 +165,13 @@ function UploadModel() {
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
-                                <Input 
-                                type="file"
-                                accept=".pt"
-                                onChange={(e) =>
-                                    field.onChange(e.target.files ? e.target.files[0] : null)
+                                <Input
+                                  type="file"
+                                  accept=".pt"
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.files ? e.target.files[0] : null
+                                    )
                                   }
                                 />
                               </FormControl>
@@ -166,105 +207,27 @@ function UploadModel() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">#13048</TableCell>
-                    <TableCell>
-                      <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
-                        Aktywny
-                      </div>
-                    </TableCell>
-                    <TableCell>1 marca 2024</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#13048</TableCell>
-                    <TableCell>
-                      <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
-                        Aktywny
-                      </div>
-                    </TableCell>
-                    <TableCell>1 marca 2024</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#13048</TableCell>
-                    <TableCell>
-                      <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
-                        Aktywny
-                      </div>
-                    </TableCell>
-                    <TableCell>1 marca 2024</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#13048</TableCell>
-                    <TableCell>
-                      <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
-                        Aktywny
-                      </div>
-                    </TableCell>
-                    <TableCell>1 marca 2024</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#13048</TableCell>
-                    <TableCell>
-                      <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
-                        Aktywny
-                      </div>
-                    </TableCell>
-                    <TableCell>1 marca 2024</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#13048</TableCell>
-                    <TableCell>
-                      <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
-                        Aktywny
-                      </div>
-                    </TableCell>
-                    <TableCell>1 marca 2024</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#13048</TableCell>
-                    <TableCell>
-                      <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
-                        Aktywny
-                      </div>
-                    </TableCell>
-                    <TableCell>1 marca 2024</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#13048</TableCell>
-                    <TableCell>
-                      <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
-                        Aktywny
-                      </div>
-                    </TableCell>
-                    <TableCell>1 marca 2024</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#13048</TableCell>
-                    <TableCell>
-                      <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
-                        Aktywny
-                      </div>
-                    </TableCell>
-                    <TableCell>1 marca 2024</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#13048</TableCell>
-                    <TableCell>
-                      <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
-                        Aktywny
-                      </div>
-                    </TableCell>
-                    <TableCell>1 marca 2024</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#13048</TableCell>
-                    <TableCell>
-                      <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
-                        Aktywny
-                      </div>
-                    </TableCell>
-                    <TableCell>1 marca 2024</TableCell>
-                  </TableRow>
+                  {modelUpdates.map((update) => (
+                    <TableRow>
+                      <TableCell className="font-medium">
+                        Wersja {update.id}
+                      </TableCell>
+                      {update.status === "active" ? (
+                        <TableCell>
+                          <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
+                            Aktywny
+                          </div>
+                        </TableCell>
+                      ) : (
+                        <TableCell>
+                          <div className="border border-[#111827] text-[#111827] text-center font-bold text-sm py-1 px-1 w-2/3 rounded-[10px]">
+                            Nieaktywny
+                          </div>
+                        </TableCell>
+                      )}
+                      <TableCell>{update.date}</TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
