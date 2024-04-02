@@ -70,15 +70,47 @@ const DialogButton = styled.button`
 const SelectWithIcon = styled.div`
   font-family: "Space Grotesk";
 `;
+import { Toaster } from "@/components/ui/toaster"
+import { useToast } from "@/components/ui/use-toast"
+import Cookies from "js-cookie";
 
 function Note() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [exportType, setExportType] = useState("pdf");
+  const [currentNote, setCurrentNote] = useState({});
+  const { toast } = useToast();
+  const [errorMessage, setErrorMessage] = useState("");
 
+  const exportNoteHandler =  async () => {
+    await axios
+      .post("http://localhost:8051/api/note/export", {
+        noteId: currentNote.id,
+        exportType: exportType,
+      }, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          // todo: co z pobieraniem pliku z serwera?
+          toast({
+            title: "Notatka została wyeksportowana",
+            body: "Plik został zapisany na Twoim komputerze",
+          })
 
-  const exportNoteHandler = () => {
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      })
+      .catch((error) => {
+        toast({
+          title: "Błąd eksportu notatki",
+          body: "Nie udało się wyeksportować notatki",
+        })
+      });
     setExportDialogOpen(false);
-    console.log("test");
   };
 
   const shareNoteHandler = () => {
@@ -101,9 +133,11 @@ function Note() {
   return (
     <>
       <Navbar></Navbar>
+      <Toaster />
       <main className="grid grid-cols-[385px_1fr]">
         <Sidebar></Sidebar>
         <NoteBody className="pl-16 pt-8">
+          
           <div className="notebody__top flex flex-row items-center justify-between mr-16">
             <BreadcrumbPage>
               <BreadcrumbList>
@@ -144,7 +178,7 @@ function Note() {
                         Wybierz, w jakim formacie zostanie wyeksportowana Twoja
                         notatka.
                       </p>
-                      <Select>
+                      <Select onValueChange={(value) => setExportType(value)}>
                         <SelectTrigger className="w-[180px] border-slate-400">
                           <SelectValue placeholder="Wybierz typ pliku" />
                         </SelectTrigger>
