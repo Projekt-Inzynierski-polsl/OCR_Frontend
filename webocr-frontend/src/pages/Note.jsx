@@ -73,15 +73,18 @@ const SelectWithIcon = styled.div`
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/components/ui/use-toast"
 import Cookies from "js-cookie";
+import { useEffect } from "react";
 
-function Note() {
+
+function Note({noteId, folderId}) {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [exportType, setExportType] = useState("pdf");
   const [currentNote, setCurrentNote] = useState({
     noteId: 5,
     title: "Testowy dokument schematyczny",
-    content: "Testowy content"
+    content: "Testowy content",
+    isPrivate: false,
   });
   const { toast } = useToast();
   const [errorMessage, setErrorMessage] = useState("");
@@ -119,7 +122,6 @@ function Note() {
 
   const shareNoteHandler = () => {
     setShareDialogOpen(false);
-    console.log("test");
   };
 
   const handleNoteHeader = (e) => {
@@ -130,8 +132,40 @@ function Note() {
 
   const [shareType, setShareType] = useState("only-user");
 
-  const handleShareTypeChange = (e) => {
-    setShareType(e.target.value);
+  const handleShareTypeChange = (value) => {
+    if (value === "all-users" && currentNote.isPrivate) {
+      axios.put(`http://localhost:8051/api/user/note/${currentNote.noteId}/update`, {
+        name: currentNote.title,
+        isPrivate: false,
+      }, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      }).then((response) => {
+        if (response.status === 200) {
+          currentNote.isPrivate = false;
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      });
+    }
+    else if (value === "only-user" && !currentNote.isPrivate) {
+      axios.put(`http://localhost:8051/api/user/note/${currentNote.noteId}/update`, {
+        name: currentNote.title,
+        isPrivate: true,
+      }, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      }).then((response) => {
+        if (response.status === 200) {
+          currentNote.isPrivate = true;
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      });
+    }
+    setShareType(value);
   };
 
   const handleDelete = () => {
@@ -152,6 +186,33 @@ function Note() {
       }
     })
   }
+  
+  useEffect(() => {
+    axios.get(`http://localhost:8051/api/user/note/${noteId}`, {
+      headers: {
+        Authorization: `Bearer ${Cookies.get("authToken")}`,
+      },
+    })
+    .then((response) => {
+      if (response.status === 200) {
+        setCurrentNote({
+          noteId: response.data.id,
+          title: response.data.name,
+          content: response.data.content,
+          isPrivate: response.data.isPrivate,
+        });
+        if (currentNote.isPrivate) {
+          setShareType("only-user");
+        }
+        else {
+          setShareType("all-users");
+        }
+        
+      } else if (response.status === 500) {
+        setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+      }
+    })
+  })
   
   return (
     <>
@@ -201,7 +262,7 @@ function Note() {
                         Wybierz, w jakim formacie zostanie wyeksportowana Twoja
                         notatka.
                       </p>
-                      <Select onValueChange={(value) => setExportType(value)}>
+                      <Select onValueChange={(value) => exportNoteHandler(value)}>
                         <SelectTrigger className="w-[180px] border-slate-400">
                           <SelectValue placeholder="Wybierz typ pliku" />
                         </SelectTrigger>
@@ -244,7 +305,7 @@ function Note() {
                       <p className="mb-6">
                         Zdecyduj, czy Twoja notatka ma być widoczna dla innych.
                       </p>
-                      <Select onValueChange={(value) => setShareType(value)}>
+                      <Select onValueChange={(value) => handleShareTypeChange(value)} defaultValue={shareType}>
                         <SelectTrigger className="w-[320px] py-6 border-slate-400">
                           <SelectValue />
                         </SelectTrigger>

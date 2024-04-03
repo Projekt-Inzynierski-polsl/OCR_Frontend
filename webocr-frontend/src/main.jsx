@@ -45,7 +45,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/notes",
-    element: <Note />,
+    element: <Note noteId={5} />,
   },
   {
     path: "/admin",

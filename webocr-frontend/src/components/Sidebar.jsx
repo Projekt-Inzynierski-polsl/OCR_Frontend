@@ -185,13 +185,13 @@ function Sidebar() {
   }
 
   const handleNewNoteDialogClose = (folderId) => {
-    if (addNewNoteDialogOpen) {
-      handleNewNote(folderId)
-      setAddNewNoteDialogOpen(false);
-    }
-    else {
-      setAddNewNoteDialogOpen(true);
-    }
+    // if (addNewNoteDialogOpen) {
+    //   handleNewNote(folderId)
+    //   setAddNewNoteDialogOpen(false);
+    // }
+    // else {
+    //   setAddNewNoteDialogOpen(true);
+    // }
   }
 
   return (
