@@ -48,6 +48,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { NavLink } from "react-router-dom";
+import { set } from "react-hook-form";
 
 const DialogButton = styled.button`
   background-color: #004423;
@@ -59,23 +60,41 @@ const DialogButton = styled.button`
   margin-top: 32px;
 `;
 
-function Sidebar() {
+const NoteHeader = styled.h1`
+  outline: none;
+  display: block;
+  min-height: 1em;
+  white-space: pre-wrap;
+  word-break: break-word;
+  width: 100%;
+  max-width: 100%;
+`;
 
+const NoteBody = styled.div`
+  font-family: "Space Grotesk";
+  [contenteditable][placeholder]:empty:after {
+    content: attr(placeholder);
+    position: absolute;
+    color: #9ca3af;
+    background-color: transparent;
+  }
+`;
+
+function Sidebar() {
   useEffect(() => {
-    if(Cookies.get("authToken")) {
-      axios.get("http://localhost:8051/api/user/folder", {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("authToken")}`,
-        }
-      }).then(
-        (response) => {
-          setUserFolders(response.data)
-        }
-      ).catch(
-        (error) => {
+    if (Cookies.get("authToken")) {
+      axios
+        .get("http://localhost:8051/api/user/folder", {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        })
+        .then((response) => {
+          setUserFolders(response.data);
+        })
+        .catch((error) => {
           console.log(error);
-        }
-      )
+        });
     }
   }, []);
 
@@ -97,9 +116,9 @@ function Sidebar() {
   ]);
 
   const [userFolders, setUserFolders] = useState([]);
-  
-
-  
+  const [addNewNoteDialogOpen, setAddNewNoteDialogOpen] = useState(false);
+  const [newNoteHeader, setNewNoteHeader] = useState("");
+  const [newNoteContent, setNewNoteContent] = useState("");
 
   const handleAddFolder = (name) => {
     const folders = [...userFolders];
@@ -121,6 +140,59 @@ function Sidebar() {
     setUserFolders(folders);
     setChangeIconPopoverOpen(false);
   };
+
+  const handleNewNoteHeader = (e) => {
+    setNewNoteHeader(e.target.innerText);
+    if (e.target.innerText.trim() === "") {
+      e.target.innerText = "";
+    }
+  };
+
+  const handleNewNote = (folderId) => {
+    if (newNoteHeader.trim() !== "") {
+      const folders = [...userFolders];
+      const folder = folders.find((folder) => folder.id === folderId);
+      folder.notes.push({
+        id: folder.notes.length + 1,
+        name: newNoteHeader,
+      });
+      folder.notesCount = folder.notes.length;
+      
+      axios.post(
+        "http://localhost:8051/api/user/note",
+        {
+          folderId: folderId,
+          name: newNoteHeader,
+          content: newNoteContent,
+          categoriesIds: [
+            1
+          ],
+          noteFileId: 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        }
+      ).then(() => {
+        setUserFolders(folders);
+        setNewNoteContent("");
+        setNewNoteHeader("");
+      }).catch((error) => {
+        console.log(error);
+      });
+    }
+  }
+
+  const handleNewNoteDialogClose = (folderId) => {
+    if (addNewNoteDialogOpen) {
+      handleNewNote(folderId)
+      setAddNewNoteDialogOpen(false);
+    }
+    else {
+      setAddNewNoteDialogOpen(true);
+    }
+  }
 
   return (
     <>
@@ -165,6 +237,8 @@ function Sidebar() {
                     <Dialog
                       open={addNewFolderDialogOpen}
                       onOpenChange={setAddNewFolderDialogOpen}
+                      modal
+                      defaultOpen={addNewFolderDialogOpen}
                     >
                       <DialogTrigger asChild>
                         <button className="p-2 hover:bg-neutral-200 mr-1">
@@ -259,6 +333,46 @@ function Sidebar() {
                       <FolderHint className="mr-24 text-sm">
                         {folder.notesCount}
                       </FolderHint>
+                      <Dialog
+                        open={addNewNoteDialogOpen}
+                        onOpenChange={handleNewNoteDialogClose(folder.id)}
+                        modal
+                        defaultOpen={addNewNoteDialogOpen}
+                      >
+                        <DialogTrigger asChild>
+                          <button className="p-2 hover:bg-neutral-200 mr-1">
+                            <img src="/plus.svg" alt="" />
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-white p-8 max-w-[1560px] min-h-[768px]">
+                          <DialogHeader>
+                            <DialogDescription>
+                              <NoteBody>
+                                <div className="notebody__text mt-8">
+                                  <NoteHeader
+                                    className="font-bold text-4xl"
+                                    contentEditable="true"
+                                    spellCheck="false"
+                                    placeholder="Nowa notatka"
+                                    onBlur={handleNewNoteHeader}
+                                    suppressContentEditableWarning={true}
+                                  >
+                                    
+                                  </NoteHeader>
+                                  <div
+                                    className="notebody__content focus:outline-none mt-8 mr-16"
+                                    contentEditable="true"
+                                    suppressContentEditableWarning={true}
+                                    onBlur={(e) => setNewNoteContent(e.target.innerText)}
+                                  >
+                                    test
+                                  </div>
+                                </div>
+                              </NoteBody>
+                            </DialogDescription>
+                          </DialogHeader>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                     <CollapsibleContent>
                       <div className="folder__notes pl-6">

@@ -78,7 +78,11 @@ function Note() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [exportType, setExportType] = useState("pdf");
-  const [currentNote, setCurrentNote] = useState({});
+  const [currentNote, setCurrentNote] = useState({
+    noteId: 5,
+    title: "Testowy dokument schematyczny",
+    content: "Testowy content"
+  });
   const { toast } = useToast();
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -130,6 +134,25 @@ function Note() {
     setShareType(e.target.value);
   };
 
+  const handleDelete = () => {
+    axios.delete(`http://localhost:8051/api/user/note/${currentNote.noteId}`, {
+      headers: {
+        Authorization: `Bearer ${Cookies.get("authToken")}`,
+      },
+    })
+    .then((response) => {
+      if (response.status === 204) {
+        toast({
+          title: "Notatka została usunięta",
+          body: "Notatka została usunięta z Twojego konta",
+        })
+        window.location.href = "/notes";
+      } else if (response.status === 500) {
+        setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+      }
+    })
+  }
+  
   return (
     <>
       <Navbar></Navbar>
@@ -145,14 +168,14 @@ function Note() {
                   <BreadcrumbPage>
                     <BreadcrumbFolder>
                       <img src="/folder.png" alt="" />
-                      <p>Przyroda</p>
+                      <p></p>
                     </BreadcrumbFolder>
                   </BreadcrumbPage>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbPage>
-                    Testowy dokument o mitochondriach
+                    {currentNote.title}
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
@@ -273,6 +296,10 @@ function Note() {
                   </DialogHeader>
                 </DialogContent>
               </Dialog>
+              <button className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 items-center p-2 text-red-800" onClick={handleDelete}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash w-6 stroke-red-700"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Usuń
+                </button>
             </div>
           </div>
           <div className="notebody__text mt-8">
@@ -284,40 +311,14 @@ function Note() {
               onBlur={handleNoteHeader}
               suppressContentEditableWarning={true}
             >
-              Testowy dokument o mitochodnirach
+              {currentNote.title}
             </NoteHeader>
             <div
               className="notebody__content focus:outline-none mt-8 mr-16"
               contentEditable="true"
               suppressContentEditableWarning={true}
             >
-              Mitochondria, znane jako odgrywają kluczową rolę w energetyce
-              komórkowej. W kontekście śląskiego węgla kamiennego, organelle te
-              stają się centralnym elementem fascynującej historii losowości i
-              determinizmu, splatającej się z geopolityką, technologią i
-              ludzkimi dziejami. Zagłębie Górnośląskie, bogate w złoża węgla
-              kamiennego, kształtowało losy regionu od wieków. Eksploatacja
-              rozpoczęła się na dużą skalę w XIX wieku, napędzając
-              industrializację i urbanizację. Wraz z wydobyciem węgla wydobywano
-              również skały płonne, zawierające mitochondria. W dwudziestoleciu
-              międzywojennym nastąpił rozkwit badań nad mitochondriami. Naukowcy
-              z różnych krajów, w tym ze Śląska, odkrywali ich strukturę,
-              funkcje i znaczenie dla życia. Jednakże, niepewność polityczna i
-              nadchodząca wojna przerwały te pionierskie badania. Podczas II
-              wojny światowej Górny Śląsk znalazł się pod okupacją niemiecką.
-              Górnictwo kontynuowano, ale w sposób rabunkowy, bez dbałości o
-              środowisko i ludzi. Badania naukowe zostały wstrzymane, a wiele
-              cennych materiałów badawczych uległo zniszczeniu. Po zakończeniu
-              wojny Górny Śląsk znalazł się w granicach Polski Ludowej. Nowe
-              władze stawiały na odbudowę przemysłu i intensyfikację wydobycia
-              węgla. Wznowiono również badania naukowe, w tym nad
-              mitochondriami. Jednakże, centralnie planowana gospodarka i
-              ograniczenia technologiczne hamowały postęp. Mitochondria w
-              śląskim węglu kamiennym podlegały losowemu rozkładowi. Ich ilość i
-              rozmieszczenie zależało od wielu czynników, takich jak geologia
-              złoża, sposób wydobycia i przeróbki węgla. Determinizm odgrywał
-              również rolę, ponieważ geny mitochondriów determinowały ich
-              funkcje i cechy.
+              {currentNote.content}
             </div>
           </div>
         </NoteBody>
