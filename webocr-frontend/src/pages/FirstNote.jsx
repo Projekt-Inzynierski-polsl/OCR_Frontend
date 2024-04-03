@@ -28,7 +28,15 @@ function FirstNote() {
 
   const handleClick = () => {
     if (uploadedFiles.length > 0) {
-        //todo: create axios request to send files to the server
+        // send uploaded files to server using axios
+        const formData = new FormData();
+          uploadedFiles.forEach((file) => {
+            formData.append("files", file);
+          });
+
+          
+          axios.post("/api/files/upload", formData)
+          .then();
       setLoaderActive(true);
     }
   };

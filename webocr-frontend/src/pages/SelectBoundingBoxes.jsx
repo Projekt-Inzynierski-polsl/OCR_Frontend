@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Annotorious } from '@recogito/annotorious';
 
 import '@recogito/annotorious/dist/annotorious.min.css';
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const FirstNoteHero = styled.div`
   background-color: #bfe6ce;
   color: #374151;
@@ -27,7 +27,6 @@ function SelectBoundingBoxes() {
   const [selectedTab, setSelectedTab] = useState("notatka");
   const imgEl = useRef();
   const [ anno, setAnno ] = useState();
-  const [createdAnnotations, setCreatedAnnotations] = useState([])
   useEffect(() => {
     let annotorious = null;
 
@@ -38,35 +37,21 @@ function SelectBoundingBoxes() {
         allowEmpty: true,
         disableEditor: true,
       });
-
-      annotorious.on('createAnnotation', annotation => {
-        console.log(annotation);
-        setCreatedAnnotations([...createdAnnotations, {
-          id: annotation.id,
-          value: annotation.target.selector.value
-        }])
-        console.log(createdAnnotations);
-      });
-      
-      // z nieznanych powodów, updateAnnotation usuwa boxa przy zmianie rozmiaru
-      // dlatego musimy dodać go ponownie z innymi wartościami
-      annotorious.on('updateAnnotation', (annotation) => {
-        setCreatedAnnotations([...createdAnnotations, {
-          id: annotation.id,
-          value: annotation.target.selector.value
-        }]);
-      });
-
-      annotorious.on('deleteAnnotation', annotation => {
-        setCreatedAnnotations(createdAnnotations.filter(a => a.id !== annotation.id));
-      });
     }
     setAnno(annotorious);
     return () => annotorious.destroy();
   }, []);
 
   const handleContinue = () => {
-    console.log(createdAnnotations);
+    // for every annotation in anno.getAnnotations() get the bounding box and send it to the server
+    anno.getAnnotations().forEach(bbox => {
+      console.log(bbox.target.selector.value)
+    });
+  }
+
+  const handleTabChange = (tab) => {
+    
+    setSelectedTab(tab);
   }
 
   return (
@@ -84,6 +69,28 @@ function SelectBoundingBoxes() {
         </FirstNoteHero>
         <div className="bound-container border border-[#D1D5DB] w-60% mt-8">
           <img src="boxtest.png" alt="Example" ref={imgEl}/>
+          <Tabs
+            className="float-right mx-8 mt-2"
+            value={selectedTab}
+            onValueChange={(e) => {handleTabChange(e.target.value)}}
+          >
+            <TabsList>
+              <TabsTrigger
+                className="data-[state=active]:bg-[#e9f7ee]"
+                value="notatka"
+              >
+                Notatka
+              </TabsTrigger>
+              <TabsTrigger
+                className="data-[state=active]:bg-[#e9f7ee]"
+                value="obrazek"
+              >
+                Obrazek
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="notatka"></TabsContent>
+            <TabsContent value="obrazek"></TabsContent>
+          </Tabs>
         </div>
 
         <NextButton className="mt-16 w-1/3"
