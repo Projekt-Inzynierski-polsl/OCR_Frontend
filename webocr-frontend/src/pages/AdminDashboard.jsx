@@ -18,13 +18,24 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import {useState, useEffect} from 'react';
+import axios from "axios";
+import Cookies from 'js-cookie';
+
+
 function AdminDashboard() {
   const [errorMessage, setErrorMessage] = useState("");
   const [modelErrors, setModelErrors] = useState([]);
   const [modelUpdates, setModelUpdates] = useState([]);
+  const [adminStats, setAdminStats] = useState({
+    activeUsers: 111,
+    activeScanErrors: 222,
+    repairedScanErrors: 333,
+    todayNotes: 444,
+  })
 
-  useEffect(() => {
-    axios
+  useEffect( () => {
+     axios
       .get("http://localhost:8051/api/model/errors", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -42,7 +53,7 @@ function AdminDashboard() {
         setErrorMessage(error);
       });
 
-    axios
+     axios
       .get("http://localhost:8051/api/model/updates", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -52,6 +63,23 @@ function AdminDashboard() {
         if (response.status === 200) {
           // todo: zmienic response w sytuacji kiedy bedzie wiadomo co bedzie wysylane i jak
           //setModelUpdates(response.data);
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+
+     axios
+      .get("http://localhost:8051/api/admin/stats", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          // todo: zmienic response w sytuacji kiedy bedzie wiadomo co bedzie wysylane i jak
         } else if (response.status === 500) {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
@@ -70,7 +98,9 @@ function AdminDashboard() {
           <div className="stats flex flex-row mx-32 mt-10 gap-4">
             <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-8 w-1/4">
               <CardContent className="pb-0">
-                <p className="text-5xl font-bold text-right mr-2">459</p>
+                <p className="text-5xl font-bold text-right mr-2">
+                  {adminStats.activeUsers}
+                </p>
               </CardContent>
               <CardHeader className="text-right mr-2 space-y-0 pt-3 pb-5">
                 <CardTitle className="text-xl pb-2">
@@ -81,7 +111,7 @@ function AdminDashboard() {
             <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-1/4">
               <CardContent className="pb-0">
                 <p className="text-5xl font-bold text-right mr-2 text-red-600">
-                  459
+                  {adminStats.activeScanErrors}
                 </p>
               </CardContent>
               <CardHeader className="text-right mr-2 space-y-0 pt-3 pb-5">
@@ -93,7 +123,7 @@ function AdminDashboard() {
             <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-1/4">
               <CardContent className="pb-0">
                 <p className="text-5xl font-bold text-right mr-2 text-green-700">
-                  459
+                  {adminStats.repairedScanErrors}
                 </p>
               </CardContent>
               <CardHeader className="text-right mr-2 space-y-0 pt-3 pb-5">
@@ -104,7 +134,9 @@ function AdminDashboard() {
             </Card>
             <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-1/4">
               <CardContent className="pb-0">
-                <p className="text-5xl font-bold text-right mr-2">553</p>
+                <p className="text-5xl font-bold text-right mr-2">
+                  {adminStats.todayNotes}
+                </p>
               </CardContent>
               <CardHeader className="text-right mr-2 space-y-0 pt-3 pb-5">
                 <CardTitle className="text-xl pb-2">
