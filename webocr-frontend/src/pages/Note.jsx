@@ -147,6 +147,15 @@ function Note({ noteId, folderId }) {
       `;
     } else {
       currentNote.content = e.target.innerText.trim();
+      axios.put(`/api/user/note/${currentNote.noteId}`, currentNote)
+        .then(response => {
+          toast({
+            title: "Notatka zapisana!",
+          })
+        })
+        .catch(error => {
+          console.error(error);
+        });
     }
   };
 
