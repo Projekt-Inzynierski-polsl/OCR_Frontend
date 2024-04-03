@@ -157,32 +157,33 @@ function Sidebar() {
         name: newNoteHeader,
       });
       folder.notesCount = folder.notes.length;
-      
-      axios.post(
-        "http://localhost:8051/api/user/note",
-        {
-          folderId: folderId,
-          name: newNoteHeader,
-          content: newNoteContent,
-          categoriesIds: [
-            1
-          ],
-          noteFileId: 1,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${Cookies.get("authToken")}`,
+
+      axios
+        .post(
+          "http://localhost:8051/api/user/note",
+          {
+            folderId: folderId,
+            name: newNoteHeader,
+            content: newNoteContent,
+            categoriesIds: [1],
+            noteFileId: 1,
           },
-        }
-      ).then(() => {
-        setUserFolders(folders);
-        setNewNoteContent("");
-        setNewNoteHeader("");
-      }).catch((error) => {
-        console.log(error);
-      });
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
+        .then(() => {
+          setUserFolders(folders);
+          setNewNoteContent("");
+          setNewNoteHeader("");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
-  }
+  };
 
   const handleNewNoteDialogClose = (folderId) => {
     // if (addNewNoteDialogOpen) {
@@ -192,7 +193,24 @@ function Sidebar() {
     // else {
     //   setAddNewNoteDialogOpen(true);
     // }
-  }
+  };
+
+  const handleNoteContent = (e) => {
+    if (e.target.innerText.trim() === "") {
+      setNewNoteContent("");
+      e.currentTarget.innerHTML = `
+      <div class="flex flex-col gap-y-4" contentEditable="false">
+      <p class="text-sm font-bold text-slate-700 select-none">Zacznij pisać lub </p>
+      <span class="flex flex-row gap-4">
+        <img src="scanicon.png" />
+        <a className="font-bold text-sm text-slate-700" href="/scan-note">Zeskanuj zdjęcie</a>
+      </span>
+    </div>
+      `;
+    } else {
+      setNewNoteContent(e.target.innerText.trim());
+    }
+  };
 
   return (
     <>
@@ -335,7 +353,7 @@ function Sidebar() {
                       </FolderHint>
                       <Dialog
                         open={addNewNoteDialogOpen}
-                        onOpenChange={handleNewNoteDialogClose(folder.id)}
+                        onOpenChange={handleNewNote(folder.id)}
                         modal
                         defaultOpen={addNewNoteDialogOpen}
                       >
@@ -356,16 +374,34 @@ function Sidebar() {
                                     placeholder="Nowa notatka"
                                     onBlur={handleNewNoteHeader}
                                     suppressContentEditableWarning={true}
-                                  >
-                                    
-                                  </NoteHeader>
+                                  ></NoteHeader>
                                   <div
                                     className="notebody__content focus:outline-none mt-8 mr-16"
                                     contentEditable="true"
                                     suppressContentEditableWarning={true}
-                                    onBlur={(e) => setNewNoteContent(e.target.innerText)}
+                                    onClick={(e) => handleNoteContent(e)}
                                   >
-                                    test
+                                    {newNoteContent.trim().length === 0 ? (
+                                      <div
+                                        class="flex flex-col gap-y-4"
+                                        contentEditable="false"
+                                      >
+                                        <p class="text-sm font-bold text-slate-700 select-none">
+                                          Zacznij pisać lub{" "}
+                                        </p>
+                                        <span class="flex flex-row gap-4">
+                                          <img src="scanicon.png" />
+                                          <a
+                                            className="font-bold text-sm text-slate-700"
+                                            href="/scan-note"
+                                          >
+                                            Zeskanuj zdjęcie
+                                          </a>
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      newNoteContent
+                                    )}
                                   </div>
                                 </div>
                               </NoteBody>

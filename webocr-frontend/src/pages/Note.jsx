@@ -70,43 +70,46 @@ const DialogButton = styled.button`
 const SelectWithIcon = styled.div`
   font-family: "Space Grotesk";
 `;
-import { Toaster } from "@/components/ui/toaster"
-import { useToast } from "@/components/ui/use-toast"
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
 
-
-function Note({noteId, folderId}) {
+function Note({ noteId, folderId }) {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [exportType, setExportType] = useState("pdf");
+  const [typingTimeout, setTypingTimeout] = useState(null);
   const [currentNote, setCurrentNote] = useState({
     noteId: 5,
     title: "Testowy dokument schematyczny",
-    content: "Testowy content",
+    content: "",
     isPrivate: false,
   });
   const { toast } = useToast();
   const [errorMessage, setErrorMessage] = useState("");
 
-  const exportNoteHandler =  async () => {
+  const exportNoteHandler = async () => {
     await axios
-      .post("http://localhost:8051/api/note/export", {
-        noteId: currentNote.id,
-        exportType: exportType,
-      }, {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("authToken")}`,
+      .post(
+        "http://localhost:8051/api/note/export",
+        {
+          noteId: currentNote.id,
+          exportType: exportType,
         },
-      })
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        }
+      )
       .then((response) => {
         if (response.status === 200) {
           // todo: co z pobieraniem pliku z serwera?
           toast({
             title: "Notatka została wyeksportowana",
             body: "Plik został zapisany na Twoim komputerze",
-          })
-
+          });
         } else if (response.status === 500) {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
@@ -115,7 +118,7 @@ function Note({noteId, folderId}) {
         toast({
           title: "Błąd eksportu notatki",
           body: "Nie udało się wyeksportować notatki",
-        })
+        });
       });
     setExportDialogOpen(false);
   };
@@ -130,90 +133,126 @@ function Note({noteId, folderId}) {
     }
   };
 
+  const handleNoteContent = (e) => {
+    if (e.target.innerText.trim() === "") {
+      currentNote.content = "";
+      e.currentTarget.innerHTML = `
+      <div class="flex flex-col gap-y-4" contentEditable="false">
+      <p class="text-sm font-bold text-slate-700 select-none">Zacznij pisać lub </p>
+      <span class="flex flex-row gap-4">
+        <img src="scanicon.png" />
+        <a className="font-bold text-sm text-slate-700" href="/scan-note">Zeskanuj zdjęcie</a>
+      </span>
+    </div>
+      `;
+    } else {
+      currentNote.content = e.target.innerText.trim();
+    }
+  };
+
   const [shareType, setShareType] = useState("only-user");
 
   const handleShareTypeChange = (value) => {
     if (value === "all-users" && currentNote.isPrivate) {
-      axios.put(`http://localhost:8051/api/user/note/${currentNote.noteId}/update`, {
-        name: currentNote.title,
-        isPrivate: false,
-      }, {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("authToken")}`,
-        },
-      }).then((response) => {
-        if (response.status === 200) {
-          currentNote.isPrivate = false;
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-        }
-      });
-    }
-    else if (value === "only-user" && !currentNote.isPrivate) {
-      axios.put(`http://localhost:8051/api/user/note/${currentNote.noteId}/update`, {
-        name: currentNote.title,
-        isPrivate: true,
-      }, {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("authToken")}`,
-        },
-      }).then((response) => {
-        if (response.status === 200) {
-          currentNote.isPrivate = true;
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-        }
-      });
+      axios
+        .put(
+          `http://localhost:8051/api/user/note/${currentNote.noteId}/update`,
+          {
+            name: currentNote.title,
+            isPrivate: false,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            currentNote.isPrivate = false;
+          } else if (response.status === 500) {
+            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+          }
+        });
+    } else if (value === "only-user" && !currentNote.isPrivate) {
+      axios
+        .put(
+          `http://localhost:8051/api/user/note/${currentNote.noteId}/update`,
+          {
+            name: currentNote.title,
+            isPrivate: true,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            currentNote.isPrivate = true;
+          } else if (response.status === 500) {
+            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+          }
+        });
     }
     setShareType(value);
   };
 
   const handleDelete = () => {
-    axios.delete(`http://localhost:8051/api/user/note/${currentNote.noteId}`, {
-      headers: {
-        Authorization: `Bearer ${Cookies.get("authToken")}`,
-      },
-    })
-    .then((response) => {
-      if (response.status === 204) {
-        toast({
-          title: "Notatka została usunięta",
-          body: "Notatka została usunięta z Twojego konta",
-        })
-        window.location.href = "/notes";
-      } else if (response.status === 500) {
-        setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-      }
-    })
-  }
-  
+    axios
+      .delete(`http://localhost:8051/api/user/note/${currentNote.noteId}`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 204) {
+          toast({
+            title: "Notatka została usunięta",
+            body: "Notatka została usunięta z Twojego konta",
+          });
+          window.location.href = "/notes";
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      });
+  };
+
+  const handleContentEdit = (e) => {
+    if (e.currentTarget.innerText.trim().length === 0) {
+      e.currentTarget.innerHTML = "";
+    } else {
+      e.currentTarget.innerHTML = currentNote.content;
+    }
+  };
+
   useEffect(() => {
-    axios.get(`http://localhost:8051/api/user/note/${noteId}`, {
-      headers: {
-        Authorization: `Bearer ${Cookies.get("authToken")}`,
-      },
-    })
-    .then((response) => {
-      if (response.status === 200) {
-        setCurrentNote({
-          noteId: response.data.id,
-          title: response.data.name,
-          content: response.data.content,
-          isPrivate: response.data.isPrivate,
-        });
-        if (currentNote.isPrivate) {
-          setShareType("only-user");
+    axios
+      .get(`http://localhost:8051/api/user/note/${noteId}`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          setCurrentNote({
+            noteId: response.data.id,
+            title: response.data.name,
+            content: response.data.content,
+            isPrivate: response.data.isPrivate,
+          });
+          if (currentNote.isPrivate) {
+            setShareType("only-user");
+          } else {
+            setShareType("all-users");
+          }
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
-        else {
-          setShareType("all-users");
-        }
-        
-      } else if (response.status === 500) {
-        setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-      }
-    })
-  })
-  
+      });
+  });
+
   return (
     <>
       <Navbar></Navbar>
@@ -221,7 +260,6 @@ function Note({noteId, folderId}) {
       <main className="grid grid-cols-[385px_1fr]">
         <Sidebar></Sidebar>
         <NoteBody className="pl-16 pt-8">
-          
           <div className="notebody__top flex flex-row items-center justify-between mr-16">
             <BreadcrumbPage>
               <BreadcrumbList>
@@ -235,9 +273,7 @@ function Note({noteId, folderId}) {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>
-                    {currentNote.title}
-                  </BreadcrumbPage>
+                  <BreadcrumbPage>{currentNote.title}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </BreadcrumbPage>
@@ -262,7 +298,9 @@ function Note({noteId, folderId}) {
                         Wybierz, w jakim formacie zostanie wyeksportowana Twoja
                         notatka.
                       </p>
-                      <Select onValueChange={(value) => exportNoteHandler(value)}>
+                      <Select
+                        onValueChange={(value) => exportNoteHandler(value)}
+                      >
                         <SelectTrigger className="w-[180px] border-slate-400">
                           <SelectValue placeholder="Wybierz typ pliku" />
                         </SelectTrigger>
@@ -305,7 +343,10 @@ function Note({noteId, folderId}) {
                       <p className="mb-6">
                         Zdecyduj, czy Twoja notatka ma być widoczna dla innych.
                       </p>
-                      <Select onValueChange={(value) => handleShareTypeChange(value)} defaultValue={shareType}>
+                      <Select
+                        onValueChange={(value) => handleShareTypeChange(value)}
+                        defaultValue={shareType}
+                      >
                         <SelectTrigger className="w-[320px] py-6 border-slate-400">
                           <SelectValue />
                         </SelectTrigger>
@@ -357,10 +398,27 @@ function Note({noteId, folderId}) {
                   </DialogHeader>
                 </DialogContent>
               </Dialog>
-              <button className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 items-center p-2 text-red-800" onClick={handleDelete}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash w-6 stroke-red-700"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    Usuń
-                </button>
+              <button
+                className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 items-center p-2 text-red-800"
+                onClick={handleDelete}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather feather-trash w-6 stroke-red-700"
+                >
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Usuń
+              </button>
             </div>
           </div>
           <div className="notebody__text mt-8">
@@ -378,8 +436,27 @@ function Note({noteId, folderId}) {
               className="notebody__content focus:outline-none mt-8 mr-16"
               contentEditable="true"
               suppressContentEditableWarning={true}
+              onBlur={handleNoteContent}
+              onClick={(e) => handleContentEdit(e)}
             >
-              {currentNote.content}
+              {currentNote.content.trim().length === 0 ? (
+                <div class="flex flex-col gap-y-4" contentEditable="false">
+                  <p class="text-sm font-bold text-slate-700 select-none">
+                    Zacznij pisać lub{" "}
+                  </p>
+                  <span class="flex flex-row gap-4">
+                    <img src="scanicon.png" />
+                    <a
+                      className="font-bold text-sm text-slate-700"
+                      href="/scan-note"
+                    >
+                      Zeskanuj zdjęcie
+                    </a>
+                  </span>
+                </div>
+              ) : (
+                currentNote.content
+              )}
             </div>
           </div>
         </NoteBody>
