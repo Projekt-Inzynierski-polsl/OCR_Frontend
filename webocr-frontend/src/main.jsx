@@ -12,6 +12,7 @@ import ScanErrors from "@/src/pages/ScanErrors.jsx";
 import CheckScanError from "@/src/pages/CheckScanError.jsx";
 import SelectBoundingBoxes from "@/src/pages/SelectBoundingBoxes.jsx";
 import UploadModel from "@/src/pages/UploadModel.jsx";
+import CheckOutput from "@/src/pages/CheckOutput.jsx";
 import { Toaster } from "@/components/ui/toaster"
 import { CookiesProvider } from 'react-cookie';
 import {
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
   {
     path: "/select-boxes",
     element: <SelectBoundingBoxes />,
+  },
+  {
+    path: "/check-output",
+    element: <CheckOutput />,
   },
   {
     path: "/upload-model",
