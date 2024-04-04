@@ -155,6 +155,7 @@ function Sidebar() {
       folder.notes.push({
         id: folder.notes.length + 1,
         name: newNoteHeader,
+        url: `/notes/${folder.notes.length + 1}`
       });
       folder.notesCount = folder.notes.length;
 
@@ -181,18 +182,11 @@ function Sidebar() {
         })
         .catch((error) => {
           console.log(error);
+          setUserFolders(folders);
+          setNewNoteContent("");
+          setNewNoteHeader("");
         });
     }
-  };
-
-  const handleNewNoteDialogClose = (folderId) => {
-    // if (addNewNoteDialogOpen) {
-    //   handleNewNote(folderId)
-    //   setAddNewNoteDialogOpen(false);
-    // }
-    // else {
-    //   setAddNewNoteDialogOpen(true);
-    // }
   };
 
   const handleNoteContent = (e) => {
@@ -353,7 +347,10 @@ function Sidebar() {
                       </FolderHint>
                       <Dialog
                         open={addNewNoteDialogOpen}
-                        onOpenChange={handleNewNote(folder.id)}
+                        onOpenChange={() => {
+                          handleNewNote(folder.id);
+                          setAddNewNoteDialogOpen(!addNewNoteDialogOpen);
+                        }}
                         modal
                         defaultOpen={addNewNoteDialogOpen}
                       >
@@ -387,7 +384,7 @@ function Sidebar() {
                                         contentEditable="false"
                                       >
                                         <p class="text-sm font-bold text-slate-700 select-none">
-                                          Zacznij pisać lub{" "}
+                                          Zacznij pisać lub
                                         </p>
                                         <span class="flex flex-row gap-4">
                                           <img src="scanicon.png" />
