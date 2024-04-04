@@ -1,11 +1,23 @@
 .a9s-annotation.selected .a9s-outer,
 .a9s-annotation.selected .a9s-inner {
   stroke: transparent !important;
-  fill: #1930601a !important; /* Zmień kolor obramowania dla rect o klasie a9s-outer */
+  fill: #1930601a !important;
 }
 
 .a9s-annotation .a9s-outer,
 .a9s-annotation .a9s-inner {
   stroke: #000000b3;
-  fill: transparent; /* Zmień kolor obramowania dla rect o klasie a9s-outer */
+  fill: transparent;
+}
+
+.a9s-annotation.text .a9s-outer,
+.a9s-annotation.text .a9s-inner {
+  stroke-width:4;
+  stroke:red;
+}
+
+.a9s-annotation.img .a9s-outer,
+.a9s-annotation.img .a9s-inner {
+  stroke-width:4;
+  stroke:green;
 }

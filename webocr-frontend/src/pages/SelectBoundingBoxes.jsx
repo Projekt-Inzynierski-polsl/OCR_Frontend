@@ -1,9 +1,9 @@
 import Navbar from "../components/Navbar.jsx";
 import styled from "styled-components";
-import { useEffect, useRef, useState } from 'react';
-import { Annotorious } from '@recogito/annotorious';
-
-import '@recogito/annotorious/dist/annotorious.min.css';
+import { useEffect, useRef, useState } from "react";
+import { Annotorious } from "@recogito/annotorious";
+import "../common/AnnoMod.css";
+import "@recogito/annotorious/dist/annotorious.min.css";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const FirstNoteHero = styled.div`
   background-color: #bfe6ce;
@@ -26,7 +26,12 @@ const NextButton = styled.button`
 function SelectBoundingBoxes() {
   const [selectedTab, setSelectedTab] = useState("notatka");
   const imgEl = useRef();
-  const [ anno, setAnno ] = useState();
+  const [anno, setAnno] = useState();
+
+  const formatter = (annotation) => {
+    return "text";
+  };  
+
   useEffect(() => {
     let annotorious = null;
 
@@ -37,6 +42,11 @@ function SelectBoundingBoxes() {
         allowEmpty: true,
         disableEditor: true,
       });
+
+      annotorious.on("createAnnotation", function (annotation) {
+        annotation.annoType = "text";
+        annotorious.formatters = [formatter];
+      });
     }
     setAnno(annotorious);
     return () => annotorious.destroy();
@@ -44,15 +54,44 @@ function SelectBoundingBoxes() {
 
   const handleContinue = () => {
     // for every annotation in anno.getAnnotations() get the bounding box and send it to the server
-    anno.getAnnotations().forEach(bbox => {
-      console.log(bbox.target.selector.value)
+    anno.getAnnotations().forEach((bbox) => {
+      console.log(bbox.target.selector.value);
+      console.log(bbox.annoType);
     });
-  }
+  };
 
-  const handleTabChange = (tab) => {
+  const handleTabChange = (value) => {
+    setSelectedTab(value);
+    const newAnno = anno;
+    newAnno.off("createAnnotation");
+    newAnno.on("createAnnotation", function (annotation) {
+      if (value === "notatka") {
+        annotation.annoType = "text";
+      } else {
+        annotation.annoType = "img";
+      }
+    });
+    newAnno.formatters = [(annotation) => {
+      if (annotation.underlying.annoType) {
+        if (annotation.underlying.annoType === "text") {
+          return "text";
+        }
+        else {
+          return "img";
+        }
+      }
+      else {
+        if (value === "notatka") {
+          return "text";
+        }
+        else {
+          return "img";
+        }
+      }
+    }];
     
-    setSelectedTab(tab);
-  }
+    setAnno(newAnno);
+  };
 
   return (
     <>
@@ -68,11 +107,11 @@ function SelectBoundingBoxes() {
           </p>
         </FirstNoteHero>
         <div className="bound-container border border-[#D1D5DB] w-60% mt-8">
-          <img src="boxtest.png" alt="Example" ref={imgEl}/>
+          <img src="boxtest.png" alt="Example" ref={imgEl} />
           <Tabs
             className="float-right mx-8 mt-2"
             value={selectedTab}
-            onValueChange={(e) => {handleTabChange(e.target.value)}}
+            onValueChange={handleTabChange}
           >
             <TabsList>
               <TabsTrigger
@@ -93,9 +132,7 @@ function SelectBoundingBoxes() {
           </Tabs>
         </div>
 
-        <NextButton className="mt-16 w-1/3"
-          onClick={handleContinue}
-        >
+        <NextButton className="mt-16 w-1/3" onClick={handleContinue}>
           Przejdź dalej &gt;
         </NextButton>
       </main>
