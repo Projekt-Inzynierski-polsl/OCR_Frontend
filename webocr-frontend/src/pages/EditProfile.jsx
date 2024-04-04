@@ -82,14 +82,15 @@ import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 function EditProfile() {
-  const { noteId } = useParams();
+  const { userId } = useParams();
   const form = useForm({
     resolver: zodResolver(formSchema),
   });
 
-  const adminChecked = useRef(null);
+  const [adminChecked, setAdminChecked] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [userActions, setUserActions] = useState([]);
+  const [currentUser, setCurrentUser] = useState({});
   const onSubmit = async (values) => {
     if (adminChecked.current.ariaChecked === "true") {
       values.roleId = 1;
@@ -146,6 +147,10 @@ function EditProfile() {
         if (response.status === 200) {
           // todo: zmienic response w sytuacji kiedy bedzie wiadomo co bedzie wysylane i jak
           //setUserActions(response.data);
+          setCurrentUser(response.data);
+          if (response.data.roleId === 1) {
+            setAdminChecked(true);
+          }
         } else if (response.status === 500) {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
@@ -153,7 +158,7 @@ function EditProfile() {
       .catch((error) => {
         setErrorMessage(error.response.data.message);
       });
-  });
+  }, []);
 
   return (
     <>
@@ -162,7 +167,7 @@ function EditProfile() {
         <Sidebar></Sidebar>
         <MainLayout>
           <h1 className="font-bold text-3xl ml-40 mt-8">
-            Profil użytkownika tester
+            Profil użytkownika {currentUser.nickname}
           </h1>
           <div className="dashboard-info gap-4 mt-8 mx-32">
             <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-3/5">
@@ -188,6 +193,7 @@ function EditProfile() {
                                   type="text"
                                   className="py-6 border-slate-300"
                                   {...field}
+                                  value={currentUser.nickname}
                                 />
                               </FormControl>
 
@@ -208,6 +214,7 @@ function EditProfile() {
                                   type="email"
                                   className="py-6 border-slate-300"
                                   {...field}
+                                  value={currentUser.email}
                                 />
                               </FormControl>
 
@@ -219,7 +226,7 @@ function EditProfile() {
                     </div>
                     <p className="text-xl font-bold mt-8">Konto użytkownika</p>
                     <div className="flex items-center space-x-4 mt-6">
-                      <Checkbox id="admin" ref={adminChecked} />
+                      <Checkbox id="admin" checked={adminChecked} onChange={() => setAdminChecked(!adminChecked)} />
                       <Label htmlFor="admin">
                         Ma uprawnienia administratora
                       </Label>

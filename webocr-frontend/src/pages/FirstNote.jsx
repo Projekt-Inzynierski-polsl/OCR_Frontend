@@ -13,7 +13,7 @@ const FirstNoteHero = styled.div`
 `;
 
 import React, { Fragment, useState } from "react";
-
+import axios from "axios";
 const NextButton = styled.button`
   background-color: #004423;
   color: #e9f7ee;
@@ -33,11 +33,12 @@ function FirstNote() {
           uploadedFiles.forEach((file) => {
             formData.append("files", file);
           });
-
-          
+          setLoaderActive(true);
           axios.post("/api/files/upload", formData)
-          .then();
-      setLoaderActive(true);
+          .then(setLoaderActive(false)
+          //todo: redirect to note page
+          );
+      
     }
   };
 
