@@ -9,16 +9,19 @@ const MainLayout = styled.div`
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input.jsx";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useParams } from "react-router-dom";
 
-function CheckScanError({ errorId }) {
+function CheckScanError() {
+  const {errorId} = useParams();
   const handleErrorCheck = (action) => {
     // send action to server
     axios
       .post("http://localhost:8051/api/model/errors", {
         action: action,
+        errorId: errorId,
       }, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -34,13 +37,17 @@ function CheckScanError({ errorId }) {
       });
   };
 
+  useEffect(() => {
+    // fetch error data
+  }, []);
+
   return (
     <>
       <Navbar></Navbar>
       <main className="grid grid-cols-[385px_1fr]">
         <Sidebar></Sidebar>
         <MainLayout>
-          <h1 className="font-bold text-3xl ml-40 mt-8">Błąd #1112</h1>
+          <h1 className="font-bold text-3xl ml-40 mt-8">Błąd #{errorId}</h1>
           <div className="dashboard-info flex flex-row items-top gap-4 mt-8 mx-32">
             <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-4/5">
               <CardContent className="pb-6 pl-16 pt-6 mr-64">

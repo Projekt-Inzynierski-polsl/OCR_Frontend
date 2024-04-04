@@ -46,7 +46,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/notes",
-    element: <Note noteId={5} />,
+    element: <Note />,
+  },
+  {
+    path: "/notes/:noteId",
+    element: <Note />,
   },
   {
     path: "/admin",
@@ -65,7 +69,7 @@ const router = createBrowserRouter([
     element: <CheckScanError />,
   },
   {
-    path: "/edit-profile",
+    path: "/edit-profile/:userId",
     element: <EditProfile />,
   },
   {

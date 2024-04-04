@@ -74,8 +74,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 
-function Note({ noteId, folderId }) {
+function Note() {
+
+  const { noteId } = useParams();
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [exportType, setExportType] = useState("pdf");
@@ -140,7 +143,7 @@ function Note({ noteId, folderId }) {
       <div class="flex flex-col gap-y-4" contentEditable="false">
       <p class="text-sm font-bold text-slate-700 select-none">Zacznij pisać lub </p>
       <span class="flex flex-row gap-4">
-        <img src="scanicon.png" />
+        <img src="http://localhost:5173/scanicon.png" />
         <a className="font-bold text-sm text-slate-700" href="/scan-note">Zeskanuj zdjęcie</a>
       </span>
     </div>
@@ -454,7 +457,7 @@ function Note({ noteId, folderId }) {
                     Zacznij pisać lub{" "}
                   </p>
                   <span class="flex flex-row gap-4">
-                    <img src="scanicon.png" />
+                    <img src="http://localhost:5173/scanicon.png" />
                     <a
                       className="font-bold text-sm text-slate-700"
                       href="/scan-note"

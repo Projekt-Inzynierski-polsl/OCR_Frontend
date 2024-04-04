@@ -221,7 +221,7 @@ function Sidebar() {
             <div className="last-doc flex flex-row gap-2 items-center hover:bg-slate-200 py-1.5 pl-12 pr-10 mx-4">
               <img src="/note.png" alt="" />
               <a
-                href=""
+                href="/notes/6"
                 className="text-ellipsis overflow-hidden whitespace-nowrap"
               >
                 testowy tekst który z pewnością jest bardzo długi
@@ -230,7 +230,7 @@ function Sidebar() {
             <div className="last-doc flex flex-row gap-2 items-center hover:bg-slate-200 py-1.5 pl-12 pr-10 mx-4">
               <img src="/note.png" alt="" />
               <a
-                href=""
+                href="/notes/7"
                 className="text-ellipsis overflow-hidden whitespace-nowrap text-md"
               >
                 jeszcze dłuższy testowy tekst o niczym

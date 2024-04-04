@@ -79,8 +79,10 @@ const DeleteAccountButton = styled.button`
 `;
 
 import { useState, useRef, useEffect } from "react";
+import { useParams } from "react-router-dom";
 
 function EditProfile() {
+  const { noteId } = useParams();
   const form = useForm({
     resolver: zodResolver(formSchema),
   });
@@ -96,7 +98,7 @@ function EditProfile() {
       values.roleId = 2;
     }
     await axios
-      .put("http://localhost:8051/api/user/1", values, {
+      .put(`http://localhost:8051/api/user/${userId}`, values, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -116,7 +118,7 @@ function EditProfile() {
 
   const handleDelete = async () => {
     await axios
-      .delete("http://localhost:8051/api/user/2", {
+      .delete(`http://localhost:8051/api/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -135,7 +137,7 @@ function EditProfile() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8051/api/user/1", {
+      .get(`http://localhost:8051/api/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
