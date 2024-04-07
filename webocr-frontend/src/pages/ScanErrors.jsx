@@ -27,7 +27,7 @@ function ScanErrors() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8051/api/model/errors", {
+      .get("http://localhost:8051/api/ocrError", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },

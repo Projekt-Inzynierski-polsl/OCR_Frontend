@@ -65,7 +65,7 @@ const router = createBrowserRouter([
     element: <ScanErrors />,
   },
   {
-    path: "/check-error",
+    path: "/errors/:errorId",
     element: <CheckScanError />,
   },
   {
