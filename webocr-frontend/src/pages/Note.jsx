@@ -310,7 +310,7 @@ function Note() {
                         notatka.
                       </p>
                       <Select
-                        onValueChange={(value) => exportNoteHandler(value)}
+                        onValueChange={(value) => setExportType(value)}
                       >
                         <SelectTrigger className="w-[180px] border-slate-400">
                           <SelectValue placeholder="Wybierz typ pliku" />
