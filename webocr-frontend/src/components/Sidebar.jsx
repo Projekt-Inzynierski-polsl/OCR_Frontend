@@ -48,7 +48,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { NavLink } from "react-router-dom";
-import { set } from "react-hook-form";
 
 const DialogButton = styled.button`
   background-color: #004423;
@@ -122,15 +121,36 @@ function Sidebar() {
 
   const handleAddFolder = (name) => {
     const folders = [...userFolders];
-    folders.push({
-      id: folders.length + 1,
-      name: name,
-      notesCount: 0,
-      notes: [],
-      icon: "/folder.png",
-    });
-    setNewFolderName("");
-    setUserFolders(folders);
+    axios
+      .post(
+        "http://localhost:8051/api/user/folder",
+        {
+          name: name,
+          iconPath: "/folder.png",
+          password: "",
+          confirmedPassword: "",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        }
+      )
+      .then((response) => {
+        folders.push({
+          folderId: response.data,
+          name: name,
+          notesCount: 0,
+          notes: [],
+          iconPath: "/folder.png",
+        });
+        setNewFolderName("");
+        setUserFolders(folders);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    
   };
 
   const editFolderIcon = (folderId, icon) => {
@@ -155,7 +175,7 @@ function Sidebar() {
       folder.notes.push({
         id: folder.notes.length + 1,
         name: newNoteHeader,
-        url: `/notes/${folder.notes.length + 1}`
+        url: `/notes/${folder.notes.length + 1}`,
       });
       folder.notesCount = folder.notes.length;
 
@@ -343,7 +363,7 @@ function Sidebar() {
                       </TooltipProvider>
                       <p className="folder__title mr-4">{folder.name}</p>
                       <FolderHint className="mr-24 text-sm">
-                        {folder.notesCount}
+                        {folder.notes.length}
                       </FolderHint>
                       <Dialog
                         open={addNewNoteDialogOpen}

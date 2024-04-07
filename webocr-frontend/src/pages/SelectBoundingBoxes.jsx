@@ -53,7 +53,6 @@ function SelectBoundingBoxes() {
   }, []);
 
   const handleContinue = () => {
-    // for every annotation in anno.getAnnotations() get the bounding box and send it to the server
     anno.getAnnotations().forEach((bbox) => {
       console.log(bbox.target.selector.value);
       console.log(bbox.annoType);

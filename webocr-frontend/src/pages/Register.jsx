@@ -11,7 +11,7 @@ const formSchema = z
   .object({
     nickname: z
       .string()
-      .min(2, { message: "Nazwa użytkownika jest za krótka" }),
+      .min(3, { message: "Nazwa użytkownika jest za krótka" }),
     email: z.string().email({ message: "Niepoprawny adres email" }),
     password: z.string().min(5, { message: "Hasło jest za krótkie" }),
     confirmedPassword: z.string(),
