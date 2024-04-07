@@ -48,6 +48,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { NavLink } from "react-router-dom";
+import { set } from "react-hook-form";
 
 const DialogButton = styled.button`
   background-color: #004423;
@@ -118,6 +119,7 @@ function Sidebar() {
   const [addNewNoteDialogOpen, setAddNewNoteDialogOpen] = useState(false);
   const [newNoteHeader, setNewNoteHeader] = useState("");
   const [newNoteContent, setNewNoteContent] = useState("");
+  const [newNoteFolderId, setNewNoteFolderId] = useState(0);
 
   const handleAddFolder = (name) => {
     const folders = [...userFolders];
@@ -150,15 +152,13 @@ function Sidebar() {
       .catch((error) => {
         console.log(error);
       });
-    
   };
 
   const editFolderIcon = (folderId, icon) => {
     const folders = [...userFolders];
     const folder = folders.find((folder) => folder.id === folderId);
-    folder.icon = icon;
+    folder.iconPath = icon;
     setUserFolders(folders);
-    setChangeIconPopoverOpen(false);
   };
 
   const handleNewNoteHeader = (e) => {
@@ -168,16 +168,17 @@ function Sidebar() {
     }
   };
 
-  const handleNewNote = (folderId) => {
+  const handleNewNote = () => {
     if (newNoteHeader.trim() !== "") {
+      const folderId = newNoteFolderId;
       const folders = [...userFolders];
-      const folder = folders.find((folder) => folder.id === folderId);
-      folder.notes.push({
-        id: folder.notes.length + 1,
+      const foundFolder = folders.find((f) => f.id === folderId);
+      foundFolder.notes.push({
+        id: foundFolder.notes.length + 1,
         name: newNoteHeader,
-        url: `/notes/${folder.notes.length + 1}`,
+        url: `/notes/${foundFolder.notes.length + 1}`,
       });
-      folder.notesCount = folder.notes.length;
+      foundFolder.notesCount = foundFolder.notes.length;
 
       axios
         .post(
@@ -310,6 +311,7 @@ function Sidebar() {
               </TooltipProvider>
             </div>
             <div className="user-notes">
+              
               {userFolders.map((folder) => (
                 <Fragment key={folder.id}>
                   <Collapsible>
@@ -324,6 +326,7 @@ function Sidebar() {
                           <img src="/arr.svg" alt="" />
                         </button>
                       </CollapsibleTrigger>
+
                       <TooltipProvider>
                         <Tooltip>
                           <Popover>
@@ -365,67 +368,12 @@ function Sidebar() {
                       <FolderHint className="mr-24 text-sm">
                         {folder.notes.length}
                       </FolderHint>
-                      <Dialog
-                        open={addNewNoteDialogOpen}
-                        onOpenChange={() => {
-                          handleNewNote(folder.id);
-                          setAddNewNoteDialogOpen(!addNewNoteDialogOpen);
-                        }}
-                        modal
-                        defaultOpen={addNewNoteDialogOpen}
-                      >
-                        <DialogTrigger asChild>
-                          <button className="p-2 hover:bg-neutral-200 mr-1">
-                            <img src="/plus.svg" alt="" />
-                          </button>
-                        </DialogTrigger>
-                        <DialogContent className="bg-white p-8 max-w-[1560px] min-h-[768px]">
-                          <DialogHeader>
-                            <DialogDescription>
-                              <NoteBody>
-                                <div className="notebody__text mt-8">
-                                  <NoteHeader
-                                    className="font-bold text-4xl"
-                                    contentEditable="true"
-                                    spellCheck="false"
-                                    placeholder="Nowa notatka"
-                                    onBlur={handleNewNoteHeader}
-                                    suppressContentEditableWarning={true}
-                                  ></NoteHeader>
-                                  <div
-                                    className="notebody__content focus:outline-none mt-8 mr-16"
-                                    contentEditable="true"
-                                    suppressContentEditableWarning={true}
-                                    onClick={(e) => handleNoteContent(e)}
-                                  >
-                                    {newNoteContent.trim().length === 0 ? (
-                                      <div
-                                        class="flex flex-col gap-y-4"
-                                        contentEditable="false"
-                                      >
-                                        <p class="text-sm font-bold text-slate-700 select-none">
-                                          Zacznij pisać lub
-                                        </p>
-                                        <span class="flex flex-row gap-4">
-                                          <img src="scanicon.png" />
-                                          <a
-                                            className="font-bold text-sm text-slate-700"
-                                            href="/scan-note"
-                                          >
-                                            Zeskanuj zdjęcie
-                                          </a>
-                                        </span>
-                                      </div>
-                                    ) : (
-                                      newNoteContent
-                                    )}
-                                  </div>
-                                </div>
-                              </NoteBody>
-                            </DialogDescription>
-                          </DialogHeader>
-                        </DialogContent>
-                      </Dialog>
+                      <button className="p-2 hover:bg-neutral-200 mr-1" onClick={() => {
+                          setNewNoteFolderId(folder.id)
+                          setAddNewNoteDialogOpen(!addNewNoteDialogOpen)
+                        }}>
+                        <img src="/plus.svg" alt="" />
+                      </button>
                     </div>
                     <CollapsibleContent>
                       <div className="folder__notes pl-6">
@@ -465,6 +413,63 @@ function Sidebar() {
                   </Collapsible>
                 </Fragment>
               ))}
+              <Dialog
+                open={addNewNoteDialogOpen}
+                modal
+                defaultOpen={addNewNoteDialogOpen}
+              >
+                <DialogContent className="bg-white p-8 max-w-[1560px] min-h-[768px]" 
+                onInteractOutside={() => {
+                  setAddNewNoteDialogOpen(false);
+                  handleNewNote();
+                }}
+                >
+                  <DialogHeader>
+                    <DialogDescription>
+                      <NoteBody>
+                        <div className="notebody__text mt-8">
+                          <NoteHeader
+                            className="font-bold text-4xl"
+                            contentEditable="true"
+                            spellCheck="false"
+                            placeholder="Nowa notatka"
+                            onBlur={handleNewNoteHeader}
+                            suppressContentEditableWarning={true}
+                          ></NoteHeader>
+                          <div
+                            className="notebody__content focus:outline-none mt-8 mr-16"
+                            contentEditable="true"
+                            suppressContentEditableWarning={true}
+                            onClick={(e) => handleNoteContent(e)}
+                          >
+                            {newNoteContent.trim().length === 0 ? (
+                              <div
+                                class="flex flex-col gap-y-4"
+                                contentEditable="false"
+                              >
+                                <p class="text-sm font-bold text-slate-700 select-none">
+                                  Zacznij pisać lub
+                                </p>
+                                <span class="flex flex-row gap-4">
+                                  <img src="scanicon.png" />
+                                  <a
+                                    className="font-bold text-sm text-slate-700"
+                                    href="/scan-note"
+                                  >
+                                    Zeskanuj zdjęcie
+                                  </a>
+                                </span>
+                              </div>
+                            ) : (
+                              newNoteContent
+                            )}
+                          </div>
+                        </div>
+                      </NoteBody>
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </SidebarBody>
