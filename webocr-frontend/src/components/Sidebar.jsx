@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import React, { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -48,7 +48,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { NavLink } from "react-router-dom";
-import { set } from "react-hook-form";
 
 const DialogButton = styled.button`
   background-color: #004423;
@@ -379,6 +378,7 @@ function Sidebar() {
                       <div className="folder__notes pl-6">
                         {folder.notes.map((note) => (
                           <NavLink
+                            key={note.id}
                             to={note.url}
                             style={({ isActive }) => {
                               return {
@@ -444,13 +444,13 @@ function Sidebar() {
                           >
                             {newNoteContent.trim().length === 0 ? (
                               <div
-                                class="flex flex-col gap-y-4"
+                                className="flex flex-col gap-y-4"
                                 contentEditable="false"
                               >
-                                <p class="text-sm font-bold text-slate-700 select-none">
+                                <p className="text-sm font-bold text-slate-700 select-none">
                                   Zacznij pisać lub
                                 </p>
-                                <span class="flex flex-row gap-4">
+                                <span className="flex flex-row gap-4">
                                   <img src="scanicon.png" />
                                   <a
                                     className="font-bold text-sm text-slate-700"

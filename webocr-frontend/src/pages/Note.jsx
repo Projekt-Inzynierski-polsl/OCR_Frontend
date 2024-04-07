@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import React, { Fragment, useState } from "react";
+import  { Fragment, useState } from "react";
 import Navbar from "../components/Navbar.jsx";
 import Sidebar from "../components/Sidebar.jsx";
 import {
@@ -82,7 +82,6 @@ function Note() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [exportType, setExportType] = useState("pdf");
-  const [typingTimeout, setTypingTimeout] = useState(null);
   const [currentNote, setCurrentNote] = useState({
     noteId: 5,
     title: "Testowy dokument schematyczny",
@@ -421,10 +420,10 @@ function Note() {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="feather feather-trash w-6 stroke-red-700"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="feather feather-trash w-6 stroke-red-700"
                 >
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -452,11 +451,11 @@ function Note() {
               onClick={(e) => handleContentEdit(e)}
             >
               {currentNote.content.trim().length === 0 ? (
-                <div class="flex flex-col gap-y-4" contentEditable="false">
-                  <p class="text-sm font-bold text-slate-700 select-none">
+                <div className="flex flex-col gap-y-4" contentEditable="false">
+                  <p className="text-sm font-bold text-slate-700 select-none">
                     Zacznij pisać lub{" "}
                   </p>
-                  <span class="flex flex-row gap-4">
+                  <span className="flex flex-row gap-4">
                     <img src="http://localhost:5173/scanicon.png" />
                     <a
                       className="font-bold text-sm text-slate-700"

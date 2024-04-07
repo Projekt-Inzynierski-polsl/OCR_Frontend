@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import Cookies from 'js-cookie'
-
+import { useState } from "react";
 const formSchema = z
   .object({
     nickname: z
@@ -56,6 +56,8 @@ const RegisterButton = styled.button`
 `;
 
 function Register() {
+
+  const [errorMessage, setErrorMessage] = useState("")
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -103,7 +105,7 @@ function Register() {
               </a>
             </span>
           </p>
-
+          <p className="mt-2 text-red-700">{errorMessage}</p>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
