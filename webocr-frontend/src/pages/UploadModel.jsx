@@ -85,7 +85,7 @@ function UploadModel() {
       .then((response) => {
         if (response.status === 200) {
           //todo: implement toast when uploaded
-          console.log("wysłany!")
+          console.log("wysłany!");
         }
       })
       .catch((error) => {
@@ -208,7 +208,7 @@ function UploadModel() {
                 </TableHeader>
                 <TableBody>
                   {modelUpdates.map((update) => (
-                    <TableRow>
+                    <TableRow key={update.id}>
                       <TableCell className="font-medium">
                         Wersja {update.id}
                       </TableCell>
@@ -228,6 +228,15 @@ function UploadModel() {
                       <TableCell>{update.date}</TableCell>
                     </TableRow>
                   ))}
+
+                  {/* Empty state dla tabeli modelUpdates */}
+                  {modelUpdates.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan="3" className="text-center">
+                        Brak aktualizacji
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>

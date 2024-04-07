@@ -94,8 +94,7 @@ function EditProfile() {
   const onSubmit = async (values) => {
     if (adminChecked.current.ariaChecked === "true") {
       values.roleId = 1;
-    }
-    else {
+    } else {
       values.roleId = 2;
     }
     await axios
@@ -134,7 +133,7 @@ function EditProfile() {
       .catch((error) => {
         setErrorMessage(error.response.data.message);
       });
-  }
+  };
 
   useEffect(() => {
     axios
@@ -177,7 +176,9 @@ function EditProfile() {
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="space-y-8"
                   >
-                    <p className="font-bold text-red-700 mb-4 mt-6">{errorMessage}</p>
+                    <p className="font-bold text-red-700 mb-4 mt-6">
+                      {errorMessage}
+                    </p>
                     <div className="text-inputs grid grid-cols-2 gap-16">
                       <div className="input-container">
                         <p className="font-bold text-lg mb-2">
@@ -226,12 +227,19 @@ function EditProfile() {
                     </div>
                     <p className="text-xl font-bold mt-8">Konto użytkownika</p>
                     <div className="flex items-center space-x-4 mt-6">
-                      <Checkbox id="admin" checked={adminChecked} onChange={() => setAdminChecked(!adminChecked)} />
+                      <Checkbox
+                        id="admin"
+                        checked={adminChecked}
+                        onChange={() => setAdminChecked(!adminChecked)}
+                      />
                       <Label htmlFor="admin">
                         Ma uprawnienia administratora
                       </Label>
                     </div>
-                    <SaveChangesButton className="float-right mt-8" type="submit">
+                    <SaveChangesButton
+                      className="float-right mt-8"
+                      type="submit"
+                    >
                       Zapisz zmiany
                     </SaveChangesButton>
                   </form>
@@ -262,7 +270,10 @@ function EditProfile() {
                       </DialogTitle>
                       <DialogDescription>
                         <p className="mb-6">Tej czynności nie można cofnąć!</p>
-                        <DeleteAccountButton className="mt-2" onClick={handleDelete}>
+                        <DeleteAccountButton
+                          className="mt-2"
+                          onClick={handleDelete}
+                        >
                           Usuń konto użytkownika
                         </DeleteAccountButton>
                       </DialogDescription>
@@ -289,14 +300,22 @@ function EditProfile() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {userActions.map((action) => (
+                    {userActions.length > 0 ? (
+                      userActions.map((action) => (
+                        <TableRow key={action.id}>
+                          <TableCell className="font-medium">
+                            {action.date}
+                          </TableCell>
+                          <TableCell>{action.action}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
                       <TableRow>
-                        <TableCell className="font-medium">
-                          {action.date}
+                        <TableCell colSpan="2" className="text-center">
+                          Brak akcji użytkownika
                         </TableCell>
-                        <TableCell>{action.action}</TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>

@@ -30,7 +30,7 @@ function CheckScanError() {
       })
       .then((response) => {
         if (response.status === 200) {
-            window.location.href = "/scan-errors";
+            window.location.href = "/errors";
         }
       })
       .catch((error) => {

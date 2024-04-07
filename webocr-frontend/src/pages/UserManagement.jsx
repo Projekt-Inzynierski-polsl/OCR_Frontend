@@ -77,7 +77,7 @@ function AdminDashboard() {
                   </TableHeader>
                   <TableBody>
                     {users.map((user) => (
-                      <TableRow>
+                      <TableRow key={user.id}>
                         <TableCell className="font-medium">{user.id}</TableCell>
                         <TableCell>{user.nickname}</TableCell>
                         <TableCell>{user.email}</TableCell>
@@ -104,6 +104,14 @@ function AdminDashboard() {
                         </TableCell>
                       </TableRow>
                     ))}
+
+                    {users.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan="7" className="text-center">
+                          Brak użytkowników
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>

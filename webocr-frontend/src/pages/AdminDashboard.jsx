@@ -18,10 +18,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from "react";
 import axios from "axios";
-import Cookies from 'js-cookie';
-
+import Cookies from "js-cookie";
 
 function AdminDashboard() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -32,10 +31,10 @@ function AdminDashboard() {
     activeScanErrors: 222,
     repairedScanErrors: 333,
     todayNotes: 444,
-  })
+  });
 
-  useEffect( () => {
-     axios
+  useEffect(() => {
+    axios
       .get("http://localhost:8051/api/model/errors", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -53,7 +52,7 @@ function AdminDashboard() {
         setErrorMessage(error);
       });
 
-     axios
+    axios
       .get("http://localhost:8051/api/model/updates", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -71,7 +70,7 @@ function AdminDashboard() {
         setErrorMessage(error);
       });
 
-     axios
+    axios
       .get("http://localhost:8051/api/admin/stats", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -167,35 +166,43 @@ function AdminDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {modelErrors.map((error) => (
+                    {modelErrors.length > 0 ? (
+                      modelErrors.map((error) => (
+                        <TableRow key={error.id}>
+                          <TableCell className="font-medium">
+                            {error.id}
+                          </TableCell>
+                          <TableCell>{error.readWord}</TableCell>
+                          <TableCell>{error.correctWord}</TableCell>
+                          <TableCell>{error.scanDate}</TableCell>
+                          <TableCell>
+                            {error.status === "unchecked" ? (
+                              <div className="border border-[#760B0D] text-[#760B0D] text-center font-bold text-sm py-2 px-2 w-3/5 rounded-[10px]">
+                                Niesprawdzony
+                              </div>
+                            ) : (
+                              <div className="border border-[#00844E] text-[#00844E] text-center font-bold text-sm py-2 px-2 w-3/5 rounded-[10px]">
+                                Zweryfikowany
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <a
+                              href={`/model-error/${error.id}`}
+                              className="font-bold text-blue-700 text-md"
+                            >
+                              Szczegóły
+                            </a>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
                       <TableRow>
-                        <TableCell className="font-medium">
-                          {error.id}
-                        </TableCell>
-                        <TableCell>{error.readWord}</TableCell>
-                        <TableCell>{error.correctWord}</TableCell>
-                        <TableCell>{error.scanDate}</TableCell>
-                        <TableCell>
-                          {error.status === "unchecked" ? (
-                            <div className="border border-[#760B0D] text-[#760B0D] text-center font-bold text-sm py-2 px-2 w-3/5 rounded-[10px]">
-                              Niesprawdzony
-                            </div>
-                          ) : (
-                            <div className="border border-[#00844E] text-[#00844E] text-center font-bold text-sm py-2 px-2 w-3/5 rounded-[10px]">
-                              Zweryfikowany
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <a
-                            href={`/model-error/${error.id}`}
-                            className="font-bold text-blue-700 text-md"
-                          >
-                            Szczegóły
-                          </a>
+                        <TableCell colSpan="6" className="text-center">
+                          Brak błędów
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -217,12 +224,22 @@ function AdminDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {modelUpdates.map((update) => (
+                    {modelUpdates.length > 0 ? (
+                      modelUpdates.map((update) => (
+                        <TableRow key={update.id}>
+                          <TableCell className="font-medium">
+                            Wersja {update.id}
+                          </TableCell>
+                          <TableCell>{update.date}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
                       <TableRow>
-                        <TableCell className="font-medium">Wersja {update.id}</TableCell>
-                        <TableCell>{update.date}</TableCell>
+                        <TableCell colSpan="2" className="text-center">
+                          Brak aktualizacji
+                        </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
