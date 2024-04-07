@@ -40,7 +40,7 @@ function ScanErrors() {
       .catch((error) => {
         console.error(error);
       });
-  });
+  }, []);
 
   return (
     <>

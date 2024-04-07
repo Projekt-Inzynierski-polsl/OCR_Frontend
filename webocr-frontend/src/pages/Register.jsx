@@ -71,7 +71,7 @@ function Register() {
       values
     ).then((response) => {
       if (response.status === 200) {
-        Cookies.set("authToken", response.data, { path: "/" })
+        Cookies.set("authToken", response.data, { path: "/", expires: 7})
         window.location.href = "/notes";
       }
     }).catch((error) => {

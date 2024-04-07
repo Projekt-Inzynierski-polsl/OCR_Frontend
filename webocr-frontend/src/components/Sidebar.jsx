@@ -310,7 +310,6 @@ function Sidebar() {
               </TooltipProvider>
             </div>
             <div className="user-notes">
-              
               {userFolders.map((folder) => (
                 <Fragment key={folder.id}>
                   <Collapsible>
@@ -367,10 +366,13 @@ function Sidebar() {
                       <FolderHint className="mr-24 text-sm">
                         {folder.notes.length}
                       </FolderHint>
-                      <button className="p-2 hover:bg-neutral-200 mr-1" onClick={() => {
-                          setNewNoteFolderId(folder.id)
-                          setAddNewNoteDialogOpen(!addNewNoteDialogOpen)
-                        }}>
+                      <button
+                        className="p-2 hover:bg-neutral-200 mr-1"
+                        onClick={() => {
+                          setNewNoteFolderId(folder.id);
+                          setAddNewNoteDialogOpen(!addNewNoteDialogOpen);
+                        }}
+                      >
                         <img src="/plus.svg" alt="" />
                       </button>
                     </div>
@@ -418,11 +420,12 @@ function Sidebar() {
                 modal
                 defaultOpen={addNewNoteDialogOpen}
               >
-                <DialogContent className="bg-white p-8 max-w-[1560px] min-h-[768px]" 
-                onInteractOutside={() => {
-                  setAddNewNoteDialogOpen(false);
-                  handleNewNote();
-                }}
+                <DialogContent
+                  className="bg-white p-8 max-w-[1560px] min-h-[768px]"
+                  onInteractOutside={() => {
+                    setAddNewNoteDialogOpen(false);
+                    handleNewNote();
+                  }}
                 >
                   <DialogHeader>
                     <DialogDescription>
