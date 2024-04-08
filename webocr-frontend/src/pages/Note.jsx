@@ -87,6 +87,7 @@ function Note() {
     content: "",
     isPrivate: false,
   });
+  const [tags, setTags] = useState(["tag1", "tag2", "tag3"]);
   const { toast } = useToast();
   const [errorMessage, setErrorMessage] = useState("");
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
@@ -227,6 +228,18 @@ function Note() {
     setPlaceholderVisible(false);
   };
 
+  const handleTagAdd = (e) => {
+    if (e.key === "Enter" && e.target.innerText.trim().length > 0) {
+      e.preventDefault();
+      setTags([...tags, e.target.innerText.trim()]);
+      e.target.innerText = "";
+    }
+  };
+
+  const handleTagDelete = (index) => {
+    setTags(tags.filter((_, i) => i !== index));
+  };
+
   useEffect(() => {
     axios
       .get(`http://localhost:8051/api/user/note/${noteId}`, {
@@ -251,7 +264,7 @@ function Note() {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
       });
-  });
+  }, []);
 
   return (
     <>
@@ -430,6 +443,36 @@ function Note() {
             >
               {currentNote.title}
             </NoteHeader>
+            <div className="mt-4">
+              <p className="font-bold text-sm text-slate-500">Tagi</p>
+
+              <div
+                className="tags mt-2 w-3/4"
+                contentEditable="true"
+                onKeyDown={handleTagAdd}
+                placeholder="Dodaj tag i wciśnij Enter"
+              ></div>
+              {tags.length > 0 && (
+                <div className="flex flex-row gap-x-1 mt-4">
+                  {tags.map((tag, index) => (
+                    <Fragment>
+                      <span
+                        key={index}
+                        className="tag bg-slate-100 text-slate-800 px-4 py-1 mr-2 rounded-[15px]"
+                      >
+                        {tag}
+                        <button
+                          onClick={() => handleTagDelete(index)}
+                          className="ml-2"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    </Fragment>
+                  ))}
+                </div>
+              )}
+            </div>
             <div
               className="notebody__content focus:outline-none mt-8 mr-16"
               contentEditable="true"

@@ -439,6 +439,7 @@ function Sidebar() {
                           >
                             {newNoteHeader}
                           </NoteHeader>
+                          
                           <div
                             className="notebody__content focus:outline-none mt-8 mr-16"
                             contentEditable="true"
