@@ -36,6 +36,7 @@ function Navbar() {
             })
             .then((response) => {
                 Cookies.set("authToken", response.data, { path: "/", expires: 7})
+                
             })
             .catch((error) => {
                toast({

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import  { Fragment, useState } from "react";
+import { Fragment, useState } from "react";
 import Navbar from "../components/Navbar.jsx";
 import Sidebar from "../components/Sidebar.jsx";
 import {
@@ -77,7 +77,6 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 function Note() {
-
   const { noteId } = useParams();
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -90,6 +89,7 @@ function Note() {
   });
   const { toast } = useToast();
   const [errorMessage, setErrorMessage] = useState("");
+  const [placeholderVisible, setPlaceholderVisible] = useState(true);
 
   const exportNoteHandler = async () => {
     await axios
@@ -138,24 +138,17 @@ function Note() {
   const handleNoteContent = (e) => {
     if (e.target.innerText.trim() === "") {
       currentNote.content = "";
-      e.currentTarget.innerHTML = `
-      <div class="flex flex-col gap-y-4" contentEditable="false">
-      <p class="text-sm font-bold text-slate-700 select-none">Zacznij pisać lub </p>
-      <span class="flex flex-row gap-4">
-        <img src="http://localhost:5173/scanicon.png" />
-        <a className="font-bold text-sm text-slate-700" href="/scan-note">Zeskanuj zdjęcie</a>
-      </span>
-    </div>
-      `;
+      setPlaceholderVisible(true);
     } else {
       currentNote.content = e.target.innerText.trim();
-      axios.put(`/api/user/note/${currentNote.noteId}`, currentNote)
-        .then(response => {
+      axios
+        .put(`/api/user/note/${currentNote.noteId}`, currentNote)
+        .then((response) => {
           toast({
             title: "Notatka zapisana!",
-          })
+          });
         })
-        .catch(error => {
+        .catch((error) => {
           console.error(error);
         });
     }
@@ -230,12 +223,8 @@ function Note() {
       });
   };
 
-  const handleContentEdit = (e) => {
-    if (e.currentTarget.innerText.trim().length === 0) {
-      e.currentTarget.innerHTML = "";
-    } else {
-      e.currentTarget.innerHTML = currentNote.content;
-    }
+  const handleContentEdit = () => {
+    setPlaceholderVisible(false);
   };
 
   useEffect(() => {
@@ -309,9 +298,7 @@ function Note() {
                         Wybierz, w jakim formacie zostanie wyeksportowana Twoja
                         notatka.
                       </p>
-                      <Select
-                        onValueChange={(value) => setExportType(value)}
-                      >
+                      <Select onValueChange={(value) => setExportType(value)}>
                         <SelectTrigger className="w-[180px] border-slate-400">
                           <SelectValue placeholder="Wybierz typ pliku" />
                         </SelectTrigger>
@@ -448,12 +435,15 @@ function Note() {
               contentEditable="true"
               suppressContentEditableWarning={true}
               onBlur={handleNoteContent}
-              onClick={(e) => handleContentEdit(e)}
             >
-              {currentNote.content.trim().length === 0 ? (
-                <div className="flex flex-col gap-y-4" contentEditable="false">
+              {currentNote.content.trim().length === 0 && placeholderVisible ? (
+                <div
+                  className="flex flex-col gap-y-4"
+                  contentEditable="false"
+                  onClick={handleContentEdit}
+                >
                   <p className="text-sm font-bold text-slate-700 select-none">
-                    Zacznij pisać lub{" "}
+                    Zacznij pisać lub
                   </p>
                   <span className="flex flex-row gap-4">
                     <img src="http://localhost:5173/scanicon.png" />

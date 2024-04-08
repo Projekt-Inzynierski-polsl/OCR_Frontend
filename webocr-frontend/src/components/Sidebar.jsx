@@ -48,6 +48,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { NavLink } from "react-router-dom";
+import { set } from "react-hook-form";
 
 const DialogButton = styled.button`
   background-color: #004423;
@@ -119,6 +120,7 @@ function Sidebar() {
   const [newNoteHeader, setNewNoteHeader] = useState("");
   const [newNoteContent, setNewNoteContent] = useState("");
   const [newNoteFolderId, setNewNoteFolderId] = useState(0);
+  const [placeholderVisible, setPlaceholderVisible] = useState(true);
 
   const handleAddFolder = (name) => {
     const folders = [...userFolders];
@@ -210,21 +212,17 @@ function Sidebar() {
   };
 
   const handleNoteContent = (e) => {
-    if (e.target.innerText.trim() === "") {
+    if (e.currentTarget.innerText.trim() === "") {
       setNewNoteContent("");
-      e.currentTarget.innerHTML = `
-      <div class="flex flex-col gap-y-4" contentEditable="false">
-      <p class="text-sm font-bold text-slate-700 select-none">Zacznij pisać lub </p>
-      <span class="flex flex-row gap-4">
-        <img src="scanicon.png" />
-        <a className="font-bold text-sm text-slate-700" href="/scan-note">Zeskanuj zdjęcie</a>
-      </span>
-    </div>
-      `;
+      setPlaceholderVisible(true);
     } else {
-      setNewNoteContent(e.target.innerText.trim());
+      setNewNoteContent(e.currentTarget.innerText.trim());
     }
   };
+
+  const handleContentEdit = () => {
+    setPlaceholderVisible(false);
+  }
 
   return (
     <>
@@ -438,23 +436,26 @@ function Sidebar() {
                             placeholder="Nowa notatka"
                             onBlur={handleNewNoteHeader}
                             suppressContentEditableWarning={true}
-                          ></NoteHeader>
+                          >
+                            {newNoteHeader}
+                          </NoteHeader>
                           <div
                             className="notebody__content focus:outline-none mt-8 mr-16"
                             contentEditable="true"
                             suppressContentEditableWarning={true}
-                            onClick={(e) => handleNoteContent(e)}
+                            onBlur={handleNoteContent}
                           >
-                            {newNoteContent.trim().length === 0 ? (
+                            {newNoteContent.trim().length === 0 && placeholderVisible ? (
                               <div
                                 className="flex flex-col gap-y-4"
                                 contentEditable="false"
+                                onClick={handleContentEdit}
                               >
                                 <p className="text-sm font-bold text-slate-700 select-none">
                                   Zacznij pisać lub
                                 </p>
                                 <span className="flex flex-row gap-4">
-                                  <img src="scanicon.png" />
+                                  <img src="http://localhost:5173/scanicon.png" />
                                   <a
                                     className="font-bold text-sm text-slate-700"
                                     href="/scan-note"
