@@ -13,10 +13,11 @@ const Avatar = styled.span`
 import Cookies from "js-cookie";
 
 import axios from "axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function Navbar() {
   const { toast } = useToast();
+  const [userData, setUserData] = useState({});
 
   const handleLogout = () => {
     Cookies.remove("authToken", { path: "/" });
@@ -52,7 +53,22 @@ function Navbar() {
       }
     );
 
-    // pobieranie informacji o userze
+      axios
+            .get("http://localhost:8051/api/user", {
+              headers: {
+                Authorization: `Bearer ${Cookies.get("authToken")}`,
+              },
+            })
+            .then((response) => {
+                setUserData(response.data);
+            })
+            .catch((error) => {
+               toast({
+                    title: "Błąd",
+                    description: error.response.data,
+                    status: "error",
+                });
+            });
     
   }, []);
 
@@ -61,10 +77,9 @@ function Navbar() {
       <nav className="flex flex-row items-center justify-between pl-32 pr-16 pt-8 pb-8 border border-slate-200">
         <img src="/logo_black.png" alt="" className="w-32" />
         <div className="user-container flex flex-row items-center">
-          <Avatar>TB</Avatar>
           <div className="user ml-4">
-            <p className="user text-lg">Tomasz Bury</p>
-            <p className="email text-sm"> dto@gmail.com</p>
+            <p className="user text-lg">{userData.nickname}</p>
+            <p className="email text-sm"> {userData.email}</p>
           </div>
           <button
             className="flex flex-row items-center ml-10 gap-2"
