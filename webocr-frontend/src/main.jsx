@@ -31,7 +31,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
-            path="/hello"
+            path="/scan-note"
             element={
               <AuthenticatedRoute>
                 <FirstNote />

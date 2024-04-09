@@ -75,6 +75,7 @@ import { useToast } from "@/components/ui/use-toast";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import CreatableSelect from "react-select/creatable";
 
 function Note() {
   const { noteId } = useParams();
@@ -91,6 +92,14 @@ function Note() {
   const { toast } = useToast();
   const [errorMessage, setErrorMessage] = useState("");
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
+  const [options, setOptions] = useState([
+    { value: "przyroda", label: "Notatki" },
+    { value: "matematyka", label: "Matematyka" },
+    { value: "polski", label: "Język polski" },
+    { value: "arekb", label: "banasik king" },
+    { value: "dziekan", label: "dziekan top" },
+  ]);
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const exportNoteHandler = async () => {
     await axios
@@ -236,9 +245,32 @@ function Note() {
     }
   };
 
-  const handleTagDelete = (index) => {
-    setTags(tags.filter((_, i) => i !== index));
-  };
+  const handleCreateCategory = (inputValue) => {
+    axios
+      .post(
+        `http://localhost:8051/api/noteCategories`,
+        {
+          name: inputValue,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        }
+      )
+      .then((response) => {
+        if (response.status === 201) {
+          const newOptions = [...options];
+          newOptions.push({ value: response.data, label: inputValue });
+          setOptions(newOptions);
+          const newSelectedOptions = [...selectedOption];
+          newSelectedOptions.push({ value: response.data, label: inputValue });
+          setSelectedOption(newSelectedOptions);
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      });
+  }
 
   useEffect(() => {
     axios
@@ -264,6 +296,20 @@ function Note() {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
       });
+      axios
+      .get(`http://localhost:8051/api/noteCategories`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          setOptions(response.data.map((category) => ({ value: category.id, label: category.name })));
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      });
+    
   }, []);
 
   return (
@@ -444,34 +490,22 @@ function Note() {
               {currentNote.title}
             </NoteHeader>
             <div className="mt-4">
-              <p className="font-bold text-sm text-slate-500">Tagi</p>
+              <p className="font-bold text-sm text-slate-500">Kategorie</p>
 
-              <div
-                className="tags mt-2 w-3/4"
-                contentEditable="true"
-                onKeyDown={handleTagAdd}
-                placeholder="Dodaj tag i wciśnij Enter"
-              ></div>
-              {tags.length > 0 && (
-                <div className="flex flex-row gap-x-1 mt-4">
-                  {tags.map((tag, index) => (
-                    <Fragment>
-                      <span
-                        key={index}
-                        className="tag bg-slate-100 text-slate-800 px-4 py-1 mr-2 rounded-[15px]"
-                      >
-                        {tag}
-                        <button
-                          onClick={() => handleTagDelete(index)}
-                          className="ml-2"
-                        >
-                          &times;
-                        </button>
-                      </span>
-                    </Fragment>
-                  ))}
-                </div>
-              )}
+              <CreatableSelect
+              className="w-2/3 mt-4"
+                isMulti
+                defaultValue={selectedOption}
+                onChange={setSelectedOption}
+                options={options}
+                noOptionsMessage={() => "Brak dostępnych kategorii"}
+                formatCreateLabel={(inputValue) => `Utwórz kategorię "${inputValue}"`}
+                placeholder="Wybierz kategorię..."
+                onCreateOption={(inputValue) => handleCreateCategory(inputValue)}
+                maxMenuHeight={512}
+                menuPlacement="auto"
+                value={selectedOption}
+              />
             </div>
             <div
               className="notebody__content focus:outline-none mt-8 mr-16"

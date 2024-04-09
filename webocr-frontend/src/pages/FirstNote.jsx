@@ -37,8 +37,10 @@ function FirstNote() {
           axios.post("/api/files/upload", formData)
           .then(setLoaderActive(false)
           //todo: redirect to note page
-          );
-      
+          ).catch(error => {
+            console.error(error);
+            setLoaderActive(false);
+           })
     }
   };
 

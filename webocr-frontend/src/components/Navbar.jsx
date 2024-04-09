@@ -60,14 +60,10 @@ function Navbar() {
               },
             })
             .then((response) => {
-                setUserData(response.data);
+              setUserData(response.data[0]);
             })
             .catch((error) => {
-               toast({
-                    title: "Błąd",
-                    description: error.response.data,
-                    status: "error",
-                });
+               console.error(error);
             });
     
   }, []);
