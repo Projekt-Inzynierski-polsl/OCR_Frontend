@@ -42,7 +42,7 @@ function Navbar() {
             .catch((error) => {
                toast({
                     title: "Błąd",
-                    description: error.response.data,
+                    description: error,
                     status: "error",
                 });
                 Cookies.remove("authToken", { path: "/" });

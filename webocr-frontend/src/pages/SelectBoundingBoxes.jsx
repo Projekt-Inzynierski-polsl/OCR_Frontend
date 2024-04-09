@@ -13,7 +13,7 @@ const FirstNoteHero = styled.div`
   align-items: center;
   justify-content: center;
 `;
-
+import Loader from "../components/Loader.jsx";
 const NextButton = styled.button`
   background-color: #004423;
   color: #e9f7ee;
@@ -22,15 +22,20 @@ const NextButton = styled.button`
   padding: 12px 96px;
   border-radius: 16px;
 `;
+import { useNavigate, useLocation } from "react-router-dom";
 
 function SelectBoundingBoxes() {
   const [selectedTab, setSelectedTab] = useState("notatka");
   const imgEl = useRef();
+  const [loaderActive, setLoaderActive] = useState(false);
   const [anno, setAnno] = useState();
+  const { state } = useLocation();
+  const { noteId } = state;
+  const navigate = useNavigate();
 
   const formatter = (annotation) => {
     return "text";
-  };  
+  };
 
   useEffect(() => {
     let annotorious = null;
@@ -57,6 +62,9 @@ function SelectBoundingBoxes() {
       console.log(bbox.target.selector.value);
       console.log(bbox.annoType);
     });
+    setLoaderActive(true);
+    // get output from API
+    navigate("/check-output", { state: { output: [] } })
   };
 
   const handleTabChange = (value) => {
@@ -70,25 +78,24 @@ function SelectBoundingBoxes() {
         annotation.annoType = "img";
       }
     });
-    newAnno.formatters = [(annotation) => {
-      if (annotation.underlying.annoType) {
-        if (annotation.underlying.annoType === "text") {
-          return "text";
+    newAnno.formatters = [
+      (annotation) => {
+        if (annotation.underlying.annoType) {
+          if (annotation.underlying.annoType === "text") {
+            return "text";
+          } else {
+            return "img";
+          }
+        } else {
+          if (value === "notatka") {
+            return "text";
+          } else {
+            return "img";
+          }
         }
-        else {
-          return "img";
-        }
-      }
-      else {
-        if (value === "notatka") {
-          return "text";
-        }
-        else {
-          return "img";
-        }
-      }
-    }];
-    
+      },
+    ];
+
     setAnno(newAnno);
   };
 
@@ -98,42 +105,49 @@ function SelectBoundingBoxes() {
         <Navbar></Navbar>
       </header>
       <main className="flex flex-col items-center pb-16">
-        <FirstNoteHero className="py-16 w-full">
-          <h1 className="text-5xl font-bold">Zaznacz, co chcesz zachować</h1>
-          <p className="max-w-3xl text-center mt-4 text-md">
-            Twoja notatka została zeskanowana i przetworzona. Jeżeli to
-            potrzebne, zaznacz na zdjęciu części tekstu i innych elementów.
-          </p>
-        </FirstNoteHero>
-        <div className="bound-container border border-[#D1D5DB] w-60% mt-8">
-          <img src="boxtest.png" alt="Example" ref={imgEl} />
-          <Tabs
-            className="float-right mx-8 mt-2"
-            value={selectedTab}
-            onValueChange={handleTabChange}
-          >
-            <TabsList>
-              <TabsTrigger
-                className="data-[state=active]:bg-[#e9f7ee]"
-                value="notatka"
+        {loaderActive ? (
+          <Loader />
+        ) : (
+          <>
+            <FirstNoteHero className="py-16 w-full">
+              <h1 className="text-5xl font-bold">
+                Zaznacz, co chcesz zachować
+              </h1>
+              <p className="max-w-3xl text-center mt-4 text-md">
+                Twoja notatka została zeskanowana i przetworzona. Jeżeli to
+                potrzebne, zaznacz na zdjęciu części tekstu i innych elementów.
+              </p>
+            </FirstNoteHero>
+            <div className="bound-container border border-[#D1D5DB] w-60% mt-8">
+              <img src="boxtest.png" alt="Example" ref={imgEl} />
+              <Tabs
+                className="float-right mx-8 mt-2"
+                value={selectedTab}
+                onValueChange={handleTabChange}
               >
-                Notatka
-              </TabsTrigger>
-              <TabsTrigger
-                className="data-[state=active]:bg-[#e9f7ee]"
-                value="obrazek"
-              >
-                Obrazek
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="notatka"></TabsContent>
-            <TabsContent value="obrazek"></TabsContent>
-          </Tabs>
-        </div>
-
-        <NextButton className="mt-16 w-1/3" onClick={handleContinue}>
-          Przejdź dalej &gt;
-        </NextButton>
+                <TabsList>
+                  <TabsTrigger
+                    className="data-[state=active]:bg-[#e9f7ee]"
+                    value="notatka"
+                  >
+                    Notatka
+                  </TabsTrigger>
+                  <TabsTrigger
+                    className="data-[state=active]:bg-[#e9f7ee]"
+                    value="obrazek"
+                  >
+                    Obrazek
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="notatka"></TabsContent>
+                <TabsContent value="obrazek"></TabsContent>
+              </Tabs>
+            </div>
+            <NextButton className="mt-16 w-1/3" onClick={handleContinue}>
+              Przejdź dalej &gt;
+            </NextButton>
+          </>
+        )}
       </main>
     </>
   );

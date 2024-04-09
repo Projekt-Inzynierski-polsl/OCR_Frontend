@@ -4,7 +4,7 @@ import App from "./App.jsx";
 import "./index.css";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
-import FirstNote from "@/src/pages/FirstNote.jsx";
+import FirstNote from "@/src/pages/UploadNoteFile.jsx";
 import Note from "@/src/pages/Note.jsx";
 import AdminDashboard from "@/src/pages/AdminDashboard.jsx";
 import UserManagement from "@/src/pages/UserManagement.jsx";

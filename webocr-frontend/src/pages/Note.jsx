@@ -76,9 +76,11 @@ import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import CreatableSelect from "react-select/creatable";
+import { useNavigate } from "react-router-dom";
 
 function Note() {
   const { noteId } = useParams();
+  const navigate = useNavigate();
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [exportType, setExportType] = useState("pdf");
@@ -237,14 +239,6 @@ function Note() {
     setPlaceholderVisible(false);
   };
 
-  const handleTagAdd = (e) => {
-    if (e.key === "Enter" && e.target.innerText.trim().length > 0) {
-      e.preventDefault();
-      setTags([...tags, e.target.innerText.trim()]);
-      e.target.innerText = "";
-    }
-  };
-
   const handleCreateCategory = (inputValue) => {
     axios
       .post(
@@ -270,6 +264,10 @@ function Note() {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
       });
+  }
+
+  const handleScanNoteRedirect = () => {
+    navigate(`/scan-note/`, { state: { noteId: noteId } }) 
   }
 
   useEffect(() => {
@@ -524,12 +522,12 @@ function Note() {
                   </p>
                   <span className="flex flex-row gap-4">
                     <img src="http://localhost:5173/scanicon.png" />
-                    <a
+                    <button
                       className="font-bold text-sm text-slate-700"
-                      href="/scan-note"
+                      onClick={handleScanNoteRedirect}
                     >
                       Zeskanuj zdjęcie
-                    </a>
+                    </button>
                   </span>
                 </div>
               ) : (

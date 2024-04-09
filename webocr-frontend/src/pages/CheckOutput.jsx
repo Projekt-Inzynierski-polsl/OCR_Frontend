@@ -24,9 +24,14 @@ const NextButton = styled.button`
   border-radius: 16px;
 `;
 
+import { useNavigate, useLocation } from 'react-router-dom'
+
 function CheckOutput() {
   const [selectedBoxId, setSelectedBoxId] = useState("");
   const imgEl = useRef();
+  const navigate = useNavigate();
+  const {state} = useLocation();
+  const { output } = []; //state
   const [textBoxes, setTextBoxes] = useState([
     {
       id: "#203170be-17d2-4aea-af37-e386bd13e521",
@@ -92,6 +97,11 @@ function CheckOutput() {
     setTextBoxes(txtBoxes);
   }
 
+  const handleNextStep = () => {
+    // todo: send new note content and load note
+    navigate(`/notes/`, { state: { noteId: 1 } });
+  }
+
   return (
     <>
       <header>
@@ -133,7 +143,7 @@ function CheckOutput() {
           </div>
         </div>
 
-        <NextButton className="mt-16 w-1/3">Przejdź dalej &gt;</NextButton>
+        <NextButton className="mt-16 w-1/3" onClick={handleNextStep}>Przejdź dalej &gt;</NextButton>
       </main>
     </>
   );
