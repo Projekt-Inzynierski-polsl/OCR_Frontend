@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-
+import chroma from "chroma-js";
 import {
   Dialog,
   DialogContent,
@@ -76,9 +76,36 @@ import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import CreatableSelect from "react-select/creatable";
+import { components } from "react-select";
 import { useNavigate } from "react-router-dom";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+
 
 function Note() {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const OptionWithTooltip = (props) => {
+    const { innerProps, innerRef } = props;
+    return (
+      <div className="flex flex-row py-2 px-4 justify-between cursor-pointer" ref={innerRef} {...innerProps}>
+        {props.data.label}
+        <Popover
+          open={isPopoverOpen}
+          onOpenChange={setIsPopoverOpen}
+        >
+          <PopoverTrigger><button onClick={(e) => {
+            e.stopPropagation();
+            setIsPopoverOpen(!isPopoverOpen);
+          }}>Open</button></PopoverTrigger>
+          <PopoverContent>Place content for the popover here.</PopoverContent>
+        </Popover>
+      </div>
+    );
+  };
   const { noteId } = useParams();
   const navigate = useNavigate();
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -95,13 +122,27 @@ function Note() {
   const [errorMessage, setErrorMessage] = useState("");
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   const [options, setOptions] = useState([
-    { value: "przyroda", label: "Notatki" },
-    { value: "matematyka", label: "Matematyka" },
-    { value: "polski", label: "Język polski" },
-    { value: "arekb", label: "banasik king" },
-    { value: "dziekan", label: "dziekan top" },
+    { value: "przyroda", label: "Notatki", color: "#00B8D9" },
+    { value: "matematyka", label: "Matematyka", color: "#0052CC" },
+    { value: "fizyka", label: "Fizyka", color: "#5243AA" },
+    { value: "chemia", label: "Chemia", color: "#FF5630" },
+    { value: "biologia", label: "Biologia", color: "#FF8B00" },
+    { value: "angielski", label: "Język angielski", color: "#FFC400" },
   ]);
+
+  const [lastNotes, setLastNotes] = useState([]);
+
+  const colourStyles = {
+    multiValue: (styles, { data }) => {
+      const color = chroma(data.color);
+      return {
+        ...styles,
+        backgroundColor: color.alpha(0.1).css(),
+      };
+    },
+  };
   const [selectedOption, setSelectedOption] = useState(null);
+  const [colorSelectOpen, setColorSelectOpen] = useState(false);
 
   const exportNoteHandler = async () => {
     await axios
@@ -258,17 +299,21 @@ function Note() {
           newOptions.push({ value: response.data, label: inputValue });
           setOptions(newOptions);
           const newSelectedOptions = [...selectedOption];
-          newSelectedOptions.push({ value: response.data, label: inputValue });
+          newSelectedOptions.push({
+            value: response.data,
+            label: inputValue,
+            color: "#FF8B00",
+          });
           setSelectedOption(newSelectedOptions);
         } else if (response.status === 500) {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
       });
-  }
+  };
 
   const handleScanNoteRedirect = () => {
-    navigate(`/scan-note/`, { state: { noteId: noteId } }) 
-  }
+    navigate(`/scan-note/`, { state: { noteId: noteId } });
+  };
 
   useEffect(() => {
     axios
@@ -294,7 +339,7 @@ function Note() {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
       });
-      axios
+    axios
       .get(`http://localhost:8051/api/noteCategories`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -302,12 +347,12 @@ function Note() {
       })
       .then((response) => {
         if (response.status === 200) {
-          setOptions(response.data.map((category) => ({ value: category.id, label: category.name })));
+          console.log(response.data);
+          // setOptions(response.data.map((category) => ({ value: category.id, label: category.name })));
         } else if (response.status === 500) {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
       });
-    
   }, []);
 
   return (
@@ -491,18 +536,29 @@ function Note() {
               <p className="font-bold text-sm text-slate-500">Kategorie</p>
 
               <CreatableSelect
-              className="w-2/3 mt-4"
+                className="w-2/3 mt-4"
                 isMulti
+                closeMenuOnSelect={false}
+                defaultMenuIsOpen={true}
+                menuIsOpen={colorSelectOpen}
+                onMenuOpen={() => setColorSelectOpen(true)}
+                blurInputOnSelect={false}
                 defaultValue={selectedOption}
                 onChange={setSelectedOption}
                 options={options}
                 noOptionsMessage={() => "Brak dostępnych kategorii"}
-                formatCreateLabel={(inputValue) => `Utwórz kategorię "${inputValue}"`}
+                formatCreateLabel={(inputValue) =>
+                  `Utwórz kategorię "${inputValue}"`
+                }
                 placeholder="Wybierz kategorię..."
-                onCreateOption={(inputValue) => handleCreateCategory(inputValue)}
+                onCreateOption={(inputValue) =>
+                  handleCreateCategory(inputValue)
+                }
                 maxMenuHeight={512}
                 menuPlacement="auto"
                 value={selectedOption}
+                styles={colourStyles}
+                components={{ Option: (props) => <OptionWithTooltip {...props} isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}/> }}
               />
             </div>
             <div

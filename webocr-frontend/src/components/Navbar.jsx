@@ -12,6 +12,7 @@ const Avatar = styled.span`
 
 import Cookies from "js-cookie";
 
+
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -28,7 +29,7 @@ function Navbar() {
     axios.interceptors.response.use(
       (response) => response,
       (error) => {
-        if (error.response.status === 401) {
+        if (error === 401) {
           axios
             .get("http://localhost:8051/api/account/token", {
               headers: {

@@ -95,6 +95,20 @@ function Sidebar() {
         .catch((error) => {
           console.log(error);
         });
+
+      axios
+        .get(`http://localhost:8051/api/user/note/lastEdited`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            setLastNotes(response.data);
+          } else if (response.status === 500) {
+            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+          }
+        });
     }
   }, []);
 
@@ -121,6 +135,7 @@ function Sidebar() {
   const [newNoteContent, setNewNoteContent] = useState("");
   const [newNoteFolderId, setNewNoteFolderId] = useState(0);
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
+  const [lastNotes, setLastNotes] = useState([]);
 
   const handleAddFolder = (name) => {
     const folders = [...userFolders];
@@ -222,7 +237,7 @@ function Sidebar() {
 
   const handleContentEdit = () => {
     setPlaceholderVisible(false);
-  }
+  };
 
   return (
     <>
@@ -230,33 +245,20 @@ function Sidebar() {
         <SidebarBody>
           <h2 className="font-bold text-xl pl-16">Ostatnie dokumenty</h2>
           <div className="last-docs-container flex flex-col mt-2">
-            <div className="last-doc flex flex-row gap-2 items-center hover:bg-slate-200 py-1.5 pl-12 pr-10 mx-4">
-              <img src="/note.png" alt="" />
-              <a
-                href="/notes/6"
-                className="text-ellipsis overflow-hidden whitespace-nowrap"
+            {lastNotes.map((note) => (
+              <div
+                key={note.id}
+                className="last-doc flex flex-row gap-2 items-center hover:bg-slate-200 py-1.5 pl-12 pr-10 mx-4"
               >
-                testowy tekst który z pewnością jest bardzo długi
-              </a>
-            </div>
-            <div className="last-doc flex flex-row gap-2 items-center hover:bg-slate-200 py-1.5 pl-12 pr-10 mx-4">
-              <img src="/note.png" alt="" />
-              <a
-                href="/notes/7"
-                className="text-ellipsis overflow-hidden whitespace-nowrap text-md"
-              >
-                jeszcze dłuższy testowy tekst o niczym
-              </a>
-            </div>
-            <div className="last-doc flex flex-row gap-2 items-center hover:bg-slate-200 py-1.5 pl-12 pr-10 mx-4">
-              <img src="/note.png" alt="" />
-              <a
-                href=""
-                className="text-ellipsis overflow-hidden whitespace-nowrap"
-              >
-                bardzo długi testowy tekst do sprawdzenia
-              </a>
-            </div>
+                <img src="/note.png" alt="" />
+                <a
+                  href={note.url}
+                  className="text-ellipsis overflow-hidden whitespace-nowrap"
+                >
+                  {note.name}
+                </a>
+              </div>
+            ))}
           </div>
           <div className="user-notes-container mt-24">
             <div className="user-notes-header flex flex-row pl-16 items-center justify-between mr-2">
@@ -439,14 +441,15 @@ function Sidebar() {
                           >
                             {newNoteHeader}
                           </NoteHeader>
-                          
+
                           <div
                             className="notebody__content focus:outline-none mt-8 mr-16"
                             contentEditable="true"
                             suppressContentEditableWarning={true}
                             onBlur={handleNoteContent}
                           >
-                            {newNoteContent.trim().length === 0 && placeholderVisible ? (
+                            {newNoteContent.trim().length === 0 &&
+                            placeholderVisible ? (
                               <div
                                 className="flex flex-col gap-y-4"
                                 contentEditable="false"
