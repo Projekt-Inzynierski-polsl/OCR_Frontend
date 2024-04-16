@@ -347,8 +347,7 @@ function Note() {
       })
       .then((response) => {
         if (response.status === 200) {
-          console.log(response.data);
-          // setOptions(response.data.map((category) => ({ value: category.id, label: category.name })));
+          setOptions(response.data.map((category) => ({ value: category.id, label: category.name, color: category.hexColor })));
         } else if (response.status === 500) {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
