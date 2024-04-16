@@ -55,13 +55,13 @@ function Navbar() {
     );
 
       axios
-            .get("http://localhost:8051/api/user", {
+            .get("http://localhost:8051/api/user/logged", {
               headers: {
                 Authorization: `Bearer ${Cookies.get("authToken")}`,
               },
             })
             .then((response) => {
-              setUserData(response.data[0]);
+              setUserData(response.data);
             })
             .catch((error) => {
                console.error(error);

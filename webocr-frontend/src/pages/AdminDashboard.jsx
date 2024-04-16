@@ -86,7 +86,7 @@ function AdminDashboard() {
       .catch((error) => {
         setErrorMessage(error);
       });
-  });
+  }, []);
 
   return (
     <>

@@ -16,6 +16,7 @@ import CheckOutput from "@/src/pages/CheckOutput.jsx";
 import { Toaster } from "@/components/ui/toaster";
 import { CookiesProvider } from "react-cookie";
 import AuthenticatedRoute from "./routes/index.jsx";
+import AdminRoute from "./routes/AdminRoute.jsx";
 
 import { BrowserRouter as Router, Route, Routes, createRoutesFromElements } from "react-router-dom";
 
@@ -55,43 +56,40 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             }
           />
           <Route
-            path="/admin"
-            element={
-              <AuthenticatedRoute>
-                <AdminDashboard />
-              </AuthenticatedRoute>
-            }
-          />
+            element={<AdminRoute />}
+          >
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Route>
           <Route
             path="/users"
             element={
-              <AuthenticatedRoute>
+              <AdminRoute>
                 <UserManagement />
-              </AuthenticatedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/errors"
             element={
-              <AuthenticatedRoute>
+              <AdminRoute>
                 <ScanErrors />
-              </AuthenticatedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/errors/:errorId"
             element={
-              <AuthenticatedRoute>
+              <AdminRoute>
                 <CheckScanError />
-              </AuthenticatedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/edit-profile/:userId"
             element={
-              <AuthenticatedRoute>
+              <AdminRoute>
                 <EditProfile />
-              </AuthenticatedRoute>
+              </AdminRoute>
             }
           />
           <Route
@@ -113,9 +111,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route
             path="/upload-model"
             element={
-              <AuthenticatedRoute>
+              <AdminRoute>
                 <UploadModel />
-              </AuthenticatedRoute>
+              </AdminRoute>
             }
           />
         </Routes>
