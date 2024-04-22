@@ -113,7 +113,7 @@ function Note() {
   const [exportType, setExportType] = useState("pdf");
   const [currentNote, setCurrentNote] = useState({
     noteId: 5,
-    title: "Testowy dokument schematyczny",
+    title: "Testowy ",
     content: "",
     isPrivate: false,
   });

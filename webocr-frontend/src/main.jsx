@@ -18,7 +18,12 @@ import { CookiesProvider } from "react-cookie";
 import AuthenticatedRoute from "./routes/index.jsx";
 import AdminRoute from "./routes/AdminRoute.jsx";
 
-import { BrowserRouter as Router, Route, Routes, createRoutesFromElements } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  createRoutesFromElements,
+} from "react-router-dom";
 
 import Home from "./pages/Home.jsx";
 import EditProfile from "@/src/pages/EditProfile.jsx";
@@ -55,43 +60,21 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               </AuthenticatedRoute>
             }
           />
-          <Route
-            element={<AdminRoute />}
-          >
+          <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
           </Route>
-          <Route
-            path="/users"
-            element={
-              <AdminRoute>
-                <UserManagement />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/errors"
-            element={
-              <AdminRoute>
-                <ScanErrors />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/errors/:errorId"
-            element={
-              <AdminRoute>
-                <CheckScanError />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/edit-profile/:userId"
-            element={
-              <AdminRoute>
-                <EditProfile />
-              </AdminRoute>
-            }
-          />
+          <Route element={<AdminRoute />}>
+            <Route path="/users" element={<UserManagement />} />
+          </Route>
+          <Route element={<AdminRoute />}>
+            <Route path="/errors" element={<ScanErrors />} />
+          </Route>
+          <Route element={<AdminRoute />}>
+            <Route path="/errors/:errorId" element={<CheckScanError />} />
+          </Route>
+          <Route element={<AdminRoute />}>
+            <Route path="/edit-profile/:userId" element={<EditProfile />} />
+          </Route>
           <Route
             path="/select-boxes"
             element={
@@ -108,14 +91,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               </AuthenticatedRoute>
             }
           />
-          <Route
-            path="/upload-model"
-            element={
-              <AdminRoute>
-                <UploadModel />
-              </AdminRoute>
-            }
-          />
+          <Route element={<AdminRoute />}>
+            <Route path="/upload-model" element={<UploadModel />} />
+          </Route>
         </Routes>
       </Router>
       <Toaster />

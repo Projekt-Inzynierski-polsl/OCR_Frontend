@@ -92,28 +92,7 @@ function EditProfile() {
   const [userActions, setUserActions] = useState([]);
   const [currentUser, setCurrentUser] = useState({});
   const onSubmit = async (values) => {
-    if (adminChecked.current.ariaChecked === "true") {
-      values.roleId = 1;
-    } else {
-      values.roleId = 2;
-    }
-    await axios
-      .put(`http://localhost:8051/api/user/${userId}`, values, {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("authToken")}`,
-        },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          Cookies.set("authToken", response.data, { path: "/" });
-          window.location.href = "/notes";
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-        }
-      })
-      .catch((error) => {
-        setErrorMessage(error.response.data.message);
-      });
+    console.log(values);
   };
 
   const handleDelete = async () => {
@@ -173,7 +152,10 @@ function EditProfile() {
               <Form {...form}>
                 <CardContent className="pb-6 pl-16 pt-6 mr-64">
                   <form
-                    onSubmit={form.handleSubmit(onSubmit)}
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      form.handleSubmit(onSubmit);
+                    }}
                     className="space-y-8"
                   >
                     <p className="font-bold text-red-700 mb-4 mt-6">
