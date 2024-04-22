@@ -107,14 +107,7 @@ const NoteBody = styled.div`
 `;
 
 function Sidebar() {
-  const [options, setOptions] = useState([
-    { value: "przyroda", name: "Notatki", color: "#00B8D9" },
-    { value: "matematyka", name: "Matematyka", color: "#0052CC" },
-    { value: "fizyka", name: "Fizyka", color: "#5243AA" },
-    { value: "chemia", name: "Chemia", color: "#FF5630" },
-    { value: "biologia", name: "Biologia", color: "#FF8B00" },
-    { value: "angielski", name: "Język angielski", color: "#FFC400" },
-  ]);
+  const [options, setOptions] = useState([]);
   const form = useForm({
     resolver: zodResolver(formSchema),
     mode: "all",

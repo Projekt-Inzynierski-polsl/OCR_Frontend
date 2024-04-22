@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar.jsx";
 import Sidebar from "../components/AdminSidebar.jsx";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -95,6 +95,41 @@ function EditProfile() {
     console.log(values);
   };
 
+  const actionDictionary = {
+    1: "Rejestracja",
+    2: "Zalogowano",
+    3: "Odświeżenie tokena",
+    4: "Dodano folder",
+    5: "Usunięto folder",
+    6: "Edytowano folder",
+    7: "Dodano notatkę",
+    8: "Usunięto notatkę",
+    9: "Edytowano notatkę",
+    10: "Zmieniono folder notatki",
+    12: "Zgłoszono błąd",
+    13: "Edytowano użytkownika",
+    14: "Wylogowano",
+    15: "Usunięto błąd",
+    16: "Pobrano błędy",
+    17: "Wyczyszczono tabelę błędów",
+    18: "Dodano kategorię",
+    19: "Usunięto kategorię",
+    20: "Zaktualizowano kategorię"
+  };
+
+  const handleUserActions = async (values) => {
+    const actions = values.map((action) => {
+      const actionDate = new Date(action.logTime.trim());
+      return {
+        id: action.id,
+        date: actionDate.toLocaleString(),
+        action: actionDictionary[action.actionId],
+      };
+    });
+    setUserActions(actions);
+  };
+        
+
   const handleDelete = async () => {
     await axios
       .delete(`http://localhost:8051/api/user/${userId}`, {
@@ -123,12 +158,34 @@ function EditProfile() {
       })
       .then((response) => {
         if (response.status === 200) {
-          // todo: zmienic response w sytuacji kiedy bedzie wiadomo co bedzie wysylane i jak
-          //setUserActions(response.data);
           setCurrentUser(response.data);
           if (response.data.roleId === 1) {
             setAdminChecked(true);
           }
+        } else if (response.status === 500) {
+          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        }
+      })
+      .catch((error) => {
+        setErrorMessage(error.response.data.message);
+      });
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 7);
+    axios
+      .get(`http://localhost:8051/api/userLog`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+        params: {
+          userId: userId,
+          startTimestamp: Math.round(startDate.getTime() / 1000),
+          endTimestamp: Math.round(endDate.getTime() / 1000),
+        }
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          handleUserActions(response.data);
         } else if (response.status === 500) {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
