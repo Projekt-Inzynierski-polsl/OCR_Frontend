@@ -27,12 +27,15 @@ import {
 
 import Home from "./pages/Home.jsx";
 import EditProfile from "@/src/pages/EditProfile.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import Unauthorized from "./pages/Unauthorized.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <CookiesProvider defaultSetOptions={{ path: "/" }}>
       <Router>
         <Routes>
+          <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -93,6 +96,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           />
           <Route element={<AdminRoute />}>
             <Route path="/upload-model" element={<UploadModel />} />
+          </Route>
+          <Route element={<Unauthorized />}>
+            <Route path="/unauthorized" element={<Unauthorized />} />
           </Route>
         </Routes>
       </Router>

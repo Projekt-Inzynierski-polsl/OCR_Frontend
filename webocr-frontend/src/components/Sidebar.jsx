@@ -124,23 +124,13 @@ function Sidebar() {
   });
 
   const handleCategoriesUpdate = async () => {
-    const newCategory = {};
-    const currentCategory = options.find(
-      (option) => option.value === selectedCategory.value
-    );
-
-    if (currentCategory.name !== selectedCategory.name) {
-      newCategory.name = selectedCategory.name;
-    }
-
-    if (currentCategory.color !== selectedCategory.color) {
-      newCategory.hexColor = selectedCategory.color;
-    }
-
     await axios
       .put(
         `http://localhost:8051/api/noteCategories/${selectedCategory.value}`,
-        newCategory,
+        {
+          name: selectedCategory.name,
+          hexColor: selectedCategory.color,
+        },
         {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,

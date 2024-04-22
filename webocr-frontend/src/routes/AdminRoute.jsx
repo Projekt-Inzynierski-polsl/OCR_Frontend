@@ -31,7 +31,7 @@ const checkAuth = () => {
 const AdminRoute = ({ children }) => {
   const isAdmin = checkAuth();
   if (isAdmin === undefined) return null;
-  return isAdmin ? <Outlet /> : <Navigate to="/forbidden" />;
+  return isAdmin ? <Outlet /> : <Navigate to="/unauthorized" />;
 };
 
 export default AdminRoute;

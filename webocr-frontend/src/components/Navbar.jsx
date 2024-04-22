@@ -50,6 +50,10 @@ function Navbar() {
                 window.location.href = "/login";
             });
         }
+        else if (error === 403) {
+          console.log("brak dostępu")
+          window.location.href = "/unauthorized";
+        }
         return Promise.reject(error);
       }
     );
