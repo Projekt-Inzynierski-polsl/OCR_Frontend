@@ -1,23 +1,17 @@
 import styled from "styled-components";
 import Navbar from "../components/Navbar.jsx";
 import Sidebar from "../components/AdminSidebar.jsx";
-import { z } from "zod";
+import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const formSchema = z
-  .object({
-    nickname: z
-      .string()
-      .min(2, { message: "Nazwa użytkownika jest za krótka" }),
-    email: z.string().email({ message: "Niepoprawny adres email" }),
-  })
-  .refine((data) => data.password === data.confirmedPassword, {
-    message: "Hasła nie są takie same",
-    path: ["confirmedPassword"],
-  });
+const formSchema = z.object({
+  nickname: z.string().min(1, { message: "Nazwa użytkownika jest za krótka" }),
+  email: z.string().email({ message: "Niepoprawny adres email" }),
+  admin: z.boolean().default(false),
+});
 
 import {
   Form,
@@ -25,6 +19,7 @@ import {
   FormField,
   FormItem,
   FormMessage,
+  FormLabel,
 } from "@/components/ui/form";
 
 const MainLayout = styled.div`
@@ -49,7 +44,6 @@ import {
 } from "@/components/ui/card";
 
 import { Input } from "@/components/ui/input.jsx";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
@@ -85,13 +79,18 @@ function EditProfile() {
   const { userId } = useParams();
   const form = useForm({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      nickname: "",
+      email: "",
+    },
   });
 
   const [adminChecked, setAdminChecked] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [userActions, setUserActions] = useState([]);
   const [currentUser, setCurrentUser] = useState({});
-  const onSubmit = async (values) => {
+
+  const handleSubmit = (values) => {
     console.log(values);
   };
 
@@ -114,7 +113,7 @@ function EditProfile() {
     17: "Wyczyszczono tabelę błędów",
     18: "Dodano kategorię",
     19: "Usunięto kategorię",
-    20: "Zaktualizowano kategorię"
+    20: "Zaktualizowano kategorię",
   };
 
   const handleUserActions = async (values) => {
@@ -128,7 +127,6 @@ function EditProfile() {
     });
     setUserActions(actions);
   };
-        
 
   const handleDelete = async () => {
     await axios
@@ -139,7 +137,7 @@ function EditProfile() {
       })
       .then((response) => {
         if (response.status === 204) {
-          window.location.href = "/user-management";
+          window.location.href = "/users";
         } else if (response.status === 500) {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
@@ -159,8 +157,10 @@ function EditProfile() {
       .then((response) => {
         if (response.status === 200) {
           setCurrentUser(response.data);
+          form.setValue("nickname", response.data.nickname);
+          form.setValue("email", response.data.email);
           if (response.data.roleId === 1) {
-            setAdminChecked(true);
+            form.setValue("admin", true);
           }
         } else if (response.status === 500) {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
@@ -169,9 +169,9 @@ function EditProfile() {
       .catch((error) => {
         setErrorMessage(error.response.data.message);
       });
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(endDate.getDate() - 7);
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 7);
     axios
       .get(`http://localhost:8051/api/userLog`, {
         headers: {
@@ -181,7 +181,7 @@ function EditProfile() {
           userId: userId,
           startTimestamp: Math.round(startDate.getTime() / 1000),
           endTimestamp: Math.round(endDate.getTime() / 1000),
-        }
+        },
       })
       .then((response) => {
         if (response.status === 200) {
@@ -209,15 +209,10 @@ function EditProfile() {
               <Form {...form}>
                 <CardContent className="pb-6 pl-16 pt-6 mr-64">
                   <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      form.handleSubmit(onSubmit);
-                    }}
+                    onSubmit={form.handleSubmit(handleSubmit)}
                     className="space-y-8"
                   >
-                    <p className="font-bold text-red-700 mb-4 mt-6">
-                      {errorMessage}
-                    </p>
+                    <p className="font-bold text-red-700 mb-4 mt-6"></p>
                     <div className="text-inputs grid grid-cols-2 gap-16">
                       <div className="input-container">
                         <p className="font-bold text-lg mb-2">
@@ -226,20 +221,21 @@ function EditProfile() {
                         <FormField
                           control={form.control}
                           name="nickname"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  type="text"
-                                  className="py-6 border-slate-300"
-                                  {...field}
-                                  value={currentUser.nickname}
-                                />
-                              </FormControl>
+                          render={({ field }) => {
+                            return (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    className="py-6 border-slate-300"
+                                    {...field}
+                                  />
+                                </FormControl>
 
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
                         />
                       </div>
                       <div className="input-container">
@@ -247,33 +243,49 @@ function EditProfile() {
                         <FormField
                           control={form.control}
                           name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  type="email"
-                                  className="py-6 border-slate-300"
-                                  {...field}
-                                  value={currentUser.email}
-                                />
-                              </FormControl>
+                          render={({ field }) => {
+                            return (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    type="email"
+                                    className="py-6 border-slate-300"
+                                    {...field}
+                                  />
+                                </FormControl>
 
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
                         />
                       </div>
                     </div>
                     <p className="text-xl font-bold mt-8">Konto użytkownika</p>
-                    <div className="flex items-center space-x-4 mt-6">
-                      <Checkbox
-                        id="admin"
-                        checked={adminChecked}
-                        onChange={() => setAdminChecked(!adminChecked)}
+                    <div className="flex flex-row items-center">
+                    <FormField
+                        control={form.control}
+                        name="admin"
+                        
+                        render={({ field }) => (
+                          <FormItem
+                          className="flex flex-row items-center justify-center space-y-0 gap-4"
+                          >
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div>
+                              <FormLabel>
+                              Ma uprawnienia administratora
+                              </FormLabel>
+                              <FormMessage />
+                            </div>
+                          </FormItem>
+                        )}
                       />
-                      <Label htmlFor="admin">
-                        Ma uprawnienia administratora
-                      </Label>
                     </div>
                     <SaveChangesButton
                       className="float-right mt-8"
