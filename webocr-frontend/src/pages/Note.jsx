@@ -84,23 +84,28 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-
-
 function Note() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const OptionWithTooltip = (props) => {
     const { innerProps, innerRef } = props;
     return (
-      <div className="flex flex-row py-2 px-4 justify-between cursor-pointer" ref={innerRef} {...innerProps}>
+      <div
+        className="flex flex-row py-2 px-4 justify-between cursor-pointer"
+        ref={innerRef}
+        {...innerProps}
+      >
         {props.data.label}
-        <Popover
-          open={isPopoverOpen}
-          onOpenChange={setIsPopoverOpen}
-        >
-          <PopoverTrigger><button onClick={(e) => {
-            e.stopPropagation();
-            setIsPopoverOpen(!isPopoverOpen);
-          }}>Open</button></PopoverTrigger>
+        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+          <PopoverTrigger>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsPopoverOpen(!isPopoverOpen);
+              }}
+            >
+              Open
+            </button>
+          </PopoverTrigger>
           <PopoverContent>Place content for the popover here.</PopoverContent>
         </Popover>
       </div>
@@ -231,6 +236,30 @@ function Note() {
             setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
           }
         });
+
+      axios
+        .post(
+          `http://localhost:8051/api/shared/note`,
+          {
+            objectId: currentNote.noteId,
+            shareMode: 2,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            toast({
+              title: "Notatka została udostępniona",
+              body: "Notatka jest dostępna dla innych użytkowników",
+            });
+          } else if (response.status === 500) {
+            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+          }
+        });
     } else if (value === "only-user" && !currentNote.isPrivate) {
       axios
         .put(
@@ -248,6 +277,30 @@ function Note() {
         .then((response) => {
           if (response.status === 200) {
             currentNote.isPrivate = true;
+          } else if (response.status === 500) {
+            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+          }
+        });
+
+      axios
+        .delete(
+          `http://localhost:8051/api/shared/note`,
+          {
+            objectId: currentNote.noteId,
+            shareMode: 2,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            toast({
+              title: "Notatka została udostępniona",
+              body: "Notatka jest dostępna dla innych użytkowników",
+            });
           } else if (response.status === 500) {
             setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
           }
@@ -347,7 +400,13 @@ function Note() {
       })
       .then((response) => {
         if (response.status === 200) {
-          setOptions(response.data.map((category) => ({ value: category.id, label: category.name, color: category.hexColor })));
+          setOptions(
+            response.data.map((category) => ({
+              value: category.id,
+              label: category.name,
+              color: category.hexColor,
+            }))
+          );
         } else if (response.status === 500) {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
@@ -361,235 +420,271 @@ function Note() {
       <main className="grid grid-cols-[385px_1fr]">
         <Sidebar></Sidebar>
         <NoteBody className="pl-16 pt-8">
-          <div className="notebody__top flex flex-row items-center justify-between mr-16">
-            <BreadcrumbPage>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbPage>
-                    <BreadcrumbFolder>
-                      <img src="/folder.png" alt="" />
-                      <p></p>
-                    </BreadcrumbFolder>
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{currentNote.title}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </BreadcrumbPage>
-            <div className="actions flex flex-row gap-4">
-              <Dialog
-                open={exportDialogOpen}
-                onOpenChange={setExportDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <button className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 p-3 items-center">
-                    <img src="/download.png" alt="" />
-                    Eksportuj
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-white p-8">
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl">
-                      Eksportuj notatkę
-                    </DialogTitle>
-                    <DialogDescription>
-                      <p className="mb-6">
-                        Wybierz, w jakim formacie zostanie wyeksportowana Twoja
-                        notatka.
-                      </p>
-                      <Select onValueChange={(value) => setExportType(value)}>
-                        <SelectTrigger className="w-[180px] border-slate-400">
-                          <SelectValue placeholder="Wybierz typ pliku" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white">
-                          <SelectItem
-                            className="bg-white focus:bg-slate-200"
-                            value="pdf"
-                          >
-                            PDF
-                          </SelectItem>
-                          <SelectItem
-                            className="bg-white focus:bg-slate-200"
-                            value="docx"
-                          >
-                            DOCX
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <DialogButton onClick={exportNoteHandler}>
+          {currentNote.title && noteId ? (
+            <Fragment>
+              <div className="notebody__top flex flex-row items-center justify-between mr-16">
+                <BreadcrumbPage>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>
+                        <BreadcrumbFolder>
+                          <img src="/folder.png" alt="" />
+                          <p></p>
+                        </BreadcrumbFolder>
+                      </BreadcrumbPage>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>{currentNote.title}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </BreadcrumbPage>
+                <div className="actions flex flex-row gap-4">
+                  <Dialog
+                    open={exportDialogOpen}
+                    onOpenChange={setExportDialogOpen}
+                  >
+                    <DialogTrigger asChild>
+                      <button className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 p-3 items-center">
+                        <img src="/download.png" alt="" />
                         Eksportuj
-                      </DialogButton>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-
-              <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-                <DialogTrigger asChild>
-                  <button className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 items-center p-2">
-                    <img src="/share.png" alt="" />
-                    Udostępnij
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-white p-8">
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl">
-                      Udostępnij notatkę
-                    </DialogTitle>
-                    <DialogDescription>
-                      <p className="mb-6">
-                        Zdecyduj, czy Twoja notatka ma być widoczna dla innych.
-                      </p>
-                      <Select
-                        onValueChange={(value) => handleShareTypeChange(value)}
-                        defaultValue={shareType}
-                      >
-                        <SelectTrigger className="w-[320px] py-6 border-slate-400">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white">
-                          <SelectItem
-                            className="bg-white focus:bg-slate-200"
-                            value="only-user"
-                          >
-                            <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
-                              <img src="/lock.svg" alt="" />
-                              <p className="font-bold">Tylko dla Ciebie</p>
-                            </SelectWithIcon>
-                          </SelectItem>
-                          <SelectItem
-                            className="bg-white focus:bg-slate-200"
-                            value="all-users"
-                          >
-                            <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
-                              <img src="/globe.svg" alt="" />
-                              <p className="font-bold">Dostęp dla każdego</p>
-                            </SelectWithIcon>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-
-                      {shareType === "all-users" && (
-                        <Fragment>
-                          <p className="font-bold text-sm mt-6">
-                            Link do notatki
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-white p-8">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl">
+                          Eksportuj notatkę
+                        </DialogTitle>
+                        <DialogDescription>
+                          <p className="mb-6">
+                            Wybierz, w jakim formacie zostanie wyeksportowana
+                            Twoja notatka.
                           </p>
-                          <div className="share-url-container flex flex-row">
-                            <Input
-                              type="text"
-                              value="https://webocr.pl/r194-ret-testowa"
-                              className="mt-4 py-6 w-[300px] border-slate-300"
-                              readonly="true"
-                            />
-                            <button className="mt-4 ml-2 border border-slate-900 inline-flex items-center justify-center h-12 px-3">
-                              <img src="/copy.svg" alt="" />
-                            </button>
-                          </div>
-                        </Fragment>
-                      )}
+                          <Select
+                            onValueChange={(value) => setExportType(value)}
+                          >
+                            <SelectTrigger className="w-[180px] border-slate-400">
+                              <SelectValue placeholder="Wybierz typ pliku" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white">
+                              <SelectItem
+                                className="bg-white focus:bg-slate-200"
+                                value="pdf"
+                              >
+                                PDF
+                              </SelectItem>
+                              <SelectItem
+                                className="bg-white focus:bg-slate-200"
+                                value="docx"
+                              >
+                                DOCX
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <DialogButton onClick={exportNoteHandler}>
+                            Eksportuj
+                          </DialogButton>
+                        </DialogDescription>
+                      </DialogHeader>
+                    </DialogContent>
+                  </Dialog>
 
-                      <DialogButton onClick={shareNoteHandler}>
-                        Zamknij
-                      </DialogButton>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-              <button
-                className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 items-center p-2 text-red-800"
-                onClick={handleDelete}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="feather feather-trash w-6 stroke-red-700"
-                >
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-                Usuń
-              </button>
-            </div>
-          </div>
-          <div className="notebody__text mt-8">
-            <NoteHeader
-              className="font-bold text-4xl"
-              contentEditable="true"
-              spellCheck="false"
-              placeholder="Nowa notatka"
-              onBlur={handleNoteHeader}
-              suppressContentEditableWarning={true}
-            >
-              {currentNote.title}
-            </NoteHeader>
-            <div className="mt-4">
-              <p className="font-bold text-sm text-slate-500">Kategorie</p>
+                  <Dialog
+                    open={shareDialogOpen}
+                    onOpenChange={setShareDialogOpen}
+                  >
+                    <DialogTrigger asChild>
+                      <button className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 items-center p-2">
+                        <img src="/share.png" alt="" />
+                        Udostępnij
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-white p-8">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl">
+                          Udostępnij notatkę
+                        </DialogTitle>
+                        <DialogDescription>
+                          <p className="mb-6">
+                            Zdecyduj, czy Twoja notatka ma być widoczna dla
+                            innych.
+                          </p>
+                          <Select
+                            onValueChange={(value) =>
+                              handleShareTypeChange(value)
+                            }
+                            defaultValue={shareType}
+                          >
+                            <SelectTrigger className="w-[320px] py-6 border-slate-400">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white">
+                              <SelectItem
+                                className="bg-white focus:bg-slate-200"
+                                value="only-user"
+                              >
+                                <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
+                                  <img src="/lock.svg" alt="" />
+                                  <p className="font-bold">Tylko dla Ciebie</p>
+                                </SelectWithIcon>
+                              </SelectItem>
+                              <SelectItem
+                                className="bg-white focus:bg-slate-200"
+                                value="all-users"
+                              >
+                                <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
+                                  <img src="/globe.svg" alt="" />
+                                  <p className="font-bold">
+                                    Dostęp dla każdego
+                                  </p>
+                                </SelectWithIcon>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
 
-              <CreatableSelect
-                className="w-2/3 mt-4"
-                isMulti
-                closeMenuOnSelect={false}
-                defaultMenuIsOpen={true}
-                menuIsOpen={colorSelectOpen}
-                onMenuOpen={() => setColorSelectOpen(true)}
-                blurInputOnSelect={false}
-                defaultValue={selectedOption}
-                onChange={setSelectedOption}
-                options={options}
-                noOptionsMessage={() => "Brak dostępnych kategorii"}
-                formatCreateLabel={(inputValue) =>
-                  `Utwórz kategorię "${inputValue}"`
-                }
-                placeholder="Wybierz kategorię..."
-                onCreateOption={(inputValue) =>
-                  handleCreateCategory(inputValue)
-                }
-                maxMenuHeight={512}
-                menuPlacement="auto"
-                value={selectedOption}
-                styles={colourStyles}
-                components={{ Option: (props) => <OptionWithTooltip {...props} isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}/> }}
-              />
-            </div>
-            <div
-              className="notebody__content focus:outline-none mt-8 mr-16"
-              contentEditable="true"
-              suppressContentEditableWarning={true}
-              onBlur={handleNoteContent}
-            >
-              {currentNote.content.trim().length === 0 && placeholderVisible ? (
-                <div
-                  className="flex flex-col gap-y-4"
-                  contentEditable="false"
-                  onClick={handleContentEdit}
-                >
-                  <p className="text-sm font-bold text-slate-700 select-none">
-                    Zacznij pisać lub
-                  </p>
-                  <span className="flex flex-row gap-4">
-                    <img src="http://localhost:5173/scanicon.png" />
-                    <button
-                      className="font-bold text-sm text-slate-700"
-                      onClick={handleScanNoteRedirect}
+                          {shareType === "all-users" && (
+                            <Fragment>
+                              <p className="font-bold text-sm mt-6">
+                                Link do notatki
+                              </p>
+                              <div className="share-url-container flex flex-row">
+                                <Input
+                                  type="text"
+                                  value="https://webocr.pl/r194-ret-testowa"
+                                  className="mt-4 py-6 w-[300px] border-slate-300"
+                                  readonly="true"
+                                />
+                                <button className="mt-4 ml-2 border border-slate-900 inline-flex items-center justify-center h-12 px-3">
+                                  <img src="/copy.svg" alt="" />
+                                </button>
+                              </div>
+                            </Fragment>
+                          )}
+
+                          <DialogButton onClick={shareNoteHandler}>
+                            Zamknij
+                          </DialogButton>
+                        </DialogDescription>
+                      </DialogHeader>
+                    </DialogContent>
+                  </Dialog>
+                  <button
+                    className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 items-center p-2 text-red-800"
+                    onClick={handleDelete}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="feather feather-trash w-6 stroke-red-700"
                     >
-                      Zeskanuj zdjęcie
-                    </button>
-                  </span>
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Usuń
+                  </button>
                 </div>
-              ) : (
-                currentNote.content
-              )}
-            </div>
-          </div>
+              </div>
+              <div className="notebody__text mt-8">
+                <NoteHeader
+                  className="font-bold text-4xl"
+                  contentEditable="true"
+                  spellCheck="false"
+                  placeholder="Nowa notatka"
+                  onBlur={handleNoteHeader}
+                  suppressContentEditableWarning={true}
+                >
+                  {currentNote.title}
+                </NoteHeader>
+                <div className="mt-4">
+                  <p className="font-bold text-sm text-slate-500">Kategorie</p>
+
+                  <CreatableSelect
+                    className="w-2/3 mt-4"
+                    isMulti
+                    closeMenuOnSelect={false}
+                    defaultMenuIsOpen={true}
+                    menuIsOpen={colorSelectOpen}
+                    onMenuOpen={() => setColorSelectOpen(true)}
+                    blurInputOnSelect={false}
+                    defaultValue={selectedOption}
+                    onChange={setSelectedOption}
+                    options={options}
+                    noOptionsMessage={() => "Brak dostępnych kategorii"}
+                    formatCreateLabel={(inputValue) =>
+                      `Utwórz kategorię "${inputValue}"`
+                    }
+                    placeholder="Wybierz kategorię..."
+                    onCreateOption={(inputValue) =>
+                      handleCreateCategory(inputValue)
+                    }
+                    maxMenuHeight={512}
+                    menuPlacement="auto"
+                    value={selectedOption}
+                    styles={colourStyles}
+                    components={{
+                      Option: (props) => (
+                        <OptionWithTooltip
+                          {...props}
+                          isOpen={isPopoverOpen}
+                          onOpenChange={setIsPopoverOpen}
+                        />
+                      ),
+                    }}
+                  />
+                </div>
+                <div
+                  className="notebody__content focus:outline-none mt-8 mr-16"
+                  contentEditable="true"
+                  suppressContentEditableWarning={true}
+                  onBlur={handleNoteContent}
+                >
+                  {currentNote.content.trim().length === 0 &&
+                  placeholderVisible ? (
+                    <div
+                      className="flex flex-col gap-y-4"
+                      contentEditable="false"
+                      onClick={handleContentEdit}
+                    >
+                      <p className="text-sm font-bold text-slate-700 select-none">
+                        Zacznij pisać lub
+                      </p>
+                      <span className="flex flex-row gap-4">
+                        <img src="http://localhost:5173/scanicon.png" />
+                        <button
+                          className="font-bold text-sm text-slate-700"
+                          onClick={handleScanNoteRedirect}
+                        >
+                          Zeskanuj zdjęcie
+                        </button>
+                      </span>
+                    </div>
+                  ) : (
+                    currentNote.content
+                  )}
+                </div>
+              </div>
+            </Fragment>
+          ) : 
+          <Fragment>
+          <NoteHeader
+                  className="font-bold text-4xl mt-8 mb-4"
+                >
+                  Cześć! Wybierz swoją notatkę
+            </NoteHeader>
+            <NoteBody>
+              Utwórz swoją notatkę lub wybierz ją z listy po lewej stronie. Jeżeli nie masz jeszcze notatek, utwórz folder i dodaj swoje pierwsze notatki.
+            </NoteBody>
+          
+          </Fragment>
+          
+          }
         </NoteBody>
       </main>
     </>
