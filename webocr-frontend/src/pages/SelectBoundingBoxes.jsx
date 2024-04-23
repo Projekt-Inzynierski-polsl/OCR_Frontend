@@ -30,7 +30,7 @@ function SelectBoundingBoxes() {
   const [loaderActive, setLoaderActive] = useState(false);
   const [anno, setAnno] = useState();
   const { state } = useLocation();
-  const { noteId } = state;
+  const { noteId, image } = state;
   const navigate = useNavigate();
 
   const formatter = (annotation) => {
@@ -54,6 +54,7 @@ function SelectBoundingBoxes() {
       });
     }
     setAnno(annotorious);
+    handleImage();
     return () => annotorious.destroy();
   }, []);
 
@@ -99,6 +100,15 @@ function SelectBoundingBoxes() {
     setAnno(newAnno);
   };
 
+  const [img, setImg] = useState(null);
+  const handleImage = () => {
+    const selected = image;
+    const imgUrl = URL.createObjectURL(selected);
+    setImg(imgUrl);
+  }
+
+  
+
   return (
     <>
       <header>
@@ -119,7 +129,7 @@ function SelectBoundingBoxes() {
               </p>
             </FirstNoteHero>
             <div className="bound-container border border-[#D1D5DB] w-60% mt-8">
-              <img src="boxtest.png" alt="Example" ref={imgEl} />
+              <img src={img} alt="Example" ref={imgEl} />
               <Tabs
                 className="float-right mx-8 mt-2"
                 value={selectedTab}

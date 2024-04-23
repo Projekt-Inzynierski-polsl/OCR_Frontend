@@ -47,7 +47,7 @@ function UploadNoteFile() {
         .then((response) => {
           // todo: write response
         });
-      navigate("/select-boxes", { state: { noteId: noteId } });
+      navigate("/select-boxes", { state: { noteId: noteId, image: formData.get("files") } });
     }
   };
 
