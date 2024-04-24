@@ -12,6 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import { TwitterPicker } from "react-color";
 import api from "../APIService.js";
@@ -107,11 +108,19 @@ const NoteBody = styled.div`
 
 function Sidebar() {
   const [options, setOptions] = useState([]);
-  const form = useForm({
+  const editCategoryForm = useForm({
     resolver: zodResolver(formSchema),
     mode: "all",
     defaultValues: {
       categoryName: "",
+    },
+  });
+
+  const editDirectoryForm = useForm({
+    resolver: zodResolver(formSchema),
+    mode: "all",
+    defaultValues: {
+      directoryName: "",
     },
   });
 
@@ -148,6 +157,33 @@ function Sidebar() {
       });
   };
 
+  const handleDirectoryUpdate = async () => {
+    await api
+      .put(
+        `http://localhost:8051/api/user/folder/${selectedDirectory.id}/update`,
+        {
+          name: selectedDirectory.name,
+          passwordToFolder: "",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        }
+      )
+      .then((response) => {
+        setUserFolders(
+          userFolders.map((dir) =>
+            dir.id === selectedDirectory.id ? selectedDirectory : dir
+          )
+        );
+        setSelectedDirectory({});
+      })
+      .catch((error) => {
+        setErrorMessage(error.response.data.message);
+      });
+  };
+
   useEffect(() => {
     if (Cookies.get("authToken")) {
       api
@@ -163,7 +199,7 @@ function Sidebar() {
           console.log(error);
         });
 
-        api
+      api
         .get(`http://localhost:8051/api/user/note/lastEdited`, {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -177,7 +213,7 @@ function Sidebar() {
           }
         });
 
-        api
+      api
         .get(`http://localhost:8051/api/noteCategories`, {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -227,6 +263,8 @@ function Sidebar() {
   const [lastNotes, setLastNotes] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
+  const [editDirectoryDialogOpen, setEditDirectoryDialogOpen] = useState(false);
+  const [selectedDirectory, setSelectedDirectory] = useState("");
 
   const handleAddFolder = (name) => {
     const folders = [...userFolders];
@@ -337,7 +375,37 @@ function Sidebar() {
   const handleRemoveCategory = (category) => {
     const newOptions = options.filter((option) => option.value !== category);
     setOptions(newOptions);
-  }
+  };
+
+  const handleRemoveDirectory = async (directory) => {
+    await api
+      .put(
+        `http://localhost:8051/api/user/folder/${directory.id}/unlock`,
+        {
+          password: "",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        }
+      )
+      .then(async (response) => {
+        await api
+          .delete(`http://localhost:8051/api/user/folder/${directory.id}`, {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          })
+          .then((response) => {
+            const newDirectories = userFolders.filter(
+              (dir) => dir.id !== directory.id
+            );
+            setUserFolders(newDirectories);
+            toast.success(`Usunięto folder ${directory.name}`);
+          });
+      });
+  };
 
   return (
     <>
@@ -400,7 +468,10 @@ function Sidebar() {
                             onClick={() => {
                               setEditCategoryDialogOpen(true);
                               setSelectedCategory(option);
-                              form.setValue("categoryName", option.name);
+                              editCategoryForm.setValue(
+                                "categoryName",
+                                option.name
+                              );
                             }}
                           >
                             Edytuj kategorię
@@ -425,7 +496,7 @@ function Sidebar() {
                 onOpenChange={() => {
                   setEditCategoryDialogOpen(!editCategoryDialogOpen);
                   if (
-                    !form.formState.errors.categoryName &&
+                    !editCategoryForm.formState.errors.categoryName &&
                     editCategoryDialogOpen
                   ) {
                     handleCategoriesUpdate();
@@ -441,7 +512,7 @@ function Sidebar() {
                       W tym miejscu możesz ustawić inny kolor kategorii lub
                       zmienić jej nazwę.
                     </DialogDescription>
-                    <Form {...form}>
+                    <Form {...editCategoryForm}>
                       <form
                         className="space-y-8"
                         onSubmit={(e) => {
@@ -449,7 +520,10 @@ function Sidebar() {
                         }}
                       >
                         <p className="font-bold text-red-700 mt-8 text-sm">
-                          {form.formState.errors.categoryName?.message}
+                          {
+                            editCategoryForm.formState.errors.categoryName
+                              ?.message
+                          }
                         </p>
                         <div className="text-inputs">
                           <div className="input-container">
@@ -457,7 +531,7 @@ function Sidebar() {
                               Nazwa kategorii
                             </p>
                             <FormField
-                              control={form.control}
+                              control={editCategoryForm.control}
                               name="categoryName"
                               render={({ field }) => (
                                 <FormItem>
@@ -466,14 +540,17 @@ function Sidebar() {
                                       type="text"
                                       className="py-6 border-slate-300 mb-8"
                                       {...field}
-                                      {...form.register("categoryName")}
+                                      {...editCategoryForm.register(
+                                        "categoryName"
+                                      )}
                                       onBlur={() => {
                                         if (
-                                          !form.formState.errors.categoryName
+                                          !editCategoryForm.formState.errors
+                                            .categoryName
                                         ) {
                                           setSelectedCategory({
                                             ...selectedCategory,
-                                            name: form.getValues(
+                                            name: editCategoryForm.getValues(
                                               "categoryName"
                                             ),
                                           });
@@ -504,10 +581,102 @@ function Sidebar() {
                       onClick={() => {
                         setEditCategoryDialogOpen(!editCategoryDialogOpen);
                         if (
-                          !form.formState.errors.categoryName &&
+                          !editCategoryForm.formState.errors.categoryName &&
                           editCategoryDialogOpen
                         ) {
                           handleCategoriesUpdate();
+                        }
+                      }}
+                    >
+                      Zapisz zmiany
+                    </DialogButton>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+              <Dialog
+                open={editDirectoryDialogOpen}
+                onOpenChange={() => {
+                  setEditDirectoryDialogOpen(!editDirectoryDialogOpen);
+                  if (
+                    !editDirectoryForm.formState.errors.directoryName &&
+                    editDirectoryDialogOpen
+                  ) {
+                    handleDirectoryUpdate();
+                  }
+                }}
+              >
+                <DialogContent className="bg-white p-8">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl mb-2">
+                      Edytuj ustawienia folderu {selectedDirectory.name}
+                    </DialogTitle>
+                    <DialogDescription>
+                      W tym miejscu możesz ustawić inny kolor kategorii lub
+                      zmienić jej nazwę.
+                    </DialogDescription>
+                    <Form {...editDirectoryForm}>
+                      <form
+                        className="space-y-8"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                        }}
+                      >
+                        <p className="font-bold text-red-700 mt-8 text-sm">
+                          {
+                            editDirectoryForm.formState.errors.categoryName
+                              ?.message
+                          }
+                        </p>
+                        <div className="text-inputs">
+                          <div className="input-container">
+                            <p className="font-bold text-sm mb-2">
+                              Nazwa folderu
+                            </p>
+                            <FormField
+                              control={editDirectoryForm.control}
+                              name="categoryName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      type="text"
+                                      className="py-6 border-slate-300 mb-8"
+                                      {...field}
+                                      {...editDirectoryForm.register(
+                                        "directoryName"
+                                      )}
+                                      onBlur={() => {
+                                        if (
+                                          !editDirectoryForm.formState.errors
+                                            .categoryName
+                                        ) {
+                                          setSelectedDirectory({
+                                            ...selectedDirectory,
+                                            name: editDirectoryForm.getValues(
+                                              "directoryName"
+                                            ),
+                                          });
+                                        }
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </form>
+                    </Form>
+                    <DialogButton
+                      className="mt-4"
+                      onClick={() => {
+                        setEditDirectoryDialogOpen(!editDirectoryDialogOpen);
+                        if (
+                          !editDirectoryForm.formState.errors.categoryName &&
+                          editDirectoryDialogOpen
+                        ) {
+                          handleDirectoryUpdate();
                         }
                       }}
                     >
@@ -633,45 +802,93 @@ function Sidebar() {
                       >
                         <img src="/plus.svg" alt="" />
                       </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <button className="p-2 hover:bg-neutral-200 mr-1">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="feather feather-more-horizontal"
+                            >
+                              <circle cx="12" cy="12" r="1"></circle>
+                              <circle cx="19" cy="12" r="1"></circle>
+                              <circle cx="5" cy="12" r="1"></circle>
+                            </svg>
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-white">
+                          <DropdownMenuItem>
+                            <button
+                              onClick={() => {
+                                setEditDirectoryDialogOpen(true);
+                                setSelectedDirectory(folder);
+                                editDirectoryForm.setValue(
+                                  "directoryName",
+                                  folder.name
+                                );
+                              }}
+                            >
+                              Edytuj folder
+                            </button>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <button
+                              onClick={() => {
+                                handleRemoveDirectory(folder);
+                              }}
+                            >
+                              Usuń folder
+                            </button>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                     <CollapsibleContent>
                       <div className="folder__notes pl-6">
                         {folder.notes.map((note) => {
                           return (
-                          <NavLink
-                            key={note.id}
-                            to={note.url}
-                            state={{
-                              folderName: folder.name,
-                            }}
-                            style={({ isActive }) => {
-                              return {
-                                backgroundColor: isActive
-                                  ? "#f3f4f6"
-                                  : "transparent",
-                                fontWeight: isActive ? "bold" : "normal",
-                              };
-                            }}
-                          >
-                            {({ isActive }) => {
-                              return isActive ? (
-                                <div
-                                  className={`folder-doc bg-slate-200 flex flex-row gap-2 items-center py-1.5 pl-12 pr-10 mx-4`}
-                                >
-                                  <img src="/note.png" alt="" />
-                                  {note.name}
-                                </div>
-                              ) : (
-                                <div
-                                  className={`folder-doc doc flex flex-row gap-2 items-center hover:bg-slate-200 py-1.5 pl-12 pr-10 mx-4`}
-                                >
-                                  <img src="/note.png" alt="" />
-                                  {note.name}
-                                </div>
-                              );
-                            }}
-                          </NavLink>
-                        )})}
+                            <NavLink
+                              key={note.id}
+                              to={note.url}
+                              state={{
+                                folderName: folder.name,
+                              }}
+                              style={({ isActive }) => {
+                                return {
+                                  backgroundColor: isActive
+                                    ? "#f3f4f6"
+                                    : "transparent",
+                                  fontWeight: isActive ? "bold" : "normal",
+                                };
+                              }}
+                            >
+                              {({ isActive }) => {
+                                return isActive ? (
+                                  <div
+                                    className={`folder-doc bg-slate-200 flex flex-row gap-2 items-center py-1.5 pl-12 pr-10 mx-4`}
+                                  >
+                                    <img src="/note.png" alt="" />
+                                    {note.name}
+                                  </div>
+                                ) : (
+                                  <div
+                                    className={`folder-doc doc flex flex-row gap-2 items-center hover:bg-slate-200 py-1.5 pl-12 pr-10 mx-4`}
+                                  >
+                                    <img src="/note.png" alt="" />
+                                    {note.name}
+                                  </div>
+                                );
+                              }}
+                            </NavLink>
+                          );
+                        })}
                       </div>
                     </CollapsibleContent>
                   </Collapsible>

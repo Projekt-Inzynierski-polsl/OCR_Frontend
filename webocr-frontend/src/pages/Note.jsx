@@ -101,7 +101,7 @@ import {
 function Note() {
   const location = useLocation();
 
-  const folderName = location.state.folderName;
+  const folderName = location.state?.folderName;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
