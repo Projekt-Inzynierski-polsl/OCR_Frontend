@@ -82,7 +82,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import CreatableSelect from "react-select/creatable";
 import { useNavigate } from "react-router-dom";
 import {
@@ -99,6 +99,9 @@ import {
 } from "@/components/ui/form";
 
 function Note() {
+  const location = useLocation();
+
+  const folderName = location.state.folderName;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -380,7 +383,6 @@ function Note() {
     }
     
   };
-
   useEffect(() => {
     api
       .get(`http://localhost:8051/api/user/note/${noteId}`, {
@@ -442,7 +444,7 @@ function Note() {
                       <BreadcrumbPage>
                         <BreadcrumbFolder>
                           <img src="/folder.png" alt="" />
-                          <p></p>
+                          <p>{folderName}</p>
                         </BreadcrumbFolder>
                       </BreadcrumbPage>
                     </BreadcrumbItem>

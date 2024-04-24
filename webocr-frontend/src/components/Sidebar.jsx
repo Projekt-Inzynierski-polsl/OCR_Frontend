@@ -636,10 +636,14 @@ function Sidebar() {
                     </div>
                     <CollapsibleContent>
                       <div className="folder__notes pl-6">
-                        {folder.notes.map((note) => (
+                        {folder.notes.map((note) => {
+                          return (
                           <NavLink
                             key={note.id}
                             to={note.url}
+                            state={{
+                              folderName: folder.name,
+                            }}
                             style={({ isActive }) => {
                               return {
                                 backgroundColor: isActive
@@ -667,7 +671,7 @@ function Sidebar() {
                               );
                             }}
                           </NavLink>
-                        ))}
+                        )})}
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
