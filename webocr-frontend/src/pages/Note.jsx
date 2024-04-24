@@ -19,6 +19,14 @@ import {
 } from "@/components/ui/dialog";
 
 import { Input } from "@/components/ui/input";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { set, useForm } from "react-hook-form";
+
+const formSchema = z.object({
+  email: z.string().email({ message: "Niepoprawny adres email" }),
+  permissions: z.string(),
+});
 
 import {
   Select,
@@ -76,16 +84,29 @@ import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import CreatableSelect from "react-select/creatable";
-import { components } from "react-select";
 import { useNavigate } from "react-router-dom";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 
 function Note() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      permissions: "",
+    },
+  });
   const OptionWithTooltip = (props) => {
     const { innerProps, innerRef } = props;
     return (
@@ -117,8 +138,8 @@ function Note() {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [exportType, setExportType] = useState("pdf");
   const [currentNote, setCurrentNote] = useState({
-    noteId: 5,
-    title: "Testowy ",
+    noteId: 1,
+    title: "Testowy",
     content: "",
     isPrivate: false,
   });
@@ -183,10 +204,6 @@ function Note() {
     setExportDialogOpen(false);
   };
 
-  const shareNoteHandler = () => {
-    setShareDialogOpen(false);
-  };
-
   const handleNoteHeader = (e) => {
     if (e.target.innerText.trim() === "") {
       e.target.innerText = "";
@@ -236,30 +253,6 @@ function Note() {
             setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
           }
         });
-
-      axios
-        .post(
-          `http://localhost:8051/api/shared/note`,
-          {
-            objectId: currentNote.noteId,
-            shareMode: 2,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${Cookies.get("authToken")}`,
-            },
-          }
-        )
-        .then((response) => {
-          if (response.status === 200) {
-            toast({
-              title: "Notatka została udostępniona",
-              body: "Notatka jest dostępna dla innych użytkowników",
-            });
-          } else if (response.status === 500) {
-            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-          }
-        });
     } else if (value === "only-user" && !currentNote.isPrivate) {
       axios
         .put(
@@ -277,30 +270,6 @@ function Note() {
         .then((response) => {
           if (response.status === 200) {
             currentNote.isPrivate = true;
-          } else if (response.status === 500) {
-            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-          }
-        });
-
-      axios
-        .delete(
-          `http://localhost:8051/api/shared/note`,
-          {
-            objectId: currentNote.noteId,
-            shareMode: 2,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${Cookies.get("authToken")}`,
-            },
-          }
-        )
-        .then((response) => {
-          if (response.status === 200) {
-            toast({
-              title: "Notatka została udostępniona",
-              body: "Notatka jest dostępna dla innych użytkowników",
-            });
           } else if (response.status === 500) {
             setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
           }
@@ -366,6 +335,50 @@ function Note() {
 
   const handleScanNoteRedirect = () => {
     navigate(`/scan-note/`, { state: { noteId: noteId } });
+  };
+
+  const handleShareSubmit = (values) => {
+    if (values.email) {
+      axios
+        .post(
+          `http://localhost:8051/api/shared/note`,
+          {
+            objectId: currentNote.noteId,
+            shareMode: parseInt(values.permissions),
+            email: values.email,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            toast({
+              title: "Notatka została udostępniona",
+              body: "Notatka jest dostępna dla innych użytkowników",
+            });
+            setShareDialogOpen(false);
+          } else if (response.status === 500) {
+            toast({
+              title: "Błąd serwera",
+            });
+          }
+        }).catch(error => {
+          console.log(error);
+          if (error.response.data === "That user doesn't exist.") {
+            form.setError("email", {
+              type: "custom",
+              message: "Użytkownik o podanym adresie e-mail nie istnieje."
+            });
+          }
+        });
+    }
+    else {
+      setShareDialogOpen(false);
+    }
+    
   };
 
   useEffect(() => {
@@ -509,61 +522,136 @@ function Note() {
                             Zdecyduj, czy Twoja notatka ma być widoczna dla
                             innych.
                           </p>
-                          <Select
-                            onValueChange={(value) =>
-                              handleShareTypeChange(value)
-                            }
-                            defaultValue={shareType}
-                          >
-                            <SelectTrigger className="w-[320px] py-6 border-slate-400">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white">
-                              <SelectItem
-                                className="bg-white focus:bg-slate-200"
-                                value="only-user"
-                              >
-                                <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
-                                  <img src="/lock.svg" alt="" />
-                                  <p className="font-bold">Tylko dla Ciebie</p>
-                                </SelectWithIcon>
-                              </SelectItem>
-                              <SelectItem
-                                className="bg-white focus:bg-slate-200"
-                                value="all-users"
-                              >
-                                <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
-                                  <img src="/globe.svg" alt="" />
-                                  <p className="font-bold">
-                                    Dostęp dla każdego
-                                  </p>
-                                </SelectWithIcon>
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Form {...form}>
+                            <form
+                              onSubmit={form.handleSubmit(handleShareSubmit)}
+                              className="mb-4"
+                            >
+                              <p className="font-bold text-red-700 mb-4 mt-6"></p>
+                              {shareType === "only-user" && (
+                                <div className="text-inputs grid grid-cols-2 gap-4">
+                                  <div className="input-container">
+                                    <p className="font-bold text-sm mb-2">
+                                      Adres e-mail
+                                    </p>
+                                    <FormField
+                                      control={form.control}
+                                      name="email"
+                                      render={({ field }) => {
+                                        return (
+                                          <FormItem>
+                                            <FormControl>
+                                              <Input
+                                                type="email"
+                                                className="py-6 border-slate-300"
+                                                {...field}
+                                              />
+                                            </FormControl>
 
-                          {shareType === "all-users" && (
-                            <Fragment>
-                              <p className="font-bold text-sm mt-6">
-                                Link do notatki
+                                            <FormMessage />
+                                          </FormItem>
+                                        );
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="select-container">
+                                    <p className="font-bold text-sm mb-2">
+                                      Zakres udostępnienia
+                                    </p>
+                                    <FormField
+                                      control={form.control}
+                                      name="permissions"
+                                      render={({ field }) => {
+                                        return (
+                                          <FormItem>
+                                            <FormControl>
+                                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <SelectTrigger className="border-slate-400 mb-8 py-6">
+                                                  <SelectValue placeholder="Wybierz zakres uprawnień" />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-white">
+                                                  <SelectItem
+                                                    className="bg-white focus:bg-slate-200"
+                                                    value="1"
+                                                  >
+                                                    Przeglądający
+                                                  </SelectItem>
+                                                  <SelectItem
+                                                    className="bg-white focus:bg-slate-200"
+                                                    value="2"
+                                                  >
+                                                    Edytor
+                                                  </SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        );
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                              <p className="font-bold text-sm mt-4 mb-2">
+                                Rodzaj udostępnienia
                               </p>
-                              <div className="share-url-container flex flex-row">
-                                <Input
-                                  type="text"
-                                  value="https://webocr.pl/r194-ret-testowa"
-                                  className="mt-4 py-6 w-[300px] border-slate-300"
-                                  readonly="true"
-                                />
-                                <button className="mt-4 ml-2 border border-slate-900 inline-flex items-center justify-center h-12 px-3">
-                                  <img src="/copy.svg" alt="" />
-                                </button>
-                              </div>
-                            </Fragment>
-                          )}
+                              <Select
+                                onValueChange={(value) =>
+                                  handleShareTypeChange(value)
+                                }
+                                defaultValue={shareType}
+                              >
+                                <SelectTrigger className="w-[320px] py-6 border-slate-400 mt-2">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white">
+                                  <SelectItem
+                                    className="bg-white focus:bg-slate-200"
+                                    value="only-user"
+                                  >
+                                    <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
+                                      <img src="/lock.svg" alt="" />
+                                      <p className="font-bold">
+                                        Dostęp ograniczony
+                                      </p>
+                                    </SelectWithIcon>
+                                  </SelectItem>
+                                  <SelectItem
+                                    className="bg-white focus:bg-slate-200"
+                                    value="all-users"
+                                  >
+                                    <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
+                                      <img src="/globe.svg" alt="" />
+                                      <p className="font-bold">
+                                        Dostęp dla każdego
+                                      </p>
+                                    </SelectWithIcon>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
 
-                          <DialogButton onClick={shareNoteHandler}>
-                            Zamknij
-                          </DialogButton>
+                              {shareType === "all-users" && (
+                                <Fragment>
+                                  <p className="font-bold text-sm mt-6">
+                                    Link do notatki
+                                  </p>
+                                  <div className="share-url-container flex flex-row">
+                                    <Input
+                                      type="text"
+                                      value="https://webocr.pl/r194-ret-testowa"
+                                      className="mt-2 py-6 w-[300px] border-slate-300"
+                                      readonly="true"
+                                    />
+                                  </div>
+                                </Fragment>
+                              )}
+
+                              <DialogButton type="submit">
+                                Udostępnij
+                              </DialogButton>
+                            </form>
+                          </Form>
                         </DialogDescription>
                       </DialogHeader>
                     </DialogContent>
@@ -671,20 +759,18 @@ function Note() {
                 </div>
               </div>
             </Fragment>
-          ) : 
-          <Fragment>
-          <NoteHeader
-                  className="font-bold text-4xl mt-8 mb-4"
-                >
-                  Cześć! Wybierz swoją notatkę
-            </NoteHeader>
-            <NoteBody>
-              Utwórz swoją notatkę lub wybierz ją z listy po lewej stronie. Jeżeli nie masz jeszcze notatek, utwórz folder i dodaj swoje pierwsze notatki.
-            </NoteBody>
-          
-          </Fragment>
-          
-          }
+          ) : (
+            <Fragment>
+              <NoteHeader className="font-bold text-4xl mt-8 mb-4">
+                Cześć! Wybierz swoją notatkę
+              </NoteHeader>
+              <NoteBody>
+                Utwórz swoją notatkę lub wybierz ją z listy po lewej stronie.
+                Jeżeli nie masz jeszcze notatek, utwórz folder i dodaj swoje
+                pierwsze notatki.
+              </NoteBody>
+            </Fragment>
+          )}
         </NoteBody>
       </main>
     </>
