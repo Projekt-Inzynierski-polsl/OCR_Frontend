@@ -27,64 +27,62 @@ function AdminDashboard() {
   const [modelErrors, setModelErrors] = useState([]);
   const [modelUpdates, setModelUpdates] = useState([]);
   const [adminStats, setAdminStats] = useState({
-    activeUsers: 111,
-    activeScanErrors: 222,
-    repairedScanErrors: 333,
-    todayNotes: 444,
+    activeUsers: null,
+    activeScanErrors: null,
+    todayNotes: null,
   });
 
   useEffect(() => {
     api
-      .get("http://localhost:8051/api/model/errors", {
+      .get("http://localhost:8051/api/userLog", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
+        params: {
+          type: "Registration",
+        },
       })
       .then((response) => {
-        if (response.status === 200) {
-          // todo: zmienic response w sytuacji kiedy bedzie wiadomo co bedzie wysylane i jak
-          //setModelErrors(response.data);
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-        }
+        setAdminStats((prevStats) => ({
+          ...prevStats,
+          activeUsers: response.data.length,
+        }));
+      });
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 1);
+    api
+      .get("http://localhost:8051/api/userLog", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+        params: {
+          startTimestamp: Math.round(startDate.getTime() / 1000),
+          endTimestamp: Math.round(endDate.getTime() / 1000),
+          type: "CreateNote",
+        },
       })
-      .catch((error) => {
-        setErrorMessage(error);
+      .then((response) => {
+        setAdminStats((prevStats) => ({
+          ...prevStats,
+          todayNotes: response.data.length,
+        }));
       });
 
     api
-      .get("http://localhost:8051/api/model/updates", {
+      .get("http://localhost:8051/api/userLog", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          // todo: zmienic response w sytuacji kiedy bedzie wiadomo co bedzie wysylane i jak
-          //setModelUpdates(response.data);
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-        }
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-
-    api
-      .get("http://localhost:8051/api/admin/stats", {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        params: {
+          type: "ReportError",
         },
       })
       .then((response) => {
-        if (response.status === 200) {
-          // todo: zmienic response w sytuacji kiedy bedzie wiadomo co bedzie wysylane i jak
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-        }
-      })
-      .catch((error) => {
-        setErrorMessage(error);
+        setAdminStats((prevStats) => ({
+          ...prevStats,
+          activeScanErrors: response.data.length,
+        }));
       });
   }, []);
 
@@ -95,7 +93,7 @@ function AdminDashboard() {
         <Sidebar></Sidebar>
         <MainLayout>
           <div className="stats flex flex-row mx-32 mt-10 gap-4">
-            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-8 w-1/4">
+            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-8 w-1/3">
               <CardContent className="pb-0">
                 <p className="text-5xl font-bold text-right mr-2">
                   {adminStats.activeUsers}
@@ -107,7 +105,7 @@ function AdminDashboard() {
                 </CardTitle>
               </CardHeader>
             </Card>
-            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-1/4">
+            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-1/3">
               <CardContent className="pb-0">
                 <p className="text-5xl font-bold text-right mr-2 text-red-600">
                   {adminStats.activeScanErrors}
@@ -115,23 +113,12 @@ function AdminDashboard() {
               </CardContent>
               <CardHeader className="text-right mr-2 space-y-0 pt-3 pb-5">
                 <CardTitle className="text-xl pb-2">
-                  Aktywne błędy skanowania
+                  Zgłoszone błędy skanowania
                 </CardTitle>
               </CardHeader>
             </Card>
-            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-1/4">
-              <CardContent className="pb-0">
-                <p className="text-5xl font-bold text-right mr-2 text-green-700">
-                  {adminStats.repairedScanErrors}
-                </p>
-              </CardContent>
-              <CardHeader className="text-right mr-2 space-y-0 pt-3 pb-5">
-                <CardTitle className="text-xl pb-2">
-                  Naprawione błędy skanowania
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-1/4">
+
+            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-1/3">
               <CardContent className="pb-0">
                 <p className="text-5xl font-bold text-right mr-2">
                   {adminStats.todayNotes}
