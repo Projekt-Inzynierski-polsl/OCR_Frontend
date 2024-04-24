@@ -61,7 +61,7 @@ const ModelButton = styled.button`
 `;
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../APIService.js";
 import Cookies from "js-cookie";
 import { Input } from "@/components/ui/input";
 
@@ -75,7 +75,7 @@ function UploadModel() {
   function onSubmit(values) {
     const formData = new FormData();
     formData.append("model", values.model);
-    axios
+    api
       .post("http://localhost:8051/api/model/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -96,7 +96,7 @@ function UploadModel() {
   const [modelUpdates, setModelUpdates] = useState([]);
 
   useEffect(() => {
-    axios
+    api
       .get("http://localhost:8051/api/model/updates", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,

@@ -13,7 +13,7 @@ const FirstNoteHero = styled.div`
 `;
 
 import React, { Fragment, useState } from "react";
-import axios from "axios";
+import api from "../APIService.js";
 const NextButton = styled.button`
   background-color: #004423;
   color: #e9f7ee;
@@ -38,7 +38,7 @@ function UploadNoteFile() {
       uploadedFiles.forEach((file) => {
         formData.append("files", file);
       });
-      axios
+      api
         .post(`http://localhost:8051/api/note/${noteId}/file`, formData, {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,

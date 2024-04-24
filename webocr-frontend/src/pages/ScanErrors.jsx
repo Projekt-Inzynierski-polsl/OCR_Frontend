@@ -19,14 +19,14 @@ import {
 } from "@/components/ui/table";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../APIService.js";
 import Cookies from "js-cookie";
 
 function ScanErrors() {
   const [modelErrors, setModelErrors] = useState([]);
 
   useEffect(() => {
-    axios
+    api
       .get("http://localhost:8051/api/ocrError", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,

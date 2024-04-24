@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../APIService.js";
 import Cookies from "js-cookie";
 
 function AdminDashboard() {
@@ -34,7 +34,7 @@ function AdminDashboard() {
   });
 
   useEffect(() => {
-    axios
+    api
       .get("http://localhost:8051/api/model/errors", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -52,7 +52,7 @@ function AdminDashboard() {
         setErrorMessage(error);
       });
 
-    axios
+    api
       .get("http://localhost:8051/api/model/updates", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -70,7 +70,7 @@ function AdminDashboard() {
         setErrorMessage(error);
       });
 
-    axios
+    api
       .get("http://localhost:8051/api/admin/stats", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,

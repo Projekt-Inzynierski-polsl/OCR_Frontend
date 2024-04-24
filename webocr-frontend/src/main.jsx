@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
 import "./index.css";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
@@ -17,13 +16,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { CookiesProvider } from "react-cookie";
 import AuthenticatedRoute from "./routes/index.jsx";
 import AdminRoute from "./routes/AdminRoute.jsx";
-
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  createRoutesFromElements,
-} from "react-router-dom";
+import { Slide, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import Home from "./pages/Home.jsx";
 import EditProfile from "@/src/pages/EditProfile.jsx";
@@ -32,6 +27,20 @@ import Unauthorized from "./pages/Unauthorized.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
+    <ToastContainer
+      position="bottom-right"
+      autoClose={2500}
+      limit={5}
+      hideProgressBar
+      newestOnTop
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable={false}
+      pauseOnHover={false}
+      theme="light"
+      transition={Slide}
+    />
     <CookiesProvider defaultSetOptions={{ path: "/" }}>
       <Router>
         <Routes>

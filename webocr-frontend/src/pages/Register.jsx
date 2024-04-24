@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import api from "../APIService.js";
 import Cookies from 'js-cookie'
 import { useState } from "react";
 const formSchema = z
@@ -66,7 +66,7 @@ function Register() {
   });
 
   const onSubmit = async (values) => {
-    await axios.post(
+    await api.post(
       "http://localhost:8051/api/account/register",
       values
     ).then((response) => {

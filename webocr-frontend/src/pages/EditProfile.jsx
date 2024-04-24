@@ -4,7 +4,7 @@ import Sidebar from "../components/AdminSidebar.jsx";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import api from "../APIService.js";
 import Cookies from "js-cookie";
 
 const formSchema = z.object({
@@ -129,7 +129,7 @@ function EditProfile() {
   };
 
   const handleDelete = async () => {
-    await axios
+    await api
       .delete(`http://localhost:8051/api/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -148,7 +148,7 @@ function EditProfile() {
   };
 
   useEffect(() => {
-    axios
+    api
       .get(`http://localhost:8051/api/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -172,7 +172,7 @@ function EditProfile() {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 7);
-    axios
+    api
       .get(`http://localhost:8051/api/userLog`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,

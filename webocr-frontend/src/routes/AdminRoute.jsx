@@ -1,14 +1,14 @@
 import React from "react";
 import { Route, Navigate, Outlet } from "react-router-dom";
 import Cookies from "js-cookie";
-import axios from "axios";
+import api from "../APIService.js";
 import { useState, useEffect } from "react";
 
 const checkAuth = () => {
   const [logged, setLogged] = useState();
   useEffect(() => {
     const fetchData = () => {
-      axios
+      api
         .get("http://localhost:8051/api/user/logged", {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,

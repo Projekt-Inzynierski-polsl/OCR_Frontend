@@ -5,7 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import React, { Fragment, useState } from "react";
-import axios from "axios";
+import api from "../APIService.js";
 import Cookies from 'js-cookie'
 
 const formSchema = z.object({
@@ -51,7 +51,7 @@ function Login() {
   });
 
   const onSubmit = async (values) => {
-      await axios.post(
+      await api.post(
         "http://localhost:8051/api/account/login",
         values
       ).then((response) => {

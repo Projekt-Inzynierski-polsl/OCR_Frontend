@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useToast } from "@/components/ui/use-toast";
+import api from "../APIService.js";
 
 const Avatar = styled.span`
   padding: 16px;
@@ -11,13 +11,10 @@ const Avatar = styled.span`
 `;
 
 import Cookies from "js-cookie";
-
-
-import axios from "axios";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 function Navbar() {
-  const { toast } = useToast();
   const [userData, setUserData] = useState({});
 
   const handleLogout = () => {
@@ -26,51 +23,18 @@ function Navbar() {
   };
 
   useEffect(() => {
-    axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error === 401) {
-          axios
-            .get("http://localhost:8051/api/account/token", {
-              headers: {
-                Authorization: `Bearer ${Cookies.get("authToken")}`,
-              },
-            })
-            .then((response) => {
-                Cookies.set("authToken", response.data, { path: "/", expires: 7})
-                
-            })
-            .catch((error) => {
-               toast({
-                    title: "Błąd",
-                    description: error,
-                    status: "error",
-                });
-                Cookies.remove("authToken", { path: "/" });
-                window.location.href = "/login";
-            });
-        }
-        else if (error === 403) {
-          console.log("brak dostępu")
-          window.location.href = "/unauthorized";
-        }
-        return Promise.reject(error);
-      }
-    );
-
-      axios
-            .get("http://localhost:8051/api/user/logged", {
-              headers: {
-                Authorization: `Bearer ${Cookies.get("authToken")}`,
-              },
-            })
-            .then((response) => {
-              setUserData(response.data);
-            })
-            .catch((error) => {
-               console.error(error);
-            });
-    
+    api
+      .get("http://localhost:8051/api/user/logged", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        setUserData(response.data);
+      })
+      .catch((error) => {
+        toast(error)
+      });
   }, []);
 
   return (

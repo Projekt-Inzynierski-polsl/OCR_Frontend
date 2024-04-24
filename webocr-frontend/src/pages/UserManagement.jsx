@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useEffect } from "react";
-import axios from "axios";
+import api from "../APIService.js";
 import Cookies from "js-cookie";
 
 function AdminDashboard() {
@@ -26,7 +26,7 @@ function AdminDashboard() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    axios
+    api
       .get("http://localhost:8051/api/user", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,

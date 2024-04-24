@@ -35,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import axios from "axios";
+import api from "../APIService.js";
 
 const NoteBody = styled.div`
   font-family: "Space Grotesk";
@@ -171,7 +171,7 @@ function Note() {
   const [colorSelectOpen, setColorSelectOpen] = useState(false);
 
   const exportNoteHandler = async () => {
-    await axios
+    await api
       .post(
         "http://localhost:8051/api/note/export",
         {
@@ -216,7 +216,7 @@ function Note() {
       setPlaceholderVisible(true);
     } else {
       currentNote.content = e.target.innerText.trim();
-      axios
+      api
         .put(`/api/user/note/${currentNote.noteId}`, currentNote)
         .then((response) => {
           toast({
@@ -233,7 +233,7 @@ function Note() {
 
   const handleShareTypeChange = (value) => {
     if (value === "all-users" && currentNote.isPrivate) {
-      axios
+      api
         .put(
           `http://localhost:8051/api/user/note/${currentNote.noteId}/update`,
           {
@@ -254,7 +254,7 @@ function Note() {
           }
         });
     } else if (value === "only-user" && !currentNote.isPrivate) {
-      axios
+      api
         .put(
           `http://localhost:8051/api/user/note/${currentNote.noteId}/update`,
           {
@@ -279,7 +279,7 @@ function Note() {
   };
 
   const handleDelete = () => {
-    axios
+    api
       .delete(`http://localhost:8051/api/user/note/${currentNote.noteId}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -303,7 +303,7 @@ function Note() {
   };
 
   const handleCreateCategory = (inputValue) => {
-    axios
+    api
       .post(
         `http://localhost:8051/api/noteCategories`,
         {
@@ -339,7 +339,7 @@ function Note() {
 
   const handleShareSubmit = (values) => {
     if (values.email) {
-      axios
+      api
         .post(
           `http://localhost:8051/api/shared/note`,
           {
@@ -382,7 +382,7 @@ function Note() {
   };
 
   useEffect(() => {
-    axios
+    api
       .get(`http://localhost:8051/api/user/note/${noteId}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -405,7 +405,7 @@ function Note() {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
       });
-    axios
+    api
       .get(`http://localhost:8051/api/noteCategories`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,

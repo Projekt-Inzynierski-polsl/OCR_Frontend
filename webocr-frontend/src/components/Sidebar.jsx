@@ -12,10 +12,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import axios from "axios";
 import Cookies from "js-cookie";
 import { TwitterPicker } from "react-color";
-
+import api from "../APIService.js";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -117,7 +116,7 @@ function Sidebar() {
   });
 
   const handleCategoriesUpdate = async () => {
-    await axios
+    await api
       .put(
         `http://localhost:8051/api/noteCategories/${selectedCategory.value}`,
         {
@@ -151,7 +150,7 @@ function Sidebar() {
 
   useEffect(() => {
     if (Cookies.get("authToken")) {
-      axios
+      api
         .get("http://localhost:8051/api/user/folder", {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -164,7 +163,7 @@ function Sidebar() {
           console.log(error);
         });
 
-      axios
+        api
         .get(`http://localhost:8051/api/user/note/lastEdited`, {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -178,7 +177,7 @@ function Sidebar() {
           }
         });
 
-      axios
+        api
         .get(`http://localhost:8051/api/noteCategories`, {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
@@ -231,7 +230,7 @@ function Sidebar() {
 
   const handleAddFolder = (name) => {
     const folders = [...userFolders];
-    axios
+    api
       .post(
         "http://localhost:8051/api/user/folder",
         {
@@ -288,7 +287,7 @@ function Sidebar() {
       });
       foundFolder.notesCount = foundFolder.notes.length;
 
-      axios
+      api
         .post(
           "http://localhost:8051/api/user/note",
           {

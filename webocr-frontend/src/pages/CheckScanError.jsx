@@ -10,7 +10,7 @@ const MainLayout = styled.div`
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input.jsx";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../APIService.js";
 import Cookies from "js-cookie";
 import { useParams } from "react-router-dom";
 
@@ -19,7 +19,7 @@ function CheckScanError() {
   const [ocrError, setOcrError] = useState({});
 
   const handleErrorCheck = (action) => {
-    axios
+    api
       .post(`http://localhost:8051/api/ocrError`, {
         action: action,
         errorId: errorId,
@@ -39,7 +39,7 @@ function CheckScanError() {
   };
 
   useEffect(() => {
-    axios
+    api
         .get(`http://localhost:8051/api/ocrError/${errorId}`, {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
