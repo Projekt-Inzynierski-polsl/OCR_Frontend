@@ -5,6 +5,7 @@ import Sidebar from "../components/AdminSidebar.jsx";
 const MainLayout = styled.div`
   background-color: #f9fafb;
   font-family: "Space Grotesk";
+  height: 100vh;
 `;
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +24,6 @@ import api from "../APIService.js";
 import Cookies from "js-cookie";
 
 function AdminDashboard() {
-  const [errorMessage, setErrorMessage] = useState("");
   const [modelErrors, setModelErrors] = useState([]);
   const [modelUpdates, setModelUpdates] = useState([]);
   const [adminStats, setAdminStats] = useState({
@@ -45,7 +45,7 @@ function AdminDashboard() {
       .then((response) => {
         setAdminStats((prevStats) => ({
           ...prevStats,
-          activeUsers: response.data.length,
+          activeUsers: response.data.items.length,
         }));
       });
     const endDate = new Date();
@@ -65,7 +65,7 @@ function AdminDashboard() {
       .then((response) => {
         setAdminStats((prevStats) => ({
           ...prevStats,
-          todayNotes: response.data.length,
+          todayNotes: response.data.items.length,
         }));
       });
 
@@ -81,9 +81,21 @@ function AdminDashboard() {
       .then((response) => {
         setAdminStats((prevStats) => ({
           ...prevStats,
-          activeScanErrors: response.data.length,
+          activeScanErrors: response.data.items.length,
         }));
+        
       });
+
+
+    api
+    .get("http://localhost:8051/api/ocrError", {
+      headers: {
+        Authorization: `Bearer ${Cookies.get("authToken")}`,
+      },
+    })
+    .then((response) => {
+      setModelErrors(response.data.items);
+    });
   }, []);
 
   return (
@@ -147,7 +159,6 @@ function AdminDashboard() {
                       </TableHead>
                       <TableHead>Odczytane słowo</TableHead>
                       <TableHead>Prawidłowe słowo</TableHead>
-                      <TableHead>Data zgłoszenia</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
@@ -159,23 +170,22 @@ function AdminDashboard() {
                           <TableCell className="font-medium">
                             {error.id}
                           </TableCell>
-                          <TableCell>{error.readWord}</TableCell>
-                          <TableCell>{error.correctWord}</TableCell>
-                          <TableCell>{error.scanDate}</TableCell>
+                          <TableCell>{error.wrongContent}</TableCell>
+                          <TableCell>{error.correctContent}</TableCell>
                           <TableCell>
-                            {error.status === "unchecked" ? (
-                              <div className="border border-[#760B0D] text-[#760B0D] text-center font-bold text-sm py-2 px-2 w-3/5 rounded-[10px]">
+                            {!error.isAccepted ? (
+                              <div className="border border-[#760B0D] text-[#760B0D] text-center font-bold text-sm py-2 px-2  rounded-[10px]">
                                 Niesprawdzony
                               </div>
                             ) : (
-                              <div className="border border-[#00844E] text-[#00844E] text-center font-bold text-sm py-2 px-2 w-3/5 rounded-[10px]">
+                              <div className="border border-[#00844E] text-[#00844E] text-center font-bold text-sm py-2 px-2  rounded-[10px]">
                                 Zweryfikowany
                               </div>
                             )}
                           </TableCell>
                           <TableCell>
                             <a
-                              href={`/model-error/${error.id}`}
+                              href={`/errors/${error.id}`}
                               className="font-bold text-blue-700 text-md"
                             >
                               Szczegóły
@@ -187,43 +197,6 @@ function AdminDashboard() {
                       <TableRow>
                         <TableCell colSpan="6" className="text-center">
                           Brak błędów
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-1/4">
-              <CardHeader className="text-left ml-2 space-y-0 pt-3 pb-5">
-                <CardTitle className="text-xl pb-2">
-                  Historia aktualizacji modelu
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pb-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[185px] font-bold">
-                        Numer zmiany
-                      </TableHead>
-                      <TableHead>Data zmiany</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {modelUpdates.length > 0 ? (
-                      modelUpdates.map((update) => (
-                        <TableRow key={update.id}>
-                          <TableCell className="font-medium">
-                            Wersja {update.id}
-                          </TableCell>
-                          <TableCell>{update.date}</TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan="2" className="text-center">
-                          Brak aktualizacji
                         </TableCell>
                       </TableRow>
                     )}

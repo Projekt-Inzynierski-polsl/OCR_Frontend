@@ -1,16 +1,8 @@
 import React from 'react';
-import { Route, Navigate, Outlet } from 'react-router-dom';
-import Cookies from "js-cookie";
+import { Outlet } from 'react-router-dom';
 
-const AuthenticatedRoute = ({ children }) => {
-  const isAuthenticated = () => {
-    return Cookies.get("authToken");
-  };
-
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" />;
-  }
+const PublicRoute = ({ children }) => {
   return children ? children : <Outlet />;
 };
 
-export default AuthenticatedRoute;
+export default PublicRoute;

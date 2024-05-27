@@ -5,6 +5,7 @@ import Sidebar from "../components/AdminSidebar.jsx";
 const MainLayout = styled.div`
   background-color: #f9fafb;
   font-family: "Space Grotesk";
+  height: 100vh;
 `;
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,7 +35,7 @@ function AdminDashboard() {
       })
       .then((response) => {
         if (response.status === 200) {
-          setUsers(response.data);
+          setUsers(response.data.items);
         } else if (response.status === 500) {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
@@ -83,11 +84,11 @@ function AdminDashboard() {
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
                           {user.roleId === 2 ? (
-                            <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-2 px-2 w-3/5 rounded-[10px]">
+                            <div className="border border-[#0072D8] text-[#0072D8] text-center font-bold text-sm py-2 px-2 rounded-[10px]">
                               Użytkownik
                             </div>
                           ) : (
-                            <div className="border border-[#00844E] text-[#00844E] text-center font-bold text-sm py-2 px-2 w-3/5 rounded-[10px]">
+                            <div className="border border-[#00844E] text-[#00844E] text-center font-bold text-sm py-2 px-2 rounded-[10px]">
                               Administrator
                             </div>
                           )}

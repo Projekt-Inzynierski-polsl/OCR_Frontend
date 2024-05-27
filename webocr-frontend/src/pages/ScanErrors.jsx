@@ -5,6 +5,7 @@ import Sidebar from "../components/AdminSidebar.jsx";
 const MainLayout = styled.div`
   background-color: #f9fafb;
   font-family: "Space Grotesk";
+  height: 100vh;
 `;
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,22 +35,22 @@ function ScanErrors() {
       })
       .then((response) => {
         if (response.status === 200) {
-          setModelErrors(response.data);
+          setModelErrors(response.data.items);
         }
       })
       .catch((error) => {
         console.error(error);
       });
-  }, []);
+  }, [modelErrors]);
 
   return (
     <>
       <Navbar></Navbar>
       <main className="grid grid-cols-[385px_1fr]">
         <Sidebar></Sidebar>
-        <MainLayout>
+        <MainLayout className="">
           <h1 className="font-bold text-3xl ml-40 mt-8">Błędy skanowania</h1>
-          <div className="dashboard-info flex flex-row items-top gap-4 mt-8 mx-32">
+          <div className="dashboard-info flex flex-row items-top gap-4 mt-8 mx-32 h-screen">
             <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-4/5">
               <CardHeader className="text-left ml-2 space-y-0 pt-3 pb-5">
                 <CardTitle className="text-xl pb-2">Lista błędów</CardTitle>
@@ -61,10 +62,8 @@ function ScanErrors() {
                       <TableHead className="w-[200px] font-bold">
                         ID błędu
                       </TableHead>
-                      <TableHead>Odczytane słowo</TableHead>
                       <TableHead>Zmienione słowo</TableHead>
                       <TableHead>Status błędu</TableHead>
-                      <TableHead>Data błędu</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -75,23 +74,21 @@ function ScanErrors() {
                           <TableCell className="font-medium">
                             {error.id}
                           </TableCell>
-                          <TableCell>{error.readWord}</TableCell>
-                          <TableCell>{error.correctWord}</TableCell>
-                          <TableCell>{error.scanDate}</TableCell>
+                          <TableCell>{error.correctContent}</TableCell>
                           <TableCell>
-                            {error.status === "unchecked" ? (
-                              <div className="border border-[#760B0D] text-[#760B0D] text-center font-bold text-sm py-2 px-2 w-3/5 rounded-[10px]">
+                            {!error.isAccepted ? (
+                              <div className="border border-[#760B0D] text-[#760B0D] min-w-1/3 max-w-1/2 text-center font-bold text-sm py-2 px-2 rounded-[10px]">
                                 Niesprawdzony
                               </div>
                             ) : (
-                              <div className="border border-[#00844E] text-[#00844E] text-center font-bold text-sm py-2 px-2 w-3/5 rounded-[10px]">
+                              <div className="border border-[#00844E] text-[#00844E] min-w-1/3 max-w-1/2 text-center font-bold text-sm py-2 px-2 rounded-[10px]">
                                 Zweryfikowany
                               </div>
                             )}
                           </TableCell>
                           <TableCell>
                             <a
-                              href={`/model-error/${error.id}`}
+                              href={`/errors/${error.id}`}
                               className="font-bold text-blue-700 text-md"
                             >
                               Szczegóły

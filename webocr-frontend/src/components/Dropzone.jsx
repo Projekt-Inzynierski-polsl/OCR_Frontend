@@ -34,7 +34,12 @@ function Dropzone({handleDrop}) {
         fileRejections,
         getRootProps,
         getInputProps
-      } = useDropzone({onDrop});
+      } = useDropzone({
+        onDrop,
+        accept: {
+          'image/*': ['.jpeg', '.png']
+        }
+      });
     
       
   return (

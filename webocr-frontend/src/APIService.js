@@ -9,11 +9,6 @@ instance.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error({
-        "error": error.response.status,
-        "url": error.response.request.responseURL,
-        "message": error.response.data,
-    });
     if (error.response.status === 401) {
       axios
         .get("http://localhost:8051/api/account/token", {
@@ -27,7 +22,7 @@ instance.interceptors.response.use(
         .catch((error) => {
           toast.error(error);
           Cookies.remove("authToken", { path: "/" });
-          window.location.href = "/login";
+          // window.location.href = "/login";
         });
     } else {
         toast.error(`Błąd serwera (${error.response.request.responseURL})`);

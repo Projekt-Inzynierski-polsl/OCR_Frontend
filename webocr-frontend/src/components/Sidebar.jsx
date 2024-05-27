@@ -68,7 +68,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
+import { useNavigate } from "react-router-dom";
 import {
   Collapsible,
   CollapsibleContent,
@@ -106,8 +106,7 @@ const NoteBody = styled.div`
   }
 `;
 
-function Sidebar() {
-  const [options, setOptions] = useState([]);
+function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
   const editCategoryForm = useForm({
     resolver: zodResolver(formSchema),
     mode: "all",
@@ -115,7 +114,7 @@ function Sidebar() {
       categoryName: "",
     },
   });
-
+  const navigate = useNavigate();
   const editDirectoryForm = useForm({
     resolver: zodResolver(formSchema),
     mode: "all",
@@ -139,18 +138,21 @@ function Sidebar() {
         }
       )
       .then((response) => {
-        if (response.status === 200) {
-          setOptions(
-            options.map((option) =>
-              option.value === selectedCategory.value
-                ? selectedCategory
-                : option
-            )
-          );
-          setSelectedCategory({});
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-        }
+        const opt = options.find(
+          (option) => option.value === selectedCategory.value
+        ).name;
+        setOptions(
+          options.map((option) =>
+            option.value === selectedCategory.value
+              ? {
+                  value: selectedCategory.value,
+                  label: selectedCategory.name,
+                  color: selectedCategory.color,
+                }
+              : option
+          )
+        );
+        setSelectedCategory({});
       })
       .catch((error) => {
         setErrorMessage(error.response.data.message);
@@ -183,6 +185,11 @@ function Sidebar() {
         setErrorMessage(error.response.data.message);
       });
   };
+  const handleScanNoteRedirect = () => {
+    navigate(`/scan-note/`, {
+      state: { folderId: newNoteFolderId, title: newNoteHeader },
+    });
+  };
 
   useEffect(() => {
     if (Cookies.get("authToken")) {
@@ -193,7 +200,7 @@ function Sidebar() {
           },
         })
         .then((response) => {
-          setUserFolders(response.data);
+          setUserFolders(response.data.items);
         })
         .catch((error) => {
           console.log(error);
@@ -201,6 +208,9 @@ function Sidebar() {
 
       api
         .get(`http://localhost:8051/api/user/note/lastEdited`, {
+          params: {
+            amount: 3
+          },
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
@@ -208,27 +218,6 @@ function Sidebar() {
         .then((response) => {
           if (response.status === 200) {
             setLastNotes(response.data);
-          } else if (response.status === 500) {
-            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-          }
-        });
-
-      api
-        .get(`http://localhost:8051/api/noteCategories`, {
-          headers: {
-            Authorization: `Bearer ${Cookies.get("authToken")}`,
-          },
-        })
-        .then((response) => {
-          if (response.status === 200) {
-            setOptions(
-              response.data.map((category) => ({
-                value: category.id,
-                name: category.name,
-                color: category.hexColor,
-              }))
-            );
-            console.log(response.data);
           } else if (response.status === 500) {
             setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
           }
@@ -253,7 +242,6 @@ function Sidebar() {
     },
   ]);
 
-  const [userFolders, setUserFolders] = useState([]);
   const [addNewNoteDialogOpen, setAddNewNoteDialogOpen] = useState(false);
   const [editCategoryDialogOpen, setEditCategoryDialogOpen] = useState(false);
   const [newNoteHeader, setNewNoteHeader] = useState("");
@@ -284,8 +272,19 @@ function Sidebar() {
         }
       )
       .then((response) => {
+        api.put(
+          `http://localhost:8051/api/user/folder/${response.data}/unlock`,
+          {
+            password: "",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        );
         folders.push({
-          folderId: response.data,
+          id: response.data,
           name: name,
           notesCount: 0,
           notes: [],
@@ -294,16 +293,27 @@ function Sidebar() {
         setNewFolderName("");
         setUserFolders(folders);
       })
-      .catch((error) => {
-        console.log(error);
-      });
   };
 
   const editFolderIcon = (folderId, icon) => {
-    const folders = [...userFolders];
-    const folder = folders.find((folder) => folder.id === folderId);
-    folder.iconPath = icon;
-    setUserFolders(folders);
+    api
+      .put(
+        `http://localhost:8051/api/user/folder/${folderId}/update`,
+        {
+          iconPath: icon,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        }
+      )
+      .then(() => {
+        const folders = [...userFolders];
+        const folder = folders.find((folder) => folder.id === folderId);
+        folder.iconPath = icon;
+        setUserFolders(folders);
+      });
   };
 
   const handleNewNoteHeader = (e) => {
@@ -313,97 +323,40 @@ function Sidebar() {
     }
   };
 
-  const handleNewNote = () => {
-    if (newNoteHeader.trim() !== "") {
-      const folderId = newNoteFolderId;
-      const folders = [...userFolders];
-      const foundFolder = folders.find((f) => f.id === folderId);
-      foundFolder.notes.push({
-        id: foundFolder.notes.length + 1,
-        name: newNoteHeader,
-        url: `/notes/${foundFolder.notes.length + 1}`,
-      });
-      foundFolder.notesCount = foundFolder.notes.length;
-
-      api
-        .post(
-          "http://localhost:8051/api/user/note",
-          {
-            folderId: folderId,
-            name: newNoteHeader,
-            content: newNoteContent,
-            categoriesIds: [1],
-            noteFileId: 1,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${Cookies.get("authToken")}`,
-            },
-          }
-        )
-        .then(() => {
-          setUserFolders(folders);
-          setNewNoteContent("");
-          setNewNoteHeader("");
-        })
-        .catch((error) => {
-          console.log(error);
-          setUserFolders(folders);
-          setNewNoteContent("");
-          setNewNoteHeader("");
-        });
-    }
-  };
-
-  const handleNoteContent = (e) => {
-    if (e.currentTarget.innerText.trim() === "") {
-      setNewNoteContent("");
-      setPlaceholderVisible(true);
-    } else {
-      setNewNoteContent(e.currentTarget.innerText.trim());
-    }
-  };
-
-  const handleContentEdit = () => {
-    setPlaceholderVisible(false);
-  };
 
   const handleColorChange = (color) => {
     setSelectedCategory({ ...selectedCategory, color: color.hex });
   };
 
   const handleRemoveCategory = (category) => {
-    const newOptions = options.filter((option) => option.value !== category);
-    setOptions(newOptions);
+    api
+      .delete(`http://localhost:8051/api/noteCategories/${category.value}`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        const newOptions = options.filter(
+          (option) => option.value !== category.value
+        );
+        setOptions(newOptions);
+        toast.success(`Usunięto kategorię ${category.label}`);
+      });
   };
 
   const handleRemoveDirectory = async (directory) => {
     await api
-      .put(
-        `http://localhost:8051/api/user/folder/${directory.id}/unlock`,
-        {
-          password: "",
+      .delete(`http://localhost:8051/api/user/folder/${directory.id}`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${Cookies.get("authToken")}`,
-          },
-        }
-      )
-      .then(async (response) => {
-        await api
-          .delete(`http://localhost:8051/api/user/folder/${directory.id}`, {
-            headers: {
-              Authorization: `Bearer ${Cookies.get("authToken")}`,
-            },
-          })
-          .then((response) => {
-            const newDirectories = userFolders.filter(
-              (dir) => dir.id !== directory.id
-            );
-            setUserFolders(newDirectories);
-            toast.success(`Usunięto folder ${directory.name}`);
-          });
+      })
+      .then((response) => {
+        const newDirectories = userFolders.filter(
+          (dir) => dir.id !== directory.id
+        );
+        setUserFolders(newDirectories);
+        toast.success(`Usunięto folder ${directory.name}`);
       });
   };
 
@@ -420,19 +373,25 @@ function Sidebar() {
               >
                 <img src="/note.png" alt="" />
                 <a
-                  href={note.url}
+                  href={`/notes/${note.id}`}
                   className="text-ellipsis overflow-hidden whitespace-nowrap"
                 >
                   {note.name}
                 </a>
               </div>
             ))}
+
+            {lastNotes.length === 0 && (
+                      <Fragment className="ml-4">
+                        <p className="ml-16 text-gray-400">Edytuj swój pierwszy dokument!</p>
+                      </Fragment>
+                )}
           </div>
           <div className="user-notes-container mt-24">
             <div className="user-notes-header flex flex-row pl-16 items-center justify-between mr-2">
               <h2 className="font-bold text-xl">Kategorie notatek</h2>
             </div>
-            <div className="user-notes">
+            <div className="user-notes mt-8 max-h-[350px] overflow-y-scroll">
               {options.map((option) => (
                 <Fragment key={option.value}>
                   <div className="folder pl-10 mt-2 flex flex-row py-1.5 mx-4 items-center">
@@ -440,7 +399,7 @@ function Sidebar() {
                       className={`rounded-full h-[12px] w-[12px] mr-[16px]`}
                       style={{ backgroundColor: `${option.color}` }}
                     />
-                    <p className="folder__title mr-4">{option.name}</p>
+                    <p className="folder__title mr-4">{option.label}</p>
                     <DropdownMenu>
                       <DropdownMenuTrigger>
                         <button className="p-2 hover:bg-neutral-200 mr-1">
@@ -470,7 +429,7 @@ function Sidebar() {
                               setSelectedCategory(option);
                               editCategoryForm.setValue(
                                 "categoryName",
-                                option.name
+                                option.label
                               );
                             }}
                           >
@@ -480,7 +439,7 @@ function Sidebar() {
                         <DropdownMenuItem>
                           <button
                             onClick={() => {
-                              handleRemoveCategory(option.value);
+                              handleRemoveCategory(option);
                             }}
                           >
                             Usuń kategorię
@@ -491,6 +450,11 @@ function Sidebar() {
                   </div>
                 </Fragment>
               ))}
+              {options.length === 0 && (
+                      <Fragment className="ml-4">
+                        <p className="ml-16 text-gray-400">Dodaj swoją pierwszą kategorię w notatce!</p>
+                      </Fragment>
+                )}
               <Dialog
                 open={editCategoryDialogOpen}
                 onOpenChange={() => {
@@ -585,6 +549,17 @@ function Sidebar() {
                           editCategoryDialogOpen
                         ) {
                           handleCategoriesUpdate();
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          setEditCategoryDialogOpen(!editCategoryDialogOpen);
+                          if (
+                            !editCategoryForm.formState.errors.categoryName &&
+                            editCategoryDialogOpen
+                          ) {
+                            handleCategoriesUpdate();
+                          }
                         }
                       }}
                     >
@@ -736,11 +711,11 @@ function Sidebar() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <div className="user-notes">
+            <div className="user-notes max-h-[512px] overflow-y-scroll">
               {userFolders.map((folder) => (
                 <Fragment key={folder.id}>
                   <Collapsible>
-                    <div className="folder pl-10 mt-2 flex flex-row hover:bg-slate-200 py-1.5 mx-4 items-center">
+                    <div className="folder pl-4 mt-2 grid grid-cols-[20px_64px_110px_64px_48px_32px] hover:bg-slate-200 py-1.5 mx-4 items-center">
                       <CollapsibleTrigger>
                         <button
                           className="p-2 hover:bg-neutral-300 rounded-md"
@@ -789,7 +764,9 @@ function Sidebar() {
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
-                      <p className="folder__title mr-4">{folder.name}</p>
+                      <p className="folder__title mr-4 text-elipsis">
+                        {folder.name}
+                      </p>
                       <FolderHint className="mr-24 text-sm">
                         {folder.notes.length}
                       </FolderHint>
@@ -856,7 +833,7 @@ function Sidebar() {
                           return (
                             <NavLink
                               key={note.id}
-                              to={note.url}
+                              to={`/notes/${note.id}`}
                               state={{
                                 folderName: folder.name,
                               }}
@@ -894,8 +871,16 @@ function Sidebar() {
                   </Collapsible>
                 </Fragment>
               ))}
+              {userFolders.length === 0 && (
+                      <Fragment className="ml-4">
+                        <p className="ml-16 mt-2 text-gray-400">Dodaj swój pierwszy folder!</p>
+                      </Fragment>
+                )}
               <Dialog
                 open={addNewNoteDialogOpen}
+                onOpenChange={() => {
+                  setNewNoteHeader("");
+                }}
                 modal
                 defaultOpen={addNewNoteDialogOpen}
               >
@@ -903,7 +888,7 @@ function Sidebar() {
                   className="bg-white p-8 max-w-[1560px] min-h-[768px]"
                   onInteractOutside={() => {
                     setAddNewNoteDialogOpen(false);
-                    handleNewNote();
+                    setNewNoteHeader("");
                   }}
                 >
                   <DialogHeader>
@@ -921,36 +906,15 @@ function Sidebar() {
                             {newNoteHeader}
                           </NoteHeader>
 
-                          <div
-                            className="notebody__content focus:outline-none mt-8 mr-16"
-                            contentEditable="true"
-                            suppressContentEditableWarning={true}
-                            onBlur={handleNoteContent}
-                          >
-                            {newNoteContent.trim().length === 0 &&
-                            placeholderVisible ? (
-                              <div
-                                className="flex flex-col gap-y-4"
-                                contentEditable="false"
-                                onClick={handleContentEdit}
-                              >
-                                <p className="text-sm font-bold text-slate-700 select-none">
-                                  Zacznij pisać lub
-                                </p>
-                                <span className="flex flex-row gap-4">
-                                  <img src="http://localhost:5173/scanicon.png" />
-                                  <a
-                                    className="font-bold text-sm text-slate-700"
-                                    href="/scan-note"
-                                  >
-                                    Zeskanuj zdjęcie
-                                  </a>
-                                </span>
-                              </div>
-                            ) : (
-                              newNoteContent
-                            )}
-                          </div>
+                          <span className="flex flex-row gap-4 mt-8">
+                            <img src="http://localhost:5173/scanicon.png" />
+                            <button
+                              className="font-bold text-sm text-slate-700"
+                              onClick={handleScanNoteRedirect}
+                            >
+                              Zeskanuj zdjęcie
+                            </button>
+                          </span>
                         </div>
                       </NoteBody>
                     </DialogDescription>

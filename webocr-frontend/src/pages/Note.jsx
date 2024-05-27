@@ -141,8 +141,7 @@ function Note() {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [exportType, setExportType] = useState("pdf");
   const [currentNote, setCurrentNote] = useState({
-    noteId: 1,
-    title: "Testowy",
+    title: "",
     content: "",
     isPrivate: false,
   });
@@ -151,12 +150,10 @@ function Note() {
   const [errorMessage, setErrorMessage] = useState("");
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   const [options, setOptions] = useState([
-    { value: "przyroda", label: "Notatki", color: "#00B8D9" },
-    { value: "matematyka", label: "Matematyka", color: "#0052CC" },
-    { value: "fizyka", label: "Fizyka", color: "#5243AA" },
-    { value: "chemia", label: "Chemia", color: "#FF5630" },
-    { value: "biologia", label: "Biologia", color: "#FF8B00" },
-    { value: "angielski", label: "Język angielski", color: "#FFC400" },
+    
+  ]);
+  const [userFolders, setUserFolders] = useState([
+    
   ]);
 
   const [lastNotes, setLastNotes] = useState([]);
@@ -170,46 +167,58 @@ function Note() {
       };
     },
   };
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedOption, setSelectedOption] = useState([]);
   const [colorSelectOpen, setColorSelectOpen] = useState(false);
 
-  const exportNoteHandler = async () => {
-    await api
-      .post(
-        "http://localhost:8051/api/note/export",
-        {
-          noteId: currentNote.id,
-          exportType: exportType,
+  const exportNoteHandler = () => {
+    api
+      .get(`http://localhost:8051/api/user/note/${noteId}/${exportType}`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${Cookies.get("authToken")}`,
-          },
-        }
-      )
-      .then((response) => {
-        if (response.status === 200) {
-          // todo: co z pobieraniem pliku z serwera?
-          toast({
-            title: "Notatka została wyeksportowana",
-            body: "Plik został zapisany na Twoim komputerze",
-          });
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-        }
+        
       })
-      .catch((error) => {
+      .then((response) => {
         toast({
-          title: "Błąd eksportu notatki",
-          body: "Nie udało się wyeksportować notatki",
+          title: "Notatka została wyeksportowana",
+          body: "Plik został zapisany na Twoim komputerze",
         });
-      });
-    setExportDialogOpen(false);
+        window.open(response.data, "_blank", "rel=noopener noreferrer")
+        setExportDialogOpen(false);
+      })
   };
 
   const handleNoteHeader = (e) => {
     if (e.target.innerText.trim() === "") {
       e.target.innerText = "";
+    }
+    else {
+      currentNote.title = e.target.innerText.trim();
+      api
+        .put(`http://localhost:8051/api/user/note/${currentNote.noteId}/update`, {
+          content: currentNote.content,
+          name: currentNote.title,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        })
+        .then((response) => {
+          toast({
+            title: "Notatka zapisana!",
+          });
+        })
+
+      api
+        .get("http://localhost:8051/api/user/folder", {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        })
+        .then((response) => {
+          setUserFolders(response.data.items);
+        });
     }
   };
 
@@ -220,7 +229,15 @@ function Note() {
     } else {
       currentNote.content = e.target.innerText.trim();
       api
-        .put(`/api/user/note/${currentNote.noteId}`, currentNote)
+        .put(`http://localhost:8051/api/user/note/${currentNote.noteId}/update`, {
+          content: currentNote.content,
+          name: currentNote.title,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        })
         .then((response) => {
           toast({
             title: "Notatka zapisana!",
@@ -235,13 +252,19 @@ function Note() {
   const [shareType, setShareType] = useState("only-user");
 
   const handleShareTypeChange = (value) => {
-    if (value === "all-users" && currentNote.isPrivate) {
-      api
-        .put(
-          `http://localhost:8051/api/user/note/${currentNote.noteId}/update`,
+    if (value === "no-share") {
+      api.get(`http://localhost:8051/api/shared/note/${currentNote.noteId}`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.data.length !== 0) {
+          api
+        .delete(
+          `http://localhost:8051/api/shared/note`,
           {
-            name: currentNote.title,
-            isPrivate: false,
+            objectId: currentNote.noteId,
           },
           {
             headers: {
@@ -250,19 +273,22 @@ function Note() {
           }
         )
         .then((response) => {
-          if (response.status === 200) {
-            currentNote.isPrivate = false;
-          } else if (response.status === 500) {
-            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-          }
-        });
-    } else if (value === "only-user" && !currentNote.isPrivate) {
+          toast({
+            title: "Notatka nie jest już udostępniana!",
+          });
+          setShareDialogOpen(false);
+        })
+        }
+      });      
+    }
+    else if (value === "all-users") {
       api
-        .put(
-          `http://localhost:8051/api/user/note/${currentNote.noteId}/update`,
+        .post(
+          `http://localhost:8051/api/shared/note`,
           {
-            name: currentNote.title,
-            isPrivate: true,
+            objectId: currentNote.noteId,
+            shareMode: 1,
+            email: null,
           },
           {
             headers: {
@@ -271,12 +297,11 @@ function Note() {
           }
         )
         .then((response) => {
-          if (response.status === 200) {
-            currentNote.isPrivate = true;
-          } else if (response.status === 500) {
-            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-          }
-        });
+          toast({
+            title: "Notatka została udostępniona",
+            body: "Notatka jest dostępna dla wszystkich użytkowników",
+          });
+        })
     }
     setShareType(value);
   };
@@ -306,11 +331,13 @@ function Note() {
   };
 
   const handleCreateCategory = (inputValue) => {
+    const color = chroma.random().hex();
     api
       .post(
         `http://localhost:8051/api/noteCategories`,
         {
           name: inputValue,
+          hexColor: color,
         },
         {
           headers: {
@@ -321,13 +348,13 @@ function Note() {
       .then((response) => {
         if (response.status === 201) {
           const newOptions = [...options];
-          newOptions.push({ value: response.data, label: inputValue });
+          newOptions.push({ value: response.data, label: inputValue, color: color});
           setOptions(newOptions);
           const newSelectedOptions = [...selectedOption];
           newSelectedOptions.push({
             value: response.data,
             label: inputValue,
-            color: "#FF8B00",
+            color: color,
           });
           setSelectedOption(newSelectedOptions);
         } else if (response.status === 500) {
@@ -341,7 +368,28 @@ function Note() {
   };
 
   const handleShareSubmit = (values) => {
-    if (values.email) {
+    if (shareType === "no-share") {
+      api
+        .delete(
+          `http://localhost:8051/api/shared/note`,
+          {
+            objectId: currentNote.noteId,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
+        .then((response) => {
+          toast({
+            title: "Notatka nie jest udostępniana",
+          });
+          setShareDialogOpen(false);
+        })
+    }
+    
+    if (shareType === "only-user" && values.email) {
       api
         .post(
           `http://localhost:8051/api/shared/note`,
@@ -357,56 +405,102 @@ function Note() {
           }
         )
         .then((response) => {
-          if (response.status === 200) {
-            toast({
-              title: "Notatka została udostępniona",
-              body: "Notatka jest dostępna dla innych użytkowników",
-            });
-            setShareDialogOpen(false);
-          } else if (response.status === 500) {
-            toast({
-              title: "Błąd serwera",
-            });
-          }
+          toast({
+            title: "Notatka została udostępniona",
+            body: "Notatka jest dostępna dla innych użytkowników",
+          });
+          setShareDialogOpen(false);
         }).catch(error => {
-          console.log(error);
           if (error.response.data === "That user doesn't exist.") {
             form.setError("email", {
               type: "custom",
               message: "Użytkownik o podanym adresie e-mail nie istnieje."
             });
           }
+          else if (error.response.data === "Cannot share resource to yourself.") {
+            form.setError("email", {
+              type: "custom",
+              message: "Nie możesz udostępnić notatki samemu sobie!"
+            });
+          }
         });
     }
-    else {
-      setShareDialogOpen(false);
+    else if (shareType === "all-users") {
+      api
+        .post(
+          `http://localhost:8051/api/shared/note`,
+          {
+            objectId: currentNote.noteId,
+            shareMode: 1,
+            email: '',
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
+        .then((response) => {
+          toast({
+            title: "Notatka została udostępniona",
+            body: "Notatka jest dostępna dla wszystkich użytkowników",
+          });
+          setShareDialogOpen(false);
+        })
     }
     
   };
   useEffect(() => {
-    api
+    if(noteId) {
+      api
       .get(`http://localhost:8051/api/user/note/${noteId}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
       })
       .then((response) => {
-        if (response.status === 200) {
-          setCurrentNote({
-            noteId: response.data.id,
-            title: response.data.name,
-            content: response.data.content,
-            isPrivate: response.data.isPrivate,
-          });
-          if (currentNote.isPrivate) {
-            setShareType("only-user");
-          } else {
-            setShareType("all-users");
-          }
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        setCurrentNote({
+          noteId: response.data.id,
+          title: response.data.name,
+          content: response.data.content,
+          isPrivate: response.data.isPrivate,
+        });
+        const newCategories = response.data.categories.map((category) => ({
+          value: category.id,
+          label: category.name,
+          color: category.hexColor,
+        }));
+        setSelectedOption(newCategories)
+        if (currentNote.isPrivate) {
+          setShareType("only-user");
+        } else {
+          setShareType("all-users");
         }
       });
+
+      api
+      .get(`http://localhost:8051/api/shared/note/${noteId}`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.data.length === 0) {
+          setShareType("no-share");
+        }
+        else {
+          if (response.data[0].shareToEmail !== "") {
+            setShareType("only-user");
+            form.setValue("email", response.data[0].shareToEmail);
+            form.setValue("permissions", response.data[0].mode.toString(), { shouldValidate: true });
+          }
+          else if (response.data[0].shareToEmail === "") {
+            setShareType("all-users");
+          }
+        }
+      });
+    }
+
     api
       .get(`http://localhost:8051/api/noteCategories`, {
         headers: {
@@ -414,26 +508,56 @@ function Note() {
         },
       })
       .then((response) => {
-        if (response.status === 200) {
-          setOptions(
-            response.data.map((category) => ({
-              value: category.id,
-              label: category.name,
-              color: category.hexColor,
-            }))
-          );
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-        }
+        setOptions(
+          response.data.items.map((category) => ({
+            value: category.id,
+            label: category.name,
+            color: category.hexColor,
+          }))
+        );
       });
-  }, []);
+
+      api
+        .get("http://localhost:8051/api/user/folder", {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        })
+        .then((response) => {
+          setUserFolders(response.data.items);
+        });
+  }, [noteId]);
+
+  const handleCategorySelect = (option) => {
+    setSelectedOption(option);
+    const categoriesIds = option.map((c) => c.value);
+    api
+        .put(
+          `http://localhost:8051/api/user/note/${currentNote.noteId}/categories`,
+          {
+            categoriesIds: categoriesIds,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            currentNote.isPrivate = false;
+          } else if (response.status === 500) {
+            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+          }
+        });
+  }
 
   return (
     <>
       <Navbar></Navbar>
       <Toaster />
       <main className="grid grid-cols-[385px_1fr]">
-        <Sidebar></Sidebar>
+        <Sidebar options={options} setOptions={setOptions} userFolders={userFolders} setUserFolders={setUserFolders}></Sidebar>
         <NoteBody className="pl-16 pt-8">
           {currentNote.title && noteId ? (
             <Fragment>
@@ -524,13 +648,61 @@ function Note() {
                             Zdecyduj, czy Twoja notatka ma być widoczna dla
                             innych.
                           </p>
+                          <p className="font-bold text-sm mt-4 mb-2">
+                                Rodzaj udostępnienia
+                              </p>
+                              <Select
+                                onValueChange={(value) =>
+                                  handleShareTypeChange(value)
+                                }
+                                defaultValue={shareType}
+                              >
+                                <SelectTrigger className="w-[320px] py-6 border-slate-400 mt-2">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white">
+                                <SelectItem
+                                    className="bg-white focus:bg-slate-200"
+                                    value="no-share"
+                                  >
+                                    <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
+                                      <img src="/x-circle.svg" alt="" />
+                                      <p className="font-bold">
+                                        Bez udostępnienia
+                                      </p>
+                                    </SelectWithIcon>
+                                  </SelectItem>
+                                  <SelectItem
+                                    className="bg-white focus:bg-slate-200"
+                                    value="only-user"
+                                  >
+                                    <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
+                                      <img src="/lock.svg" alt="" />
+                                      <p className="font-bold">
+                                        Dostęp ograniczony
+                                      </p>
+                                    </SelectWithIcon>
+                                  </SelectItem>
+                                  <SelectItem
+                                    className="bg-white focus:bg-slate-200"
+                                    value="all-users"
+                                  >
+                                    <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
+                                      <img src="/globe.svg" alt="" />
+                                      <p className="font-bold">
+                                        Dostęp dla każdego
+                                      </p>
+                                    </SelectWithIcon>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                          {shareType === "only-user" && (
                           <Form {...form}>
                             <form
                               onSubmit={form.handleSubmit(handleShareSubmit)}
-                              className="mb-4"
+                              className="mt-6"
                             >
-                              <p className="font-bold text-red-700 mb-4 mt-6"></p>
-                              {shareType === "only-user" && (
+                              
                                 <div className="text-inputs grid grid-cols-2 gap-4">
                                   <div className="input-container">
                                     <p className="font-bold text-sm mb-2">
@@ -594,66 +766,18 @@ function Note() {
                                     />
                                   </div>
                                 </div>
-                              )}
-                              <p className="font-bold text-sm mt-4 mb-2">
-                                Rodzaj udostępnienia
-                              </p>
-                              <Select
-                                onValueChange={(value) =>
-                                  handleShareTypeChange(value)
-                                }
-                                defaultValue={shareType}
-                              >
-                                <SelectTrigger className="w-[320px] py-6 border-slate-400 mt-2">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-white">
-                                  <SelectItem
-                                    className="bg-white focus:bg-slate-200"
-                                    value="only-user"
-                                  >
-                                    <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
-                                      <img src="/lock.svg" alt="" />
-                                      <p className="font-bold">
-                                        Dostęp ograniczony
-                                      </p>
-                                    </SelectWithIcon>
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-white focus:bg-slate-200"
-                                    value="all-users"
-                                  >
-                                    <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
-                                      <img src="/globe.svg" alt="" />
-                                      <p className="font-bold">
-                                        Dostęp dla każdego
-                                      </p>
-                                    </SelectWithIcon>
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-
-                              {shareType === "all-users" && (
-                                <Fragment>
-                                  <p className="font-bold text-sm mt-6">
-                                    Link do notatki
-                                  </p>
-                                  <div className="share-url-container flex flex-row">
-                                    <Input
-                                      type="text"
-                                      value="https://webocr.pl/r194-ret-testowa"
-                                      className="mt-2 py-6 w-[300px] border-slate-300"
-                                      readonly="true"
-                                    />
-                                  </div>
-                                </Fragment>
-                              )}
-
+                              
                               <DialogButton type="submit">
                                 Udostępnij
                               </DialogButton>
-                            </form>
+                              </form>
                           </Form>
+                          )}
+                          {shareType !== "only-user" && (
+                            <DialogButton onClick={handleShareTypeChange}>
+                            Udostępnij
+                            </DialogButton>
+                          )} 
                         </DialogDescription>
                       </DialogHeader>
                     </DialogContent>
@@ -698,13 +822,8 @@ function Note() {
                   <CreatableSelect
                     className="w-2/3 mt-4"
                     isMulti
-                    closeMenuOnSelect={false}
-                    defaultMenuIsOpen={true}
-                    menuIsOpen={colorSelectOpen}
-                    onMenuOpen={() => setColorSelectOpen(true)}
-                    blurInputOnSelect={false}
                     defaultValue={selectedOption}
-                    onChange={setSelectedOption}
+                    onChange={(e) => handleCategorySelect(e)}
                     options={options}
                     noOptionsMessage={() => "Brak dostępnych kategorii"}
                     formatCreateLabel={(inputValue) =>

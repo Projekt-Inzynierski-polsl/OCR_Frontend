@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { useEffect, useRef, useState } from "react";
 import { Annotorious } from "@recogito/annotorious";
 import '../common/AnnoMod.css'
-
+import api from "../APIService.js";
+import Cookies from "js-cookie";
 import "@recogito/annotorious/dist/annotorious.min.css";
 
 const FirstNoteHero = styled.div`
@@ -31,14 +32,11 @@ function CheckOutput() {
   const imgEl = useRef();
   const navigate = useNavigate();
   const {state} = useLocation();
-  const { output } = []; //state
-  const [textBoxes, setTextBoxes] = useState([
-    {
-      id: "#203170be-17d2-4aea-af37-e386bd13e521",
-      content: "text",
-    },
-  ]);
+  const { output, image, fileId, folderId, title } = state;
+  const [textBoxes, setTextBoxes] = useState([]);
+  
   const [anno, setAnno] = useState();
+
   useEffect(() => {
     let annotorious = null;
 
@@ -66,41 +64,100 @@ function CheckOutput() {
         });
         setSelectedBoxId("");
       });
-
-      // todo: write endpoint call to get annotations
-
-      annotorious.addAnnotation({
-        "@context": "http://www.w3.org/ns/anno.jsonld",
-        type: "Annotation",
-        body: [],
-        target: {
-          source: "http://localhost:5173/boxtest.png",
-          selector: {
-            type: "FragmentSelector",
-            conformsTo: "http://www.w3.org/TR/media-frags/",
-            value: "xywh=pixel:50,50,800,150",
-          },
-        },
-        id: "#203170be-17d2-4aea-af37-e386bd13e521",
+      const txtBoxes = [...textBoxes];
+      output.boundingBoxes.forEach((box) => {
+        box.lines.forEach((line) => {
+          let val = "xywh=pixel:";
+          let lx = box.leftX + line.leftX;
+          let ly = box.leftY + line.leftY;
+          let rx = box.leftX + line.rightX;
+          let ry = box.leftY + line.rightY;
+          let w = rx-lx;
+          let h = ry-ly;
+          let lineId = Math.floor(Math.random() * 15000);
+          val += lx + "," + ly + "," + w + "," + h
+          annotorious.addAnnotation({
+            "@context": "http://www.w3.org/ns/anno.jsonld",
+            type: "Annotation",
+            body: [],
+            target: {
+              source: "http://localhost:5173/boxtest.png",
+              selector: {
+                type: "FragmentSelector",
+                conformsTo: "http://www.w3.org/TR/media-frags/",
+                value: val,
+              },
+            },
+            id: lineId,
+          });
+          
+          txtBoxes.push({
+            id: lineId,
+            content: line.content,
+          })
+          
+        });
       });
+      setTextBoxes(txtBoxes.reverse());
     }
+    handleImage();
     setAnno(annotorious);
     return () => annotorious.destroy();
   }, []);
 
   const handleEdit = (textBoxId, content) => {
-    // todo: write endpoint call to create scan error
-
     const txtBoxes = [...textBoxes];
     const txtBox = txtBoxes.find((box) => box.id === textBoxId);
-    txtBox.content = content;
-    setTextBoxes(txtBoxes);
+    const coords = anno.getAnnotationById(txtBox.id).target.selector.value.replace("xywh=pixel:", "").split(",");
+
+    api
+      .post(`http://localhost:8051/api/ocrError`, {
+        fileId: fileId,
+        wrongContent: txtBox.content,
+        correctContent: content,
+        leftX: parseInt(coords[0]),
+        leftY: parseInt(coords[1]),
+        rightX: parseInt(coords[0]) + parseInt(coords[2]),
+        rightY: parseInt(coords[1]) + parseInt(coords[3]),
+      }, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        txtBox.content = content;
+        setTextBoxes(txtBoxes);
+      });
   }
 
   const handleNextStep = () => {
-    // todo: send new note content and load note
-    navigate(`/notes/`, { state: { noteId: 1 } });
+    let content = textBoxes.map((box) => box.content).join(" ");
+    api
+      .post(`http://localhost:8051/api/user/note`, {
+        folderId: folderId,
+        noteFileId: fileId,
+        name: title,
+        content: content,
+        isPrivate: true,
+        categoriesIds: [],  
+      }, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        navigate(`/notes/${response.data}`, { state: { noteId: response.data } });
+      });
+    
   }
+
+  const [img, setImg] = useState(null);
+
+  const handleImage = () => {
+    const selected = image;
+    const imgUrl = URL.createObjectURL(selected);
+    setImg(imgUrl);
+  };
 
   return (
     <>
@@ -118,7 +175,7 @@ function CheckOutput() {
           </p>
         </FirstNoteHero>
         <div className="bound-container border border-[#D1D5DB] mt-8 flex flex-row w-[90%]">
-          <img src="boxtest.png" alt="Example" ref={imgEl} />
+          <img src={img} ref={imgEl} />
           <div className="border border-[#D1D5DB] p-8 w-1/2">
             {textBoxes.map((textBox) => (
               <div className="text">

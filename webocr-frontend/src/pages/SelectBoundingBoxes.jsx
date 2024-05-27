@@ -23,14 +23,15 @@ const NextButton = styled.button`
   border-radius: 16px;
 `;
 import { useNavigate, useLocation } from "react-router-dom";
-
+import api from "../APIService.js";
+import Cookies from "js-cookie";
 function SelectBoundingBoxes() {
   const [selectedTab, setSelectedTab] = useState("notatka");
   const imgEl = useRef();
   const [loaderActive, setLoaderActive] = useState(false);
   const [anno, setAnno] = useState();
   const { state } = useLocation();
-  const { noteId, image } = state;
+  const { folderId, title, image, data } = state;
   const navigate = useNavigate();
 
   const formatter = (annotation) => {
@@ -59,13 +60,37 @@ function SelectBoundingBoxes() {
   }, []);
 
   const handleContinue = () => {
+    const bboxData = []
+    const bboxObj = {
+      "boundingBoxes": bboxData
+    }
     anno.getAnnotations().forEach((bbox) => {
-      console.log(bbox.target.selector.value);
-      console.log(bbox.annoType);
+      const value = bbox.target.selector.value.replace("xywh=pixel:", "").split(",");
+      bboxData.push({
+        coords: {
+          x1: parseInt(value[0]),
+          y1: parseInt(value[1]),
+          x2: parseInt(value[0]) + parseInt(value[2]),
+          y2: parseInt(value[1]) + parseInt(value[3]),
+        }
+      })
     });
+    bboxObj.boundingBoxes = bboxData;
+    data.append("boundingBoxes", JSON.stringify(bboxObj))
     setLoaderActive(true);
-    // get output from API
-    navigate("/check-output", { state: { output: [] } })
+    api
+      .post(`http://localhost:8051/api/noteFile`, data, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        navigate("/check-output", { state: { output: response.data, image: image, fileId: response.data.id, folderId: folderId, title: title} })
+      })
+      .catch((error) => {
+        setLoaderActive(false);
+      });
+      
   };
 
   const handleTabChange = (value) => {
@@ -105,9 +130,7 @@ function SelectBoundingBoxes() {
     const selected = image;
     const imgUrl = URL.createObjectURL(selected);
     setImg(imgUrl);
-  }
-
-  
+  };
 
   return (
     <>
@@ -129,7 +152,7 @@ function SelectBoundingBoxes() {
               </p>
             </FirstNoteHero>
             <div className="bound-container border border-[#D1D5DB] w-60% mt-8">
-              <img src={img} alt="Example" ref={imgEl} />
+              <img src={img} ref={imgEl} />
               <Tabs
                 className="float-right mx-8 mt-2"
                 value={selectedTab}

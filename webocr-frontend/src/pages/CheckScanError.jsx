@@ -13,29 +13,31 @@ import { useEffect, useState } from "react";
 import api from "../APIService.js";
 import Cookies from "js-cookie";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 function CheckScanError() {
   const {errorId} = useParams();
   const [ocrError, setOcrError] = useState({});
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleErrorCheck = (action) => {
     api
-      .post(`http://localhost:8051/api/ocrError`, {
-        action: action,
-        errorId: errorId,
+      .put(`http://localhost:8051/api/ocrError/${errorId}`, {
+        isAccepted: true,
       }, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
       })
       .then((response) => {
-        if (response.status === 200) {
-            window.location.href = "/errors";
-        }
+        toast({
+          title: "Poprawka zaakceptowana!",
+          body: "Sprawdź też inne błędy.",
+        });
+        navigate("/errors")
       })
-      .catch((error) => {
-        console.error(error);
-      });
   };
 
   useEffect(() => {
@@ -47,10 +49,8 @@ function CheckScanError() {
         })
         .then((response) => {
           setOcrError(response.data);
+          
         })
-        .catch((error) => {
-          console.log(error);
-        });
   }, [errorId]);
 
   return (
@@ -58,7 +58,7 @@ function CheckScanError() {
       <Navbar></Navbar>
       <main className="grid grid-cols-[385px_1fr]">
         <Sidebar></Sidebar>
-        <MainLayout>
+        <MainLayout className="h-screen">
           <h1 className="font-bold text-3xl ml-40 mt-8">Błąd #{errorId}</h1>
           <div className="dashboard-info flex flex-row items-top gap-4 mt-8 mx-32">
             <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-4/5">
@@ -85,12 +85,6 @@ function CheckScanError() {
                     onClick={() => handleErrorCheck("accept")}
                   >
                     Zaakceptuj poprawkę
-                  </button>
-                  <button
-                    className="border border-[#760B0D] text-[#760B0D] text-center font-bold rounded-[10px] py-3"
-                    onClick={() => handleErrorCheck("reject")}
-                  >
-                    Odrzuć poprawkę
                   </button>
                 </div>
               </CardContent>

@@ -4,18 +4,34 @@ import styled from "styled-components";
 const HeroHeader = styled.h1`
   font-family: "Space Grotesk";
 `;
-
+import api from "../APIService.js";
 const HomeNavbar = styled.header`
   background-color: #00844e;
   color: #e9f7ee;
 `;
 import Cookies from "js-cookie";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect, useState } from "react";
 
+import { useNavigate, useLocation } from 'react-router-dom'
 function Home() {
+  const navigate = useNavigate();
   const handleLogout = () => {
     Cookies.remove("authToken", { path: "/" });
+    navigate('/')
   };
+  const [userData, setUserData] = useState({});
+  useEffect(() => {
+    api
+      .get("http://localhost:8051/api/user/logged", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        setUserData(response.data);
+      })
+  }, []);
 
   return (
     <>
@@ -25,8 +41,8 @@ function Home() {
           {Cookies.get("authToken") ? (
             <div className="user-container flex flex-row items-center">
               <div className="user ml-4">
-                <p className="user text-lg">Test</p>
-                <p className="email text-sm">test@gmail.com</p>
+                <p className="user text-lg">{userData.nickname}</p>
+                <p className="email text-sm">{userData.email}</p>
               </div>
               <button
                 className="flex flex-row items-center ml-10 gap-2"
@@ -198,10 +214,7 @@ function Home() {
             sprawdź, co mówią nasi użytkownicy!
           </h2>
           <p className="text-right max-w-4xl float-right mt-4 mr-64">
-            uwaga. nasi użytkownicy nie istnieją, bo to projekt inżynierski i
-            nikt z tego nie będzie korzystać. twarze wygenerowane są z użyciem
-            Pravatar, który zapewnia je na licencji CC0. opinie wygenerowałem
-            Gemini i git. (wypełniacz tekstu, oficjalnie będzie coś innego)
+            
           </p>
           <div className="opinions-container mt-40 mx-64 grid grid-cols-3 gap-8 items-center">
             <div className="opinion py-10 px-8 flex flex-col justify-between gap-y-24">
@@ -268,7 +281,7 @@ function Home() {
           <p className="mt-4">projektowany z myślą o Tobie</p>
         </div>
         <p className="text-center pb-4">
-          wykonano w 2024 przez avenq, undefined i zerdzinskiego
+          wykonano w 2024
         </p>
       </footer>
     </>

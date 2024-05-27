@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import api from "../APIService.js";
-
+import { NavLink } from "react-router-dom";
 const Avatar = styled.span`
   padding: 16px;
   font-weight: bold;
@@ -40,7 +40,9 @@ function Navbar() {
   return (
     <>
       <nav className="flex flex-row items-center justify-between pl-32 pr-16 pt-8 pb-8 border border-slate-200">
-        <img src="/logo_black.png" alt="" className="w-32" />
+        <NavLink to="/">
+          <img src="/logo_black.png" alt="" className="w-32" />
+        </NavLink>
         <div className="user-container flex flex-row items-center">
           <div className="user ml-4">
             <p className="user text-lg">{userData.nickname}</p>

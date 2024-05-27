@@ -12,6 +12,15 @@ const formSchema = z.object({
   email: z.string().email({ message: "Niepoprawny adres email" }),
   admin: z.boolean().default(false),
 });
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 import {
   Form,
@@ -74,6 +83,7 @@ const DeleteAccountButton = styled.button`
 
 import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 function EditProfile() {
   const { userId } = useParams();
@@ -84,36 +94,65 @@ function EditProfile() {
       email: "",
     },
   });
-
+  const { toast } = useToast();
   const [adminChecked, setAdminChecked] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [userActions, setUserActions] = useState([]);
   const [currentUser, setCurrentUser] = useState({});
 
   const handleSubmit = (values) => {
-    console.log(values);
+    api
+    .put(`http://localhost:8051/api/user/${userId}`, {
+      email: values.email,
+      nickname: values.nickname,
+      roleId: values.admin ? 1 : 2,
+    }, {
+      headers: {
+        Authorization: `Bearer ${Cookies.get("authToken")}`,
+      },
+    })
+    .then((response) => {
+      setCurrentUser({
+        nickname: values.nickname,
+        email: values.email,
+        roleId: values.admin ? 1 : 2,
+      });
+      toast({
+        title: "Zapisano zmiany!",
+      });
+      form.setValue("nickname", values.nickname);
+      form.setValue("email", values.email);
+      if (values.admin === 1) {
+        form.setValue("admin", true);
+      }
+    })
   };
 
   const actionDictionary = {
     1: "Rejestracja",
     2: "Zalogowano",
     3: "Odświeżenie tokena",
-    4: "Dodano folder",
-    5: "Usunięto folder",
-    6: "Edytowano folder",
-    7: "Dodano notatkę",
-    8: "Usunięto notatkę",
-    9: "Edytowano notatkę",
-    10: "Zmieniono folder notatki",
-    12: "Zgłoszono błąd",
-    13: "Edytowano użytkownika",
-    14: "Wylogowano",
-    15: "Usunięto błąd",
-    16: "Pobrano błędy",
-    17: "Wyczyszczono tabelę błędów",
-    18: "Dodano kategorię",
-    19: "Usunięto kategorię",
-    20: "Zaktualizowano kategorię",
+    4: "Wylogowanie",
+    5: "Stworzono folder",
+    6: "Usunięto folder",
+    7: "Zaktualizowano folder",
+    8: "Zablokowano folder",
+    9: "Odblokowano folder",
+    10: "Stworzono notatkę",
+    12: "Usunięto notatkę",
+    13: "Zaktualizowano notatkę",
+    14: "Zmieniono folder notatki",
+    15: "Zaktualizowano kategorię notatki",
+    16: "Zgłoszono błąd",
+    17: "Zaktualizowano profil",
+    18: "Usunięto użytkownika",
+    19: "Usunięto błąd",
+    20: "Wyczyszczono tabelę błędów",
+    21: "Dodano kategorię",
+    22: "Usunięto kategorię",
+    23: "Zaktualizowano kategorię",
+    24: "Udostępniono notatkę",
+    25: "Udostępniono folder",
   };
 
   const handleUserActions = async (values) => {
@@ -155,23 +194,16 @@ function EditProfile() {
         },
       })
       .then((response) => {
-        if (response.status === 200) {
-          setCurrentUser(response.data);
-          form.setValue("nickname", response.data.nickname);
-          form.setValue("email", response.data.email);
-          if (response.data.roleId === 1) {
-            form.setValue("admin", true);
-          }
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+        setCurrentUser(response.data);
+        form.setValue("nickname", response.data.nickname);
+        form.setValue("email", response.data.email);
+        if (response.data.roleId === 1) {
+          form.setValue("admin", true);
         }
       })
       .catch((error) => {
         setErrorMessage(error.response.data.message);
       });
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 7);
     api
       .get(`http://localhost:8051/api/userLog`, {
         headers: {
@@ -179,21 +211,32 @@ function EditProfile() {
         },
         params: {
           userId: userId,
-          startTimestamp: Math.round(startDate.getTime() / 1000),
-          endTimestamp: Math.round(endDate.getTime() / 1000),
         },
       })
       .then((response) => {
-        if (response.status === 200) {
-          handleUserActions(response.data);
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-        }
-      })
-      .catch((error) => {
-        setErrorMessage(error.response.data.message);
+        setMaxPage(Math.ceil(response.data.items.length / 10));
       });
+    getPaginatedUserActions();
   }, []);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [maxPage, setMaxPage] = useState(100);
+  const getPaginatedUserActions = () => {
+    api
+      .get(`http://localhost:8051/api/userLog`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+        params: {
+          userId: userId,
+          pageSize: 10,
+          pageNumber: currentPage,
+        },
+      })
+      .then((response) => {
+        handleUserActions(response.data.items);
+      });
+  };
 
   return (
     <>
@@ -263,14 +306,11 @@ function EditProfile() {
                     </div>
                     <p className="text-xl font-bold mt-8">Konto użytkownika</p>
                     <div className="flex flex-row items-center">
-                    <FormField
+                      <FormField
                         control={form.control}
                         name="admin"
-                        
                         render={({ field }) => (
-                          <FormItem
-                          className="flex flex-row items-center justify-center space-y-0 gap-4"
-                          >
+                          <FormItem className="flex flex-row items-center justify-center space-y-0 gap-4">
                             <FormControl>
                               <Checkbox
                                 checked={field.value}
@@ -279,7 +319,7 @@ function EditProfile() {
                             </FormControl>
                             <div>
                               <FormLabel>
-                              Ma uprawnienia administratora
+                                Ma uprawnienia administratora
                               </FormLabel>
                               <FormMessage />
                             </div>
@@ -369,6 +409,40 @@ function EditProfile() {
                     )}
                   </TableBody>
                 </Table>
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50 select-none"
+                            : "cursor-pointer select-none"
+                        }
+                        onClick={() => {
+                          if (currentPage > 1) {
+                            setCurrentPage(currentPage - 1);
+                            getPaginatedUserActions();
+                          }
+                        }}
+                      />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext
+                        className={
+                          currentPage === maxPage
+                            ? "pointer-events-none opacity-50 select-none"
+                            : "cursor-pointer select-none"
+                        }
+                        onClick={() => {
+                          if (currentPage < maxPage) {
+                            setCurrentPage(currentPage + 1);
+                            getPaginatedUserActions();
+                          }
+                        }}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </CardContent>
             </Card>
           </div>

@@ -30,24 +30,15 @@ function UploadNoteFile() {
 
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { noteId } = state;
+  const { folderId, title } = state;
 
   const handleClick = () => {
     if (uploadedFiles.length > 0) {
       const formData = new FormData();
       uploadedFiles.forEach((file) => {
-        formData.append("files", file);
+        formData.append("image", file);
       });
-      api
-        .post(`http://localhost:8051/api/note/${noteId}/file`, formData, {
-          headers: {
-            Authorization: `Bearer ${Cookies.get("authToken")}`,
-          },
-        })
-        .then((response) => {
-          // todo: write response
-        });
-      navigate("/select-boxes", { state: { noteId: noteId, image: formData.get("files") } });
+      navigate("/select-boxes", { state: { folderId: folderId, title: title, image: formData.get("image"), data: formData } });
     }
   };
 
