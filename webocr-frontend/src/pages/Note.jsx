@@ -103,6 +103,7 @@ function Note() {
 
   const folderName = location.state?.folderName;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isViewMode, setIsVieWMode] = useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -149,12 +150,8 @@ function Note() {
   const { toast } = useToast();
   const [errorMessage, setErrorMessage] = useState("");
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
-  const [options, setOptions] = useState([
-    
-  ]);
-  const [userFolders, setUserFolders] = useState([
-    
-  ]);
+  const [options, setOptions] = useState([]);
+  const [userFolders, setUserFolders] = useState([]);
 
   const [lastNotes, setLastNotes] = useState([]);
 
@@ -176,39 +173,40 @@ function Note() {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
-        
       })
       .then((response) => {
         toast({
           title: "Notatka została wyeksportowana",
           body: "Plik został zapisany na Twoim komputerze",
         });
-        window.open(response.data, "_blank", "rel=noopener noreferrer")
+        window.open(response.data, "_blank", "rel=noopener noreferrer");
         setExportDialogOpen(false);
-      })
+      });
   };
 
   const handleNoteHeader = (e) => {
     if (e.target.innerText.trim() === "") {
       e.target.innerText = "";
-    }
-    else {
+    } else {
       currentNote.title = e.target.innerText.trim();
       api
-        .put(`http://localhost:8051/api/user/note/${currentNote.noteId}/update`, {
-          content: currentNote.content,
-          name: currentNote.title,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${Cookies.get("authToken")}`,
+        .put(
+          `http://localhost:8051/api/user/note/${currentNote.noteId}/update`,
+          {
+            content: currentNote.content,
+            name: currentNote.title,
           },
-        })
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
         .then((response) => {
           toast({
             title: "Notatka zapisana!",
           });
-        })
+        });
 
       api
         .get("http://localhost:8051/api/user/folder", {
@@ -229,15 +227,18 @@ function Note() {
     } else {
       currentNote.content = e.target.innerText.trim();
       api
-        .put(`http://localhost:8051/api/user/note/${currentNote.noteId}/update`, {
-          content: currentNote.content,
-          name: currentNote.title,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${Cookies.get("authToken")}`,
+        .put(
+          `http://localhost:8051/api/user/note/${currentNote.noteId}/update`,
+          {
+            content: currentNote.content,
+            name: currentNote.title,
           },
-        })
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
         .then((response) => {
           toast({
             title: "Notatka zapisana!",
@@ -253,35 +254,35 @@ function Note() {
 
   const handleShareTypeChange = (value) => {
     if (value === "no-share") {
-      api.get(`http://localhost:8051/api/shared/note/${currentNote.noteId}`, {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("authToken")}`,
-        },
-      })
-      .then((response) => {
-        if (response.data.length !== 0) {
-          api
-        .delete(
-          `http://localhost:8051/api/shared/note`,
-          {
-            objectId: currentNote.noteId,
+      api
+        .get(`http://localhost:8051/api/shared/note/${currentNote.noteId}`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${Cookies.get("authToken")}`,
-            },
-          }
-        )
-        .then((response) => {
-          toast({
-            title: "Notatka nie jest już udostępniana!",
-          });
-          setShareDialogOpen(false);
         })
-        }
-      });      
-    }
-    else if (value === "all-users") {
+        .then((response) => {
+          if (response.data.length !== 0) {
+            api
+              .delete(
+                `http://localhost:8051/api/shared/note`,
+                {
+                  objectId: currentNote.noteId,
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${Cookies.get("authToken")}`,
+                  },
+                }
+              )
+              .then((response) => {
+                toast({
+                  title: "Notatka nie jest już udostępniana!",
+                });
+                setShareDialogOpen(false);
+              });
+          }
+        });
+    } else if (value === "all-users") {
       api
         .post(
           `http://localhost:8051/api/shared/note`,
@@ -301,7 +302,7 @@ function Note() {
             title: "Notatka została udostępniona",
             body: "Notatka jest dostępna dla wszystkich użytkowników",
           });
-        })
+        });
     }
     setShareType(value);
   };
@@ -332,35 +333,41 @@ function Note() {
 
   const handleCreateCategory = (inputValue) => {
     const color = chroma.random().hex();
-    api
-      .post(
-        `http://localhost:8051/api/noteCategories`,
-        {
-          name: inputValue,
-          hexColor: color,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${Cookies.get("authToken")}`,
+    if (!isViewMode) {
+      api
+        .post(
+          `http://localhost:8051/api/noteCategories`,
+          {
+            name: inputValue,
+            hexColor: color,
           },
-        }
-      )
-      .then((response) => {
-        if (response.status === 201) {
-          const newOptions = [...options];
-          newOptions.push({ value: response.data, label: inputValue, color: color});
-          setOptions(newOptions);
-          const newSelectedOptions = [...selectedOption];
-          newSelectedOptions.push({
-            value: response.data,
-            label: inputValue,
-            color: color,
-          });
-          setSelectedOption(newSelectedOptions);
-        } else if (response.status === 500) {
-          setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-        }
-      });
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("authToken")}`,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 201) {
+            const newOptions = [...options];
+            newOptions.push({
+              value: response.data,
+              label: inputValue,
+              color: color,
+            });
+            setOptions(newOptions);
+            const newSelectedOptions = [...selectedOption];
+            newSelectedOptions.push({
+              value: response.data,
+              label: inputValue,
+              color: color,
+            });
+            setSelectedOption(newSelectedOptions);
+          } else if (response.status === 500) {
+            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+          }
+        });
+    }
   };
 
   const handleScanNoteRedirect = () => {
@@ -386,9 +393,9 @@ function Note() {
             title: "Notatka nie jest udostępniana",
           });
           setShareDialogOpen(false);
-        })
+        });
     }
-    
+
     if (shareType === "only-user" && values.email) {
       api
         .post(
@@ -410,29 +417,30 @@ function Note() {
             body: "Notatka jest dostępna dla innych użytkowników",
           });
           setShareDialogOpen(false);
-        }).catch(error => {
+        })
+        .catch((error) => {
           if (error.response.data === "That user doesn't exist.") {
             form.setError("email", {
               type: "custom",
-              message: "Użytkownik o podanym adresie e-mail nie istnieje."
+              message: "Użytkownik o podanym adresie e-mail nie istnieje.",
             });
-          }
-          else if (error.response.data === "Cannot share resource to yourself.") {
+          } else if (
+            error.response.data === "Cannot share resource to yourself."
+          ) {
             form.setError("email", {
               type: "custom",
-              message: "Nie możesz udostępnić notatki samemu sobie!"
+              message: "Nie możesz udostępnić notatki samemu sobie!",
             });
           }
         });
-    }
-    else if (shareType === "all-users") {
+    } else if (shareType === "all-users") {
       api
         .post(
           `http://localhost:8051/api/shared/note`,
           {
             objectId: currentNote.noteId,
             shareMode: 1,
-            email: '',
+            email: "",
           },
           {
             headers: {
@@ -446,59 +454,63 @@ function Note() {
             body: "Notatka jest dostępna dla wszystkich użytkowników",
           });
           setShareDialogOpen(false);
-        })
+        });
     }
-    
   };
   useEffect(() => {
-    if(noteId) {
+    if (noteId) {
       api
-      .get(`http://localhost:8051/api/user/note/${noteId}`, {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("authToken")}`,
-        },
-      })
-      .then((response) => {
-        setCurrentNote({
-          noteId: response.data.id,
-          title: response.data.name,
-          content: response.data.content,
-          isPrivate: response.data.isPrivate,
-        });
-        const newCategories = response.data.categories.map((category) => ({
-          value: category.id,
-          label: category.name,
-          color: category.hexColor,
-        }));
-        setSelectedOption(newCategories)
-        if (currentNote.isPrivate) {
-          setShareType("only-user");
-        } else {
-          setShareType("all-users");
-        }
-      });
-
-      api
-      .get(`http://localhost:8051/api/shared/note/${noteId}`, {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("authToken")}`,
-        },
-      })
-      .then((response) => {
-        if (response.data.length === 0) {
-          setShareType("no-share");
-        }
-        else {
-          if (response.data[0].shareToEmail !== "") {
+        .get(`http://localhost:8051/api/user/note/${noteId}`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        })
+        .then((response) => {
+          setCurrentNote({
+            noteId: response.data.id,
+            title: response.data.name,
+            content: response.data.content,
+            isPrivate: response.data.isPrivate,
+          });
+          const newCategories = response.data.categories.map((category) => ({
+            value: category.id,
+            label: category.name,
+            color: category.hexColor,
+          }));
+          setSelectedOption(newCategories);
+          if (currentNote.isPrivate) {
             setShareType("only-user");
-            form.setValue("email", response.data[0].shareToEmail);
-            form.setValue("permissions", response.data[0].mode.toString(), { shouldValidate: true });
-          }
-          else if (response.data[0].shareToEmail === "") {
+          } else {
             setShareType("all-users");
           }
-        }
-      });
+        });
+
+      api
+        .get(`http://localhost:8051/api/shared/note/${noteId}`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        })
+        .then((response) => {
+          if (response.data.length === 0) {
+            setShareType("no-share");
+          } else {
+            if (response.data[0].shareToEmail !== "") {
+              setShareType("only-user");
+              form.setValue("email", response.data[0].shareToEmail);
+              form.setValue("permissions", response.data[0].mode.toString(), {
+                shouldValidate: true,
+              });
+            } else if (response.data[0].shareToEmail === "") {
+              setShareType("all-users");
+            }
+          }
+        })
+        .catch((error) => {
+          if (error.response.data === "Cannot operate someone else's note.") {
+            setIsVieWMode(true);
+          }
+        });
     }
 
     api
@@ -517,47 +529,50 @@ function Note() {
         );
       });
 
-      api
-        .get("http://localhost:8051/api/user/folder", {
-          headers: {
-            Authorization: `Bearer ${Cookies.get("authToken")}`,
-          },
-        })
-        .then((response) => {
-          setUserFolders(response.data.items);
-        });
+    api
+      .get("http://localhost:8051/api/user/folder", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        setUserFolders(response.data.items);
+      });
   }, [noteId]);
 
   const handleCategorySelect = (option) => {
-    setSelectedOption(option);
+    if(!isViewMode) {
+      setSelectedOption(option);
     const categoriesIds = option.map((c) => c.value);
     api
-        .put(
-          `http://localhost:8051/api/user/note/${currentNote.noteId}/categories`,
-          {
-            categoriesIds: categoriesIds,
+      .put(
+        `http://localhost:8051/api/user/note/${currentNote.noteId}/categories`,
+        {
+          categoriesIds: categoriesIds,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${Cookies.get("authToken")}`,
-            },
-          }
-        )
-        .then((response) => {
-          if (response.status === 200) {
-            currentNote.isPrivate = false;
-          } else if (response.status === 500) {
-            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
-          }
-        });
-  }
+        }
+      )
+      .then((response) => {
+        currentNote.isPrivate = false;
+      });
+    }
+  };
 
   return (
     <>
       <Navbar></Navbar>
       <Toaster />
       <main className="grid grid-cols-[385px_1fr]">
-        <Sidebar options={options} setOptions={setOptions} userFolders={userFolders} setUserFolders={setUserFolders}></Sidebar>
+        <Sidebar
+          options={options}
+          setOptions={setOptions}
+          userFolders={userFolders}
+          setUserFolders={setUserFolders}
+        ></Sidebar>
         <NoteBody className="pl-16 pt-8">
           {currentNote.title && noteId ? (
             <Fragment>
@@ -628,27 +643,29 @@ function Note() {
                     </DialogContent>
                   </Dialog>
 
-                  <Dialog
-                    open={shareDialogOpen}
-                    onOpenChange={setShareDialogOpen}
-                  >
-                    <DialogTrigger asChild>
-                      <button className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 items-center p-2">
-                        <img src="/share.png" alt="" />
-                        Udostępnij
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-white p-8">
-                      <DialogHeader>
-                        <DialogTitle className="text-2xl">
-                          Udostępnij notatkę
-                        </DialogTitle>
-                        <DialogDescription>
-                          <p className="mb-6">
-                            Zdecyduj, czy Twoja notatka ma być widoczna dla
-                            innych.
-                          </p>
-                          <p className="font-bold text-sm mt-4 mb-2">
+                  {!isViewMode && (
+                    <>
+                      <Dialog
+                        open={shareDialogOpen}
+                        onOpenChange={setShareDialogOpen}
+                      >
+                        <DialogTrigger asChild>
+                          <button className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 items-center p-2">
+                            <img src="/share.png" alt="" />
+                            Udostępnij
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-white p-8">
+                          <DialogHeader>
+                            <DialogTitle className="text-2xl">
+                              Udostępnij notatkę
+                            </DialogTitle>
+                            <DialogDescription>
+                              <p className="mb-6">
+                                Zdecyduj, czy Twoja notatka ma być widoczna dla
+                                innych.
+                              </p>
+                              <p className="font-bold text-sm mt-4 mb-2">
                                 Rodzaj udostępnienia
                               </p>
                               <Select
@@ -661,7 +678,7 @@ function Note() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="bg-white">
-                                <SelectItem
+                                  <SelectItem
                                     className="bg-white focus:bg-slate-200"
                                     value="no-share"
                                   >
@@ -696,119 +713,122 @@ function Note() {
                                   </SelectItem>
                                 </SelectContent>
                               </Select>
-                          {shareType === "only-user" && (
-                          <Form {...form}>
-                            <form
-                              onSubmit={form.handleSubmit(handleShareSubmit)}
-                              className="mt-6"
-                            >
-                              
-                                <div className="text-inputs grid grid-cols-2 gap-4">
-                                  <div className="input-container">
-                                    <p className="font-bold text-sm mb-2">
-                                      Adres e-mail
-                                    </p>
-                                    <FormField
-                                      control={form.control}
-                                      name="email"
-                                      render={({ field }) => {
-                                        return (
-                                          <FormItem>
-                                            <FormControl>
-                                              <Input
-                                                type="email"
-                                                className="py-6 border-slate-300"
-                                                {...field}
-                                              />
-                                            </FormControl>
+                              {shareType === "only-user" && (
+                                <Form {...form}>
+                                  <form
+                                    onSubmit={form.handleSubmit(
+                                      handleShareSubmit
+                                    )}
+                                    className="mt-6"
+                                  >
+                                    <div className="text-inputs grid grid-cols-2 gap-4">
+                                      <div className="input-container">
+                                        <p className="font-bold text-sm mb-2">
+                                          Adres e-mail
+                                        </p>
+                                        <FormField
+                                          control={form.control}
+                                          name="email"
+                                          render={({ field }) => {
+                                            return (
+                                              <FormItem>
+                                                <FormControl>
+                                                  <Input
+                                                    type="email"
+                                                    className="py-6 border-slate-300"
+                                                    {...field}
+                                                  />
+                                                </FormControl>
 
-                                            <FormMessage />
-                                          </FormItem>
-                                        );
-                                      }}
-                                    />
-                                  </div>
-                                  <div className="select-container">
-                                    <p className="font-bold text-sm mb-2">
-                                      Zakres udostępnienia
-                                    </p>
-                                    <FormField
-                                      control={form.control}
-                                      name="permissions"
-                                      render={({ field }) => {
-                                        return (
-                                          <FormItem>
-                                            <FormControl>
-                                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <SelectTrigger className="border-slate-400 mb-8 py-6">
-                                                  <SelectValue placeholder="Wybierz zakres uprawnień" />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-white">
-                                                  <SelectItem
-                                                    className="bg-white focus:bg-slate-200"
-                                                    value="1"
+                                                <FormMessage />
+                                              </FormItem>
+                                            );
+                                          }}
+                                        />
+                                      </div>
+                                      <div className="select-container">
+                                        <p className="font-bold text-sm mb-2">
+                                          Zakres udostępnienia
+                                        </p>
+                                        <FormField
+                                          control={form.control}
+                                          name="permissions"
+                                          render={({ field }) => {
+                                            return (
+                                              <FormItem>
+                                                <FormControl>
+                                                  <Select
+                                                    onValueChange={
+                                                      field.onChange
+                                                    }
+                                                    defaultValue={field.value}
                                                   >
-                                                    Przeglądający
-                                                  </SelectItem>
-                                                  <SelectItem
-                                                    className="bg-white focus:bg-slate-200"
-                                                    value="2"
-                                                  >
-                                                    Edytor
-                                                  </SelectItem>
-                                                </SelectContent>
-                                              </Select>
-                                            </FormControl>
-                                            <FormMessage />
-                                          </FormItem>
-                                        );
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              
-                              <DialogButton type="submit">
-                                Udostępnij
-                              </DialogButton>
-                              </form>
-                          </Form>
-                          )}
-                          {shareType !== "only-user" && (
-                            <DialogButton onClick={handleShareTypeChange}>
-                            Udostępnij
-                            </DialogButton>
-                          )} 
-                        </DialogDescription>
-                      </DialogHeader>
-                    </DialogContent>
-                  </Dialog>
-                  <button
-                    className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 items-center p-2 text-red-800"
-                    onClick={handleDelete}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-trash w-6 stroke-red-700"
-                    >
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                    Usuń
-                  </button>
+                                                    <SelectTrigger className="border-slate-400 mb-8 py-6">
+                                                      <SelectValue placeholder="Wybierz zakres uprawnień" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-white">
+                                                      <SelectItem
+                                                        className="bg-white focus:bg-slate-200"
+                                                        value="1"
+                                                      >
+                                                        Przeglądający
+                                                      </SelectItem>
+                                                      <SelectItem
+                                                        className="bg-white focus:bg-slate-200"
+                                                        value="2"
+                                                      >
+                                                        Edytor
+                                                      </SelectItem>
+                                                    </SelectContent>
+                                                  </Select>
+                                                </FormControl>
+                                                <FormMessage />
+                                              </FormItem>
+                                            );
+                                          }}
+                                        />
+                                      </div>
+                                    </div>
+
+                                    <DialogButton type="submit">
+                                      Udostępnij
+                                    </DialogButton>
+                                  </form>
+                                </Form>
+                              )}
+                            </DialogDescription>
+                          </DialogHeader>
+                        </DialogContent>
+                      </Dialog>
+                      <button
+                        className="action flex flex-row gap-2 font-bold text-md hover:bg-neutral-200 items-center p-2 text-red-800"
+                        onClick={handleDelete}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="feather feather-trash w-6 stroke-red-700"
+                        >
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        Usuń
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
               <div className="notebody__text mt-8">
                 <NoteHeader
                   className="font-bold text-4xl"
-                  contentEditable="true"
+                  contentEditable={!isViewMode}
                   spellCheck="false"
                   placeholder="Nowa notatka"
                   onBlur={handleNoteHeader}
@@ -850,7 +870,7 @@ function Note() {
                 </div>
                 <div
                   className="notebody__content focus:outline-none mt-8 mr-16"
-                  contentEditable="true"
+                  contentEditable={!isViewMode}
                   suppressContentEditableWarning={true}
                   onBlur={handleNoteContent}
                 >

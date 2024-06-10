@@ -186,8 +186,9 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
       });
   };
   const handleScanNoteRedirect = () => {
+    const title = newNoteHeader === "" ? "Nowa notatka" : newNoteHeader;
     navigate(`/scan-note/`, {
-      state: { folderId: newNoteFolderId, title: newNoteHeader },
+      state: { folderId: newNoteFolderId, title: title },
     });
   };
 
@@ -583,11 +584,10 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
                 <DialogContent className="bg-white p-8">
                   <DialogHeader>
                     <DialogTitle className="text-xl mb-2">
-                      Edytuj ustawienia folderu {selectedDirectory.name}
+                      Edytuj folder {selectedDirectory.name}
                     </DialogTitle>
                     <DialogDescription>
-                      W tym miejscu możesz ustawić inny kolor kategorii lub
-                      zmienić jej nazwę.
+                      W tym miejscu możesz ustawić nową nazwę dla wybranego przez Ciebie katalogu.
                     </DialogDescription>
                     <Form {...editDirectoryForm}>
                       <form

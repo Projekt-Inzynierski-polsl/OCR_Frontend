@@ -29,6 +29,7 @@ function SelectBoundingBoxes() {
   const [selectedTab, setSelectedTab] = useState("notatka");
   const imgEl = useRef();
   const [loaderActive, setLoaderActive] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [anno, setAnno] = useState();
   const { state } = useLocation();
   const { folderId, title, image, data } = state;
@@ -76,7 +77,8 @@ function SelectBoundingBoxes() {
       })
     });
     bboxObj.boundingBoxes = bboxData;
-    data.append("boundingBoxes", JSON.stringify(bboxObj))
+    if (bboxData.length !== 0) {
+      data.append("boundingBoxes", JSON.stringify(bboxObj))
     setLoaderActive(true);
     api
       .post(`http://localhost:8051/api/noteFile`, data, {
@@ -90,6 +92,13 @@ function SelectBoundingBoxes() {
       .catch((error) => {
         setLoaderActive(false);
       });
+    }
+    else {
+      setErrorMessage("Nie zaznaczono żadnych obszarów.")
+    }
+
+
+    
       
   };
 
@@ -151,7 +160,8 @@ function SelectBoundingBoxes() {
                 potrzebne, zaznacz na zdjęciu części tekstu i innych elementów.
               </p>
             </FirstNoteHero>
-            <div className="bound-container border border-[#D1D5DB] w-60% mt-8">
+            <p className="text-xl mt-8 text-red-700 font-bold">{errorMessage}</p>
+            <div className="bound-container border border-[#D1D5DB] w-4/5 mt-8">
               <img src={img} ref={imgEl} />
               <Tabs
                 className="float-right mx-8 mt-2"

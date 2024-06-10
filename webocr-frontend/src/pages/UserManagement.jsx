@@ -71,8 +71,6 @@ function AdminDashboard() {
                       <TableHead>Nazwa użytkownika</TableHead>
                       <TableHead>Adres e-mail</TableHead>
                       <TableHead>Typ użytkownika</TableHead>
-                      <TableHead>Data rejestracji</TableHead>
-                      <TableHead>Data ostatniego logowania</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -93,8 +91,6 @@ function AdminDashboard() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
                         <TableCell>
                           <a
                             href={`/edit-profile/${user.id}`}

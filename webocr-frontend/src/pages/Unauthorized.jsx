@@ -21,7 +21,7 @@ function Unauthorized() {
         <FirstNoteHero className="py-16 w-full">
           <h1 className="text-5xl font-bold">Błąd 403</h1>
           <p className="max-w-3xl text-center mt-4 text-md">
-            Nie masz uprawnień do tej akcji. Zaloguj się na konto administratora. Incydent zgłoszony na policję i do prokuratury, zgodnie z art. 267 paragraf 2 Kodeksu Karnego. Zostanie przeprowadzone dochodzenie w sprawie naruszenia systemu informatycznego.
+            Nie masz uprawnień do tej akcji. Zaloguj się na konto administratora.
           </p>
         </FirstNoteHero>
       </main>

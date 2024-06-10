@@ -153,13 +153,17 @@ function EditProfile() {
     23: "Zaktualizowano kategorię",
     24: "Udostępniono notatkę",
     25: "Udostępniono folder",
+    26: "Usunięto udostępnienie notatki",
+    27: "Usunięto udostępnienie folderu",
+    28: "Przesłano plik notatki",
+    29: "Zaktualizowano hash notatki",
+    30: "Zaakceptowano poprawkę",
   };
 
   const handleUserActions = async (values) => {
     const actions = values.map((action) => {
       const actionDate = new Date(action.logTime.trim());
       return {
-        id: action.id,
         date: actionDate.toLocaleString(),
         action: actionDictionary[action.actionId],
       };
@@ -181,9 +185,6 @@ function EditProfile() {
           setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
         }
       })
-      .catch((error) => {
-        setErrorMessage(error.response.data.message);
-      });
   };
 
   useEffect(() => {

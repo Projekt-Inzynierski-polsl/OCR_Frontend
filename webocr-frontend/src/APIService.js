@@ -25,7 +25,9 @@ instance.interceptors.response.use(
           // window.location.href = "/login";
         });
     } else {
-        toast.error(`Błąd serwera (${error.response.request.responseURL})`);
+        if(error.response.data != "Cannot operate someone else's note.") {
+          toast.error(`Błąd serwera (${error.response.request.responseURL})`);
+        }
     }
     return Promise.reject(error);
   }

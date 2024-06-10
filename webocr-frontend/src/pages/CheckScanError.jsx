@@ -21,7 +21,7 @@ function CheckScanError() {
   const [ocrError, setOcrError] = useState({});
   const navigate = useNavigate();
   const { toast } = useToast();
-
+  const [img, setImg] = useState("");
   const handleErrorCheck = (action) => {
     api
       .put(`http://localhost:8051/api/ocrError/${errorId}`, {
@@ -51,6 +51,17 @@ function CheckScanError() {
           setOcrError(response.data);
           
         })
+        api
+        .get(`http://localhost:8051/api/ocrError/${errorId}/file`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+          responseType: 'blob'
+        })
+        .then((response) => {
+          const url = URL.createObjectURL( response.data );
+          setImg(url)
+        })
   }, [errorId]);
 
   return (
@@ -66,7 +77,7 @@ function CheckScanError() {
                 <div className="text-inputs grid grid-cols-2 mt-6 mb-24 gap-16">
                 <div className="scanned-image flex flex-col gap-2">
                   <p className="font-bold text-lg">Wrzucone zdjęcie</p>
-                  <img src="/example_photo.png" alt="" className="w-48" />
+                  <img src={img} alt="" className="w-5xl h-4xl" />
                 </div>
                   <div className="input-container">
                     <p className="font-bold text-lg mb-2">Zaproponowany tekst</p>

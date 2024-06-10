@@ -50,12 +50,10 @@ function UploadNoteFile() {
       <main className="flex flex-col items-center">
         <Fragment>
           <FirstNoteHero className="py-16 w-full">
-            <h1 className="text-5xl font-bold">Dodaj pierwszą notatkę</h1>
+            <h1 className="text-5xl font-bold">Wrzuć zdjęcie notatki</h1>
             <p className="max-w-3xl text-center mt-4 text-md">
-              Przekonaj się, jak łatwe i przyjemne jest korzystanie z webOCR.
-              Zacznijmy od utworzenia pierwszej notatki. Przeciągnij i upuść lub
-              wybierz plik do wrzucenia, a system z użyciem AI rozpozna i
-              zapisze tekst, który się tam znajduje.
+              Przekonaj się, jak łatwe i przyjemne jest korzystanie z webOCR. Przeciągnij i upuść lub
+              wybierz plik do wrzucenia, a system z użyciem AI rozpozna i zapisze tekst, który się tam znajduje.
             </p>
           </FirstNoteHero>
           <Dropzone handleDrop={setUploadedFiles}></Dropzone>
