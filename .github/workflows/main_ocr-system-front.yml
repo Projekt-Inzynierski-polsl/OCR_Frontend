@@ -15,7 +15,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Show current directory
+        run: pwd
 
+      - name: List files in current directory
+        run: ls -la
+
+      - name: List files in OCR_Frontend directory
+        run: ls -la OCR_Frontend
+
+      - name: List files in OCR_Frontend\webocr-frontend directory
+        run: ls -la OCR_Frontend\webocr-frontend
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
