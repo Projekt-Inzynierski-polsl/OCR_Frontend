@@ -21,12 +21,12 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: Navigate to the webocr-frontend directory
-        working-directory: OCR_Frontend\webocr-frontend
+      - name: Install dependencies, build, and test
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
+        working-directory: OCR_Frontend\webocr-frontend
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -54,4 +54,4 @@ jobs:
           app-name: 'ocr-system-front'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B7655BDA6D064C9A8467666C02148D8F }}
-          package: .
+          package: node-app
