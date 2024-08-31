@@ -39,8 +39,7 @@ jobs:
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
           app_location: "./webocr-frontend" # App source code path
           api_location: "" # Api source code path - optional
-          output_location: "./webocr-frontend/dist" # Ścieżka do zbudowanych plików
-          ###### End of Repository/Build Configurations ######
+          output_location: "."
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
