@@ -11,7 +11,7 @@ instance.interceptors.response.use(
   (error) => {
     if (error.response.status === 401) {
       axios
-        .get("http://ocr-api:8080/api/account/token", {
+        .get("https://ocr-api:8080/api/account/token", {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
           },

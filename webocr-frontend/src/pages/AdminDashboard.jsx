@@ -34,7 +34,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     api
-      .get("http://ocr-api:8080/api/userLog", {
+      .get("https://ocr-api:8080/api/userLog", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -52,7 +52,7 @@ function AdminDashboard() {
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 1);
     api
-      .get("http://ocr-api:8080/api/userLog", {
+      .get("https://ocr-api:8080/api/userLog", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -70,7 +70,7 @@ function AdminDashboard() {
       });
 
     api
-      .get("http://ocr-api:8080/api/userLog", {
+      .get("https://ocr-api:8080/api/userLog", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -88,7 +88,7 @@ function AdminDashboard() {
 
 
     api
-    .get("http://ocr-api:8080/api/ocrError", {
+    .get("https://ocr-api:8080/api/ocrError", {
       headers: {
         Authorization: `Bearer ${Cookies.get("authToken")}`,
       },

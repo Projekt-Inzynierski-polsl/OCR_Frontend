@@ -28,7 +28,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     api
-      .get("http://ocr-api:8080/api/user", {
+      .get("https://ocr-api:8080/api/user", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },

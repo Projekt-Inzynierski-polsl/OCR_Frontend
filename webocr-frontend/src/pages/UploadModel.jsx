@@ -77,7 +77,7 @@ function UploadModel() {
     const formData = new FormData();
     formData.append("model", values.model);
     api
-      .post("http://ocr-api:8080/api/model/upload", formData, {
+      .post("https://ocr-api:8080/api/model/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${Cookies.get("authToken")}`,

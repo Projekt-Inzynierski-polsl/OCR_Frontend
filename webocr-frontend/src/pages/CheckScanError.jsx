@@ -24,7 +24,7 @@ function CheckScanError() {
   const [img, setImg] = useState("");
   const handleErrorCheck = (action) => {
     api
-      .put(`http://ocr-api:8080/api/ocrError/${errorId}`, {
+      .put(`https://ocr-api:8080/api/ocrError/${errorId}`, {
         isAccepted: true,
       }, {
         headers: {
@@ -42,7 +42,7 @@ function CheckScanError() {
 
   useEffect(() => {
     api
-        .get(`http://ocr-api:8080/api/ocrError/${errorId}`, {
+        .get(`https://ocr-api:8080/api/ocrError/${errorId}`, {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
@@ -52,7 +52,7 @@ function CheckScanError() {
           
         })
         api
-        .get(`http://ocr-api:8080/api/ocrError/${errorId}/file`, {
+        .get(`https://ocr-api:8080/api/ocrError/${errorId}/file`, {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
