@@ -102,7 +102,7 @@ function EditProfile() {
 
   const handleSubmit = (values) => {
     api
-    .put(`https://ocr-api:8080/api/user/${userId}`, {
+    .put(`http://ocr-api:8080/api/user/${userId}`, {
       email: values.email,
       nickname: values.nickname,
       roleId: values.admin ? 1 : 2,
@@ -173,7 +173,7 @@ function EditProfile() {
 
   const handleDelete = async () => {
     await api
-      .delete(`https://ocr-api:8080/api/user/${userId}`, {
+      .delete(`http://ocr-api:8080/api/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -189,7 +189,7 @@ function EditProfile() {
 
   useEffect(() => {
     api
-      .get(`https://ocr-api:8080/api/user/${userId}`, {
+      .get(`http://ocr-api:8080/api/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -206,7 +206,7 @@ function EditProfile() {
         setErrorMessage(error.response.data.message);
       });
     api
-      .get(`https://ocr-api:8080/api/userLog`, {
+      .get(`http://ocr-api:8080/api/userLog`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -224,7 +224,7 @@ function EditProfile() {
   const [maxPage, setMaxPage] = useState(100);
   const getPaginatedUserActions = () => {
     api
-      .get(`https://ocr-api:8080/api/userLog`, {
+      .get(`http://ocr-api:8080/api/userLog`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },

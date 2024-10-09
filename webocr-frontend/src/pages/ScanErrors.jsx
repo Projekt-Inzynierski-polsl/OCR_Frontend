@@ -28,7 +28,7 @@ function ScanErrors() {
 
   useEffect(() => {
     api
-      .get("https://ocr-api:8080/api/ocrError", {
+      .get("http://ocr-api:8080/api/ocrError", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },

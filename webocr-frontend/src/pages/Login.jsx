@@ -52,7 +52,7 @@ function Login() {
 
   const onSubmit = async (values) => {
       await api.post(
-        "https://ocr-api:8080/api/account/login",
+        "http://ocr-api:8080/api/account/login",
         values
       ).then((response) => {
         if (response.status === 200) {

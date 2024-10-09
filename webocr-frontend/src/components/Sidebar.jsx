@@ -126,7 +126,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
   const handleCategoriesUpdate = async () => {
     await api
       .put(
-        `https://ocr-api:8080/api/noteCategories/${selectedCategory.value}`,
+        `http://ocr-api:8080/api/noteCategories/${selectedCategory.value}`,
         {
           name: selectedCategory.name,
           hexColor: selectedCategory.color,
@@ -162,7 +162,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
   const handleDirectoryUpdate = async () => {
     await api
       .put(
-        `https://ocr-api:8080/api/user/folder/${selectedDirectory.id}/update`,
+        `http://ocr-api:8080/api/user/folder/${selectedDirectory.id}/update`,
         {
           name: selectedDirectory.name,
           passwordToFolder: "",
@@ -195,7 +195,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
   useEffect(() => {
     if (Cookies.get("authToken")) {
       api
-        .get("https://ocr-api:8080/api/user/folder", {
+        .get("http://ocr-api:8080/api/user/folder", {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
@@ -208,7 +208,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
         });
 
       api
-        .get(`https://ocr-api:8080/api/user/note/lastEdited`, {
+        .get(`http://ocr-api:8080/api/user/note/lastEdited`, {
           params: {
             amount: 3
           },
@@ -259,7 +259,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
     const folders = [...userFolders];
     api
       .post(
-        "https://ocr-api:8080/api/user/folder",
+        "http://ocr-api:8080/api/user/folder",
         {
           name: name,
           iconPath: "/folder.png",
@@ -274,7 +274,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
       )
       .then((response) => {
         api.put(
-          `https://ocr-api:8080/api/user/folder/${response.data}/unlock`,
+          `http://ocr-api:8080/api/user/folder/${response.data}/unlock`,
           {
             password: "",
           },
@@ -299,7 +299,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
   const editFolderIcon = (folderId, icon) => {
     api
       .put(
-        `https://ocr-api:8080/api/user/folder/${folderId}/update`,
+        `http://ocr-api:8080/api/user/folder/${folderId}/update`,
         {
           iconPath: icon,
         },
@@ -331,7 +331,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
 
   const handleRemoveCategory = (category) => {
     api
-      .delete(`https://ocr-api:8080/api/noteCategories/${category.value}`, {
+      .delete(`http://ocr-api:8080/api/noteCategories/${category.value}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -347,7 +347,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
 
   const handleRemoveDirectory = async (directory) => {
     await api
-      .delete(`https://ocr-api:8080/api/user/folder/${directory.id}`, {
+      .delete(`http://ocr-api:8080/api/user/folder/${directory.id}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },

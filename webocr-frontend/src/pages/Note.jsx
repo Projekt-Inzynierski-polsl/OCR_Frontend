@@ -169,7 +169,7 @@ function Note() {
 
   const exportNoteHandler = () => {
     api
-      .get(`https://ocr-api:8080/api/user/note/${noteId}/${exportType}`, {
+      .get(`http://ocr-api:8080/api/user/note/${noteId}/${exportType}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -191,7 +191,7 @@ function Note() {
       currentNote.title = e.target.innerText.trim();
       api
         .put(
-          `https://ocr-api:8080/api/user/note/${currentNote.noteId}/update`,
+          `http://ocr-api:8080/api/user/note/${currentNote.noteId}/update`,
           {
             content: currentNote.content,
             name: currentNote.title,
@@ -209,7 +209,7 @@ function Note() {
         });
 
       api
-        .get("https://ocr-api:8080/api/user/folder", {
+        .get("http://ocr-api:8080/api/user/folder", {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
@@ -228,7 +228,7 @@ function Note() {
       currentNote.content = e.target.innerText.trim();
       api
         .put(
-          `https://ocr-api:8080/api/user/note/${currentNote.noteId}/update`,
+          `http://ocr-api:8080/api/user/note/${currentNote.noteId}/update`,
           {
             content: currentNote.content,
             name: currentNote.title,
@@ -255,7 +255,7 @@ function Note() {
   const handleShareTypeChange = (value) => {
     if (value === "no-share") {
       api
-        .get(`https://ocr-api:8080/api/shared/note/${currentNote.noteId}`, {
+        .get(`http://ocr-api:8080/api/shared/note/${currentNote.noteId}`, {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
@@ -264,7 +264,7 @@ function Note() {
           if (response.data.length !== 0) {
             api
               .delete(
-                `https://ocr-api:8080/api/shared/note`,
+                `http://ocr-api:8080/api/shared/note`,
                 {
                   objectId: currentNote.noteId,
                 },
@@ -285,7 +285,7 @@ function Note() {
     } else if (value === "all-users") {
       api
         .post(
-          `https://ocr-api:8080/api/shared/note`,
+          `http://ocr-api:8080/api/shared/note`,
           {
             objectId: currentNote.noteId,
             shareMode: 1,
@@ -309,7 +309,7 @@ function Note() {
 
   const handleDelete = () => {
     api
-      .delete(`https://ocr-api:8080/api/user/note/${currentNote.noteId}`, {
+      .delete(`http://ocr-api:8080/api/user/note/${currentNote.noteId}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -336,7 +336,7 @@ function Note() {
     if (!isViewMode) {
       api
         .post(
-          `https://ocr-api:8080/api/noteCategories`,
+          `http://ocr-api:8080/api/noteCategories`,
           {
             name: inputValue,
             hexColor: color,
@@ -378,7 +378,7 @@ function Note() {
     if (shareType === "no-share") {
       api
         .delete(
-          `https://ocr-api:8080/api/shared/note`,
+          `http://ocr-api:8080/api/shared/note`,
           {
             objectId: currentNote.noteId,
           },
@@ -399,7 +399,7 @@ function Note() {
     if (shareType === "only-user" && values.email) {
       api
         .post(
-          `https://ocr-api:8080/api/shared/note`,
+          `http://ocr-api:8080/api/shared/note`,
           {
             objectId: currentNote.noteId,
             shareMode: parseInt(values.permissions),
@@ -436,7 +436,7 @@ function Note() {
     } else if (shareType === "all-users") {
       api
         .post(
-          `https://ocr-api:8080/api/shared/note`,
+          `http://ocr-api:8080/api/shared/note`,
           {
             objectId: currentNote.noteId,
             shareMode: 1,
@@ -460,7 +460,7 @@ function Note() {
   useEffect(() => {
     if (noteId) {
       api
-        .get(`https://ocr-api:8080/api/user/note/${noteId}`, {
+        .get(`http://ocr-api:8080/api/user/note/${noteId}`, {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
@@ -486,7 +486,7 @@ function Note() {
         });
 
       api
-        .get(`https://ocr-api:8080/api/shared/note/${noteId}`, {
+        .get(`http://ocr-api:8080/api/shared/note/${noteId}`, {
           headers: {
             Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
@@ -514,7 +514,7 @@ function Note() {
     }
 
     api
-      .get(`https://ocr-api:8080/api/noteCategories`, {
+      .get(`http://ocr-api:8080/api/noteCategories`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -530,7 +530,7 @@ function Note() {
       });
 
     api
-      .get("https://ocr-api:8080/api/user/folder", {
+      .get("http://ocr-api:8080/api/user/folder", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -546,7 +546,7 @@ function Note() {
     const categoriesIds = option.map((c) => c.value);
     api
       .put(
-        `https://ocr-api:8080/api/user/note/${currentNote.noteId}/categories`,
+        `http://ocr-api:8080/api/user/note/${currentNote.noteId}/categories`,
         {
           categoriesIds: categoriesIds,
         },

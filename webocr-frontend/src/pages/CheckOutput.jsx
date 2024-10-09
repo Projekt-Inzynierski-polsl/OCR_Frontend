@@ -111,7 +111,7 @@ function CheckOutput() {
     const coords = anno.getAnnotationById(txtBox.id).target.selector.value.replace("xywh=pixel:", "").split(",");
 
     api
-      .post(`https://ocr-api:8080/api/ocrError`, {
+      .post(`http://ocr-api:8080/api/ocrError`, {
         fileId: fileId,
         wrongContent: txtBox.content,
         correctContent: content,
@@ -133,7 +133,7 @@ function CheckOutput() {
   const handleNextStep = () => {
     let content = textBoxes.map((box) => box.content).join(" ");
     api
-      .post(`https://ocr-api:8080/api/user/note`, {
+      .post(`http://ocr-api:8080/api/user/note`, {
         folderId: folderId,
         noteFileId: fileId,
         name: title,

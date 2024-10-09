@@ -1,7 +1,7 @@
 {
   "name": "webocr-frontend",
   "private": true,
-  "proxy": "https://ocr-api:8080/",
+  "proxy": "http://ocr-api:8080/",
   "version": "1.0.0",
   "type": "module",
   "scripts": {

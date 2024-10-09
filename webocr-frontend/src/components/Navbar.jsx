@@ -24,7 +24,7 @@ function Navbar() {
 
   useEffect(() => {
     api
-      .get("https://ocr-api:8080/api/user/logged", {
+      .get("http://ocr-api:8080/api/user/logged", {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },

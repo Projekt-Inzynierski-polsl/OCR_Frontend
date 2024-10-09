@@ -67,7 +67,7 @@ function Register() {
 
   const onSubmit = async (values) => {
     await api.post(
-      "https://ocr-api:8080/api/account/register",
+      "http://ocr-api:8080/api/account/register",
       values
     ).then((response) => {
       if (response.status === 200) {
