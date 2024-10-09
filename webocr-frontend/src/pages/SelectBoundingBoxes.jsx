@@ -81,7 +81,7 @@ function SelectBoundingBoxes() {
       data.append("boundingBoxes", JSON.stringify(bboxObj))
     setLoaderActive(true);
     api
-      .post(`http://ocr-api:8080/api/noteFile`, data, {
+      .post(`http://localhost:8051/api/noteFile`, data, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
