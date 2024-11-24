@@ -82,7 +82,7 @@ function SelectBoundingBoxes() {
     });
     bboxObj.boundingBoxes = bboxData;
     if (bboxData.length !== 0) {
-      data.append("boundingBoxes", JSON.stringify(bboxObj))
+      formData.append("boundingBoxes", JSON.stringify(bboxObj))
     setLoaderActive(true);
     
     api
