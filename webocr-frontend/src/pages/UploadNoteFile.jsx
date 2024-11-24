@@ -34,11 +34,7 @@ function UploadNoteFile() {
 
   const handleClick = () => {
     if (uploadedFiles.length > 0) {
-      const formData = new FormData();
-      uploadedFiles.forEach((file) => {
-        formData.append("image", file);
-      });
-      navigate("/select-boxes", { state: { folderId: folderId, title: title, image: formData.get("image"), data: formData } });
+      navigate("/select-boxes", { state: { folderId: folderId, title: title, uploadedFiles: uploadedFiles } });
     }
   };
 

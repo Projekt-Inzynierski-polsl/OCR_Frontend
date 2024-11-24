@@ -32,12 +32,16 @@ function SelectBoundingBoxes() {
   const [errorMessage, setErrorMessage] = useState("");
   const [anno, setAnno] = useState();
   const { state } = useLocation();
-  const { folderId, title, image, data } = state;
+  const { folderId, title, uploadedFiles } = state;
   const navigate = useNavigate();
-
   const formatter = (annotation) => {
     return "text";
   };
+
+  const formData = new FormData();
+  uploadedFiles.forEach((file) => {
+      formData.append("image", file);
+  });
 
   useEffect(() => {
     let annotorious = null;
@@ -80,14 +84,15 @@ function SelectBoundingBoxes() {
     if (bboxData.length !== 0) {
       data.append("boundingBoxes", JSON.stringify(bboxObj))
     setLoaderActive(true);
+    
     api
-      .post(`http://localhost:8051/api/noteFile`, data, {
+      .post(`http://localhost:8051/api/noteFile`, formData, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
       })
       .then((response) => {
-        navigate("/check-output", { state: { output: response.data, image: image, fileId: response.data.id, folderId: folderId, title: title} })
+        navigate("/check-output", { state: { output: response.data, image: formData.get("image"), fileId: response.data.id, folderId: folderId, title: title} })
       })
       .catch((error) => {
         setLoaderActive(false);
@@ -96,10 +101,6 @@ function SelectBoundingBoxes() {
     else {
       setErrorMessage("Nie zaznaczono żadnych obszarów.")
     }
-
-
-    
-      
   };
 
   const handleTabChange = (value) => {
@@ -136,7 +137,7 @@ function SelectBoundingBoxes() {
 
   const [img, setImg] = useState(null);
   const handleImage = () => {
-    const selected = image;
+    const selected = formData.get("image");
     const imgUrl = URL.createObjectURL(selected);
     setImg(imgUrl);
   };
