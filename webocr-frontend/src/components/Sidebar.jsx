@@ -204,7 +204,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
           setUserFolders(response.data.items);
         })
         .catch((error) => {
-          console.log(error);
+          console.error(error);
         });
 
       api
@@ -219,6 +219,20 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
         .then((response) => {
           if (response.status === 200) {
             setLastNotes(response.data);
+          } else if (response.status === 500) {
+            setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
+          }
+        });
+
+      api
+        .get(`http://localhost:8051/api/shared/notes`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("authToken")}`,
+          },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            setSharedNotes(response.data);
           } else if (response.status === 500) {
             setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
           }
@@ -250,6 +264,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
   const [newNoteFolderId, setNewNoteFolderId] = useState(0);
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   const [lastNotes, setLastNotes] = useState([]);
+  const [sharedNotes, setSharedNotes] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [editDirectoryDialogOpen, setEditDirectoryDialogOpen] = useState(false);
@@ -263,8 +278,6 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
         {
           name: name,
           iconPath: "/folder.png",
-          password: "",
-          confirmedPassword: "",
         },
         {
           headers: {
@@ -273,17 +286,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
         }
       )
       .then((response) => {
-        api.put(
-          `http://localhost:8051/api/user/folder/${response.data}/unlock`,
-          {
-            password: "",
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${Cookies.get("authToken")}`,
-            },
-          }
-        );
+      
         folders.push({
           id: response.data,
           name: name,
@@ -388,6 +391,30 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
                       </Fragment>
                 )}
           </div>
+          <h2 className="font-bold text-xl pl-16 mt-16">Udostępnione dokumenty</h2>
+          <div className="last-docs-container flex flex-col mt-2">
+            {sharedNotes.map((note) => (
+              <div
+                key={note.note.id}
+                className="last-doc flex flex-row gap-2 items-center hover:bg-slate-200 py-1.5 pl-12 pr-10 mx-4"
+              >
+                <img src="/note.png" alt="" />
+                <a
+                  href={`/notes/${note.note.id}`}
+                  className="text-ellipsis overflow-hidden whitespace-nowrap"
+                >
+                  {note.note.name}
+                </a>
+              </div>
+            ))}
+
+            {lastNotes.length === 0 && (
+                      <Fragment className="ml-4">
+                        <p className="ml-16 text-gray-400">Edytuj swój pierwszy dokument!</p>
+                      </Fragment>
+                )}
+          </div>
+          
           <div className="user-notes-container mt-24">
             <div className="user-notes-header flex flex-row pl-16 items-center justify-between mr-2">
               <h2 className="font-bold text-xl">Kategorie notatek</h2>
@@ -880,6 +907,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
                 open={addNewNoteDialogOpen}
                 onOpenChange={() => {
                   setNewNoteHeader("");
+                  setAddNewNoteDialogOpen(!addNewNoteDialogOpen);
                 }}
                 modal
                 defaultOpen={addNewNoteDialogOpen}

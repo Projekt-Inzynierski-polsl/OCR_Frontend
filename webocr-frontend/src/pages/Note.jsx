@@ -168,20 +168,30 @@ function Note() {
   const [colorSelectOpen, setColorSelectOpen] = useState(false);
 
   const exportNoteHandler = () => {
-    api
-      .get(`http://localhost:8051/api/user/note/${noteId}/${exportType}`, {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("authToken")}`,
-        },
-      })
-      .then((response) => {
-        toast({
-          title: "Notatka została wyeksportowana",
-          body: "Plik został zapisany na Twoim komputerze",
-        });
-        window.open(response.data, "_blank", "rel=noopener noreferrer");
-        setExportDialogOpen(false);
-      });
+    api.get(`http://localhost:8051/api/user/note/${noteId}/${exportType}`, {
+      headers: {
+        Authorization: `Bearer ${Cookies.get("authToken")}`,
+      },
+      responseType: "blob",
+    }).then((response) => {
+      const mimeType = exportType === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      const blob = new Blob([response.data], { type: mimeType });
+
+      // Create a link element
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${currentNote.title}_export.${exportType}`; // Specify the desired file name
+
+      // Programmatically click the link to trigger the download
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
+      setExportDialogOpen(false);
+    })
   };
 
   const handleNoteHeader = (e) => {
@@ -697,17 +707,6 @@ function Note() {
                                       <img src="/lock.svg" alt="" />
                                       <p className="font-bold">
                                         Dostęp ograniczony
-                                      </p>
-                                    </SelectWithIcon>
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-white focus:bg-slate-200"
-                                    value="all-users"
-                                  >
-                                    <SelectWithIcon className="flex flex-row items-center justify-center gap-5">
-                                      <img src="/globe.svg" alt="" />
-                                      <p className="font-bold">
-                                        Dostęp dla każdego
                                       </p>
                                     </SelectWithIcon>
                                   </SelectItem>

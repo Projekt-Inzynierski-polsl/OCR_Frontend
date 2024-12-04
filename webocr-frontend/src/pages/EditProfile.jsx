@@ -156,7 +156,7 @@ function EditProfile() {
     26: "Usunięto udostępnienie notatki",
     27: "Usunięto udostępnienie folderu",
     28: "Przesłano plik notatki",
-    29: "Zaktualizowano hash notatki",
+    29: "Zaszyfrowano obraz notatki",
     30: "Zaakceptowano poprawkę",
   };
 
