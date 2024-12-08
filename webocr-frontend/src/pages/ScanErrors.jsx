@@ -5,7 +5,6 @@ import Sidebar from "../components/AdminSidebar.jsx";
 const MainLayout = styled.div`
   background-color: #f9fafb;
   font-family: "Space Grotesk";
-  height: 100vh;
 `;
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,15 +42,41 @@ function ScanErrors() {
       });
   }, [modelErrors]);
 
+  const handleErrorDownload = () => {
+    api
+      .get("http://localhost:8051/api/ocrError/csv", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+        responseType: 'blob',
+      })
+      .then((response) => {
+        const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = 'errors.zip'; // Nazwa pliku do pobrania
+        link.click();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
   return (
     <>
       <Navbar></Navbar>
-      <main className="grid grid-cols-[385px_1fr]">
+      <main className="flex flex-col lg:grid lg:grid-cols-[385px_1fr]">
         <Sidebar></Sidebar>
-        <MainLayout className="">
-          <h1 className="font-bold text-3xl ml-40 mt-8">Błędy skanowania</h1>
-          <div className="dashboard-info flex flex-row items-top gap-4 mt-8 mx-32 h-screen">
-            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-4/5">
+        <MainLayout className="max-md:pt-8 h-full">
+          <h1 className="font-bold text-3xl ml-16 lg:ml-40 mt-8">Błędy skanowania</h1>
+          <div className="dashboard-info mt-8 lg:mx-32 mb-4">
+            <button
+              className="border border-[#004601] text-[#004601] text-center font-bold rounded-[10px] py-3 px-8 mb-8 ml-16 lg:ml-0"
+              onClick={() => handleErrorDownload()}
+            >
+              Pobierz .zip z błędami
+            </button>
+            <Card className="bg-white border border-slate-100 flex flex-col pt-4 xl:w-4/5">
               <CardHeader className="text-left ml-2 space-y-0 pt-3 pb-5">
                 <CardTitle className="text-xl pb-2">Lista błędów</CardTitle>
               </CardHeader>

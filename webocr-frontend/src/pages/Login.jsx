@@ -73,15 +73,15 @@ function Login() {
   else {
     return (
       <>
-        <main className="grid grid-cols-2">
-          <div className="left-panel px-24 py-16">
+        <main className="grid lg:grid-cols-2">
+          <div className="left-panel px-16 lg:px-24 py-16">
             <img src="./logo_black.png" alt="" />
             <LoginHeader className="text-4xl mt-24">
               Zaloguj się do platformy
             </LoginHeader>
-            <p className="mt-2">
+            <p className="lg:mt-2 mt-8">
               Nie masz jeszcze konta?
-              <span className="ml-1">
+              <span className="md:ml-1 max-md:block">
                 <a href="/register" className="underline">
                   Zarejestruj się za darmo!
                 </a>
@@ -101,7 +101,7 @@ function Login() {
                       <FormControl>
                         <Input
                           placeholder="Adres email"
-                          className="mt-6 py-6 w-2/3 border-slate-300"
+                          className="mt-6 py-6 lg:w-2/3 border-slate-300"
                           onChange={(e) => setUsername(e.target.value)}
                           {...field}
                         />
@@ -120,7 +120,7 @@ function Login() {
                         <Input
                           type="password"
                           placeholder="Hasło"
-                          className="mt-6 py-6 w-2/3 border-slate-300"
+                          className="mt-6 py-6 lg:w-2/3 border-slate-300"
                           {...field}
                         />
                       </FormControl>
@@ -128,7 +128,7 @@ function Login() {
                     </FormItem>
                   )}
                 />
-                <LoginButton type="submit" className="text-md mt-10">
+                <LoginButton type="submit" className="lg:text-md mt-10">
                   Zaloguj się
                 </LoginButton>
               </form>

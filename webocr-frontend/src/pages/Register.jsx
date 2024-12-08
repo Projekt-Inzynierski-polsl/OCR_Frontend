@@ -51,8 +51,7 @@ const RegisterButton = styled.button`
   font-weight: bold;
   padding: 12px 96px;
   border-radius: 16px;
-  float: right;
-  margin-right: 256px;
+  float: left;
 `;
 
 function Register() {
@@ -81,7 +80,7 @@ function Register() {
 
   return (
     <>
-      <main className="grid grid-cols-2">
+      <main className="lg:grid lg:grid-cols-2 flex flex-col-reverse">
         <LeftPanel>
           <h1 className="mt-8 font-bold text-6xl">
             narzędzie, które odmieni Twoją pracę
@@ -116,7 +115,7 @@ function Register() {
                     <FormControl>
                       <Input
                         placeholder="Nazwa użytkownika"
-                        className="mt-12 py-6 w-2/3 border-slate-300"
+                        className="mt-12 py-6 lg:w-2/3 border-slate-300"
                         {...field}
                       />
                     </FormControl>
@@ -134,7 +133,7 @@ function Register() {
                       <Input
                         type="email"
                         placeholder="Adres email"
-                        className="mt-6 py-6 w-2/3 border-slate-300"
+                        className="mt-6 py-6 lg:w-2/3 border-slate-300"
                         {...field}
                       />
                     </FormControl>
@@ -151,7 +150,7 @@ function Register() {
                       <Input
                         type="password"
                         placeholder="Hasło"
-                        className="mt-6 py-6 w-2/3 border-slate-300"
+                        className="mt-6 py-6 lg:w-2/3 border-slate-300"
                         {...field}
                       />
                     </FormControl>
@@ -168,7 +167,7 @@ function Register() {
                       <Input
                         type="password"
                         placeholder="Powtórz hasło"
-                        className="mt-6 py-6 w-2/3 border-slate-300"
+                        className="mt-6 py-6 lg:w-2/3 border-slate-300"
                         {...field}
                       />
                     </FormControl>

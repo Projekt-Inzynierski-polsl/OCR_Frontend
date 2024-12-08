@@ -29,7 +29,8 @@ import {
 const SidebarBody = styled.div`
   background-color: #f3f4f6;
   color: #374151;
-  height: 100vh;
+  height: 100%;
+  padding-bottom: 48px;
   padding-top: 64px;
   font-family: "Space Grotesk";
 `;
@@ -408,9 +409,9 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
               </div>
             ))}
 
-            {lastNotes.length === 0 && (
+            {sharedNotes.length === 0 && (
                       <Fragment className="ml-4">
-                        <p className="ml-16 text-gray-400">Edytuj swój pierwszy dokument!</p>
+                        <p className="ml-16 text-gray-400">Nie masz żadnych udostępnionych dokumentów dla Ciebie.</p>
                       </Fragment>
                 )}
           </div>
@@ -742,7 +743,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
               {userFolders.map((folder) => (
                 <Fragment key={folder.id}>
                   <Collapsible>
-                    <div className="folder pl-4 mt-2 grid grid-cols-[20px_64px_110px_64px_48px_32px] hover:bg-slate-200 py-1.5 mx-4 items-center">
+                    <div className="folder pl-4 mt-2 grid grid-cols-[20px_64px_1fr_64px_48px_32px] lg:grid-cols-[20px_64px_110px_64px_48px_32px] hover:bg-slate-200 py-1.5 mx-4 items-center">
                       <CollapsibleTrigger>
                         <button
                           className="p-2 hover:bg-neutral-300 rounded-md"
@@ -924,7 +925,7 @@ function Sidebar({ options, setOptions, userFolders, setUserFolders }) {
                       <NoteBody>
                         <div className="notebody__text mt-8">
                           <NoteHeader
-                            className="font-bold text-4xl"
+                            className="font-bold text-4xl text-left"
                             contentEditable="true"
                             spellCheck="false"
                             placeholder="Nowa notatka"

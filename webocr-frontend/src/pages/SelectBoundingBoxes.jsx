@@ -153,7 +153,7 @@ function SelectBoundingBoxes() {
         ) : (
           <>
             <FirstNoteHero className="py-16 w-full">
-              <h1 className="text-5xl font-bold">
+              <h1 className="text-5xl text-center lg:text-left font-bold">
                 Zaznacz, co chcesz zachować
               </h1>
               <p className="max-w-3xl text-center mt-4 text-md">
@@ -187,7 +187,7 @@ function SelectBoundingBoxes() {
                 <TabsContent value="obrazek"></TabsContent>
               </Tabs>
             </div>
-            <NextButton className="mt-16 w-1/3" onClick={handleContinue}>
+            <NextButton className="mt-16 lg:w-1/3" onClick={handleContinue}>
               Przejdź dalej &gt;
             </NextButton>
           </>

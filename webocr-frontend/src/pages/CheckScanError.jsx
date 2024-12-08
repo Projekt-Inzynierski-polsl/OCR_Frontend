@@ -23,7 +23,8 @@ function CheckScanError() {
   const { toast } = useToast();
   const [img, setImg] = useState("");
   const handleErrorCheck = (action) => {
-    api
+    if (action === "accept") {
+      api
       .put(`http://localhost:8051/api/ocrError/${errorId}`, {
         isAccepted: true,
       }, {
@@ -38,6 +39,21 @@ function CheckScanError() {
         });
         navigate("/errors")
       })
+    } else {
+      api
+      .delete(`http://localhost:8051/api/ocrError/${errorId}`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        toast({
+          title: "Poprawka usunięta pomyślnie!",
+          body: "Sprawdź też inne błędy.",
+        });
+        navigate("/errors")
+      })
+    }
   };
 
   useEffect(() => {
@@ -67,15 +83,15 @@ function CheckScanError() {
   return (
     <>
       <Navbar></Navbar>
-      <main className="grid grid-cols-[385px_1fr]">
+      <main className="flex flex-col lg:grid lg:grid-cols-[385px_1fr]">
         <Sidebar></Sidebar>
-        <MainLayout className="h-screen">
-          <h1 className="font-bold text-3xl ml-40 mt-8">Błąd #{errorId}</h1>
-          <div className="dashboard-info flex flex-row items-top gap-4 mt-8 mx-32">
+        <MainLayout className="h-screen max-lg:pt-8">
+          <h1 className="font-bold text-3xl ml-8 lg:ml-40 mt-8">Błąd #{errorId}</h1>
+          <div className="dashboard-info flex flex-col lg:flex-row items-top gap-4 mt-8 lg:mx-32 ml-8 max-md:w-full">
             <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-4/5">
-              <CardContent className="pb-6 pl-16 pt-6 mr-64">
-                <div className="text-inputs grid grid-cols-2 mt-6 mb-24 gap-16">
-                <div className="scanned-image flex flex-col gap-2">
+              <CardContent className="pb-6 lg:pl-16 pt-6">
+                <div className="text-inputs flex flex-col xl:grid xl:grid-cols-2 mt-6 mb-24 gap-16">
+                <div className="scanned-image gap-2">
                   <p className="font-bold text-lg">Wrzucone zdjęcie</p>
                   <img src={img} alt="" className="w-5xl h-4xl" />
                 </div>
@@ -90,12 +106,18 @@ function CheckScanError() {
                   </div>
                 </div>
 
-                <div className="buttons-container grid grid-cols-2 mt-12 gap-8 w-2/3">
+                <div className="buttons-container flex flex-col lg:grid lf:grid-cols-2 mt-12 gap-8">
                   <button
                     className="border border-[#004601] text-[#004601] text-center font-bold rounded-[10px] py-3"
                     onClick={() => handleErrorCheck("accept")}
                   >
                     Zaakceptuj poprawkę
+                  </button>
+                  <button
+                    className="border border-[#760b0d] text-[#760b0d] text-center font-bold rounded-[10px] py-3"
+                    onClick={() => handleErrorCheck("delete")}
+                  >
+                    Usuń poprawkę
                   </button>
                 </div>
               </CardContent>

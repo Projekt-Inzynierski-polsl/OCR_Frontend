@@ -5,7 +5,7 @@ import Sidebar from "../components/AdminSidebar.jsx";
 const MainLayout = styled.div`
   background-color: #f9fafb;
   font-family: "Space Grotesk";
-  height: 100vh;
+  height: 100%;
 `;
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -101,11 +101,11 @@ function AdminDashboard() {
   return (
     <>
       <Navbar></Navbar>
-      <main className="grid grid-cols-[385px_1fr]">
+      <main className="flex flex-col w-full lg:grid lg:grid-cols-[385px_1fr]">
         <Sidebar></Sidebar>
         <MainLayout>
-          <div className="stats flex flex-row mx-32 mt-10 gap-4">
-            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-8 w-1/3">
+          <div className="stats flex flex-col lg:flex-row lg:mx-32 mt-10 gap-4">
+            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-8 w-full mx-4 lg:mx-0 lg:w-1/3">
               <CardContent className="pb-0">
                 <p className="text-5xl font-bold text-right mr-2">
                   {adminStats.activeUsers}
@@ -117,7 +117,7 @@ function AdminDashboard() {
                 </CardTitle>
               </CardHeader>
             </Card>
-            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-1/3">
+            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-full mx-4 lg:mx-0 lg:w-1/3">
               <CardContent className="pb-0">
                 <p className="text-5xl font-bold text-right mr-2 text-red-600">
                   {adminStats.activeScanErrors}
@@ -130,7 +130,7 @@ function AdminDashboard() {
               </CardHeader>
             </Card>
 
-            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-1/3">
+            <Card className="bg-white border border-slate-100 flex flex-col items-end justify-end pt-4 w-full mx-4 lg:mx-0 lg:w-1/3">
               <CardContent className="pb-0">
                 <p className="text-5xl font-bold text-right mr-2">
                   {adminStats.todayNotes}
@@ -143,8 +143,8 @@ function AdminDashboard() {
               </CardHeader>
             </Card>
           </div>
-          <div className="dashboard-info flex flex-row items-top gap-4 mt-8 mx-32">
-            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-3/4">
+          <div className="dashboard-info flex flex-row items-top gap-4 mt-8 lg:mx-32">
+            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-full">
               <CardHeader className="text-left ml-2 space-y-0 pt-3 pb-5">
                 <CardTitle className="text-xl pb-2">
                   Aktywne błędy skanowania

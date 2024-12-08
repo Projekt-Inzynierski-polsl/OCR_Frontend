@@ -103,7 +103,7 @@ function Note() {
 
   const folderName = location.state?.folderName;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isViewMode, setIsVieWMode] = useState(false);
+  const [isViewMode, setIsViewMode] = useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -373,6 +373,21 @@ function Note() {
               color: color,
             });
             setSelectedOption(newSelectedOptions);
+            api
+            .put(
+              `http://localhost:8051/api/user/note/${currentNote.noteId}/categories`,
+              {
+                categoriesIds: [response.data],
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${Cookies.get("authToken")}`,
+                },
+              }
+            )
+            .then((response) => {
+              currentNote.isPrivate = false;
+            });
           } else if (response.status === 500) {
             setErrorMessage("Błąd serwera. Spróbuj ponownie później.");
           }
@@ -518,7 +533,7 @@ function Note() {
         })
         .catch((error) => {
           if (error.response.data === "Cannot operate someone else's note.") {
-            setIsVieWMode(true);
+            setIsViewMode(true);
           }
         });
     }
@@ -576,17 +591,17 @@ function Note() {
     <>
       <Navbar></Navbar>
       <Toaster />
-      <main className="grid grid-cols-[385px_1fr]">
+      <main className="flex flex-col-reverse lg:grid lg:grid-cols-[385px_1fr]">
         <Sidebar
           options={options}
           setOptions={setOptions}
           userFolders={userFolders}
           setUserFolders={setUserFolders}
         ></Sidebar>
-        <NoteBody className="pl-16 pt-8">
+        <NoteBody className="pl-8 lg:pl-16 pt-8 max-lg:h-full max-lg:mb-16 min-h-screen h-full">
           {currentNote.title && noteId ? (
             <Fragment>
-              <div className="notebody__top flex flex-row items-center justify-between mr-16">
+              <div className="notebody__top flex flex-row items-center justify-between mr-8 lg:mr-16">
                 <BreadcrumbPage>
                   <BreadcrumbList>
                     <BreadcrumbItem>
@@ -603,7 +618,7 @@ function Note() {
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </BreadcrumbPage>
-                <div className="actions flex flex-row gap-4">
+                <div className="actions flex flex-col sm:flex-row gap-4">
                   <Dialog
                     open={exportDialogOpen}
                     onOpenChange={setExportDialogOpen}
@@ -838,7 +853,8 @@ function Note() {
                 <div className="mt-4">
                   <p className="font-bold text-sm text-slate-500">Kategorie</p>
 
-                  <CreatableSelect
+                  {!isViewMode ? (
+                    <CreatableSelect
                     className="w-2/3 mt-4"
                     isMulti
                     defaultValue={selectedOption}
@@ -866,6 +882,27 @@ function Note() {
                       ),
                     }}
                   />
+                
+                  ) : (
+                    <CreatableSelect
+                    className="w-2/3 mt-4"
+                    isMulti
+                    isDisabled
+                    defaultValue={selectedOption}
+                    options={options}
+                    maxMenuHeight={512}
+                    menuPlacement="auto"
+                    value={selectedOption}
+                    styles={colourStyles}
+                    components={{
+                      Option: (props) => (
+                        <OptionWithTooltip
+                          {...props}
+                          isOpen={isPopoverOpen}
+                          onOpenChange={setIsPopoverOpen}
+                        />
+                      ),
+                    }} />)}
                 </div>
                 <div
                   className="notebody__content focus:outline-none mt-8 mr-16"

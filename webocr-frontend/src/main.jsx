@@ -10,7 +10,6 @@ import UserManagement from "@/src/pages/UserManagement.jsx";
 import ScanErrors from "@/src/pages/ScanErrors.jsx";
 import CheckScanError from "@/src/pages/CheckScanError.jsx";
 import SelectBoundingBoxes from "@/src/pages/SelectBoundingBoxes.jsx";
-import UploadModel from "@/src/pages/UploadModel.jsx";
 import CheckOutput from "@/src/pages/CheckOutput.jsx";
 import { Toaster } from "@/components/ui/toaster";
 import { CookiesProvider } from "react-cookie";
@@ -93,7 +92,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route path="/errors" element={<ScanErrors />} />
             <Route path="/errors/:errorId" element={<CheckScanError />} />
             <Route path="/edit-profile/:userId" element={<EditProfile />} />
-            <Route path="/upload-model" element={<UploadModel />} />
           </Route>
           <Route
             path="/select-boxes"

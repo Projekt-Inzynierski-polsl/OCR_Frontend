@@ -166,7 +166,7 @@ function CheckOutput() {
       </header>
       <main className="flex flex-col items-center pb-16">
         <FirstNoteHero className="py-16 w-full">
-          <h1 className="text-5xl font-bold">
+          <h1 className="text-5xl text-center lg:text-left font-bold">
             Sprawdź i popraw zeskanowany tekst
           </h1>
           <p className="max-w-3xl text-center mt-4 text-md">
@@ -174,9 +174,9 @@ function CheckOutput() {
             potrzebne, zaznacz na zdjęciu części tekstu i innych elementów.
           </p>
         </FirstNoteHero>
-        <div className="bound-container border border-[#D1D5DB] mt-8 flex flex-row w-[90%]">
-          <img src={img} ref={imgEl} />
-          <div className="border border-[#D1D5DB] p-8 w-1/2">
+        <div className="bound-container border border-[#D1D5DB] mt-8 flex flex-col lg:flex-row w-[90%]">
+          <img src={img} ref={imgEl}/>
+          <div className="border border-[#D1D5DB] p-8 lg:w-1/2">
             {textBoxes.map((textBox) => (
               <div className="text">
                 <div
@@ -200,7 +200,7 @@ function CheckOutput() {
           </div>
         </div>
 
-        <NextButton className="mt-16 w-1/3" onClick={handleNextStep}>Przejdź dalej &gt;</NextButton>
+        <NextButton className="mt-16 lg:w-1/3" onClick={handleNextStep}>Przejdź dalej &gt;</NextButton>
       </main>
     </>
   );

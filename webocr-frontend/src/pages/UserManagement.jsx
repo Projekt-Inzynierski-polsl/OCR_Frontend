@@ -48,14 +48,14 @@ function AdminDashboard() {
   return (
     <>
       <Navbar></Navbar>
-      <main className="grid grid-cols-[385px_1fr]">
+      <main className="flex flex-col lg:grid lg:grid-cols-[385px_1fr]">
         <Sidebar></Sidebar>
         <MainLayout>
-          <h1 className="font-bold text-3xl ml-40 mt-8">
+          <h1 className="font-bold text-3xl ml-8 lg:ml-40 mt-8">
             Zarządzanie użytkownikami
           </h1>
-          <div className="dashboard-info flex flex-row items-top gap-4 mt-8 mx-32">
-            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-4/5">
+          <div className="dashboard-info flex flex-row items-top gap-4 mt-8 lg:mx-32">
+            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-full lg:w-4/5">
               <CardHeader className="text-left ml-2 space-y-0 pt-3 pb-5">
                 <CardTitle className="text-xl pb-2">
                   Lista użytkowników

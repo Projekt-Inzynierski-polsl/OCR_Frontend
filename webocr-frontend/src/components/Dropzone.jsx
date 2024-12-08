@@ -47,24 +47,24 @@ function Dropzone({handleDrop}) {
     { fileRejections.length > 0 && 
         <h2 className="mt-4 text-red-700 font-bold">Wrzucone pliki są niepoprawne. Wrzuć pliki .jpg lub .png o rozmiarze maksymalnie 10 MB.</h2>
     }
-      <form className="p-16 mt-4 border border-neutral-200 w-1/3 flex flex-col items-center justify-center">
+      <form className="p-16 mt-4 border border-neutral-200 lg:w-1/3 flex flex-col items-center justify-center">
         
         <div {...getRootProps()} className="flex flex-col items-center">
           <input {...getInputProps()} />
           <img src="/upload-cloud.png" alt="" className="mb-4" />
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-col items-center xl:items-start xl:flex-row gap-2">
               <DropzoneHeader className="text-xl">
                 Kliknij, by wrzucić zdjęcie
               </DropzoneHeader>
               <p className="text-xl">lub przeciągnij i upuść</p>
             </div>
-          <DropzoneHint>
+          <DropzoneHint className="text-center lg:text-left">
             Dopuszczalne formaty JPG i PNG, maksymalnie 10 MB
           </DropzoneHint>
         </div>
       </form>
       { acceptedFiles.length > 0 && acceptedFiles.map(file => (
-        <AcceptedFiles className="w-1/3" key={file.name}>
+        <AcceptedFiles className="lg:w-1/3" key={file.name}>
         <div className="info-container flex flex-row items-center gap-4">
             <img src="/image_icon.png" alt=""/>
             <span className="flex flex-col">

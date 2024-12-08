@@ -46,7 +46,7 @@ function UploadNoteFile() {
       <main className="flex flex-col items-center">
         <Fragment>
           <FirstNoteHero className="py-16 w-full">
-            <h1 className="text-5xl font-bold">Wrzuć zdjęcie notatki</h1>
+            <h1 className="text-5xl font-bold text-center lg:text-left">Wrzuć zdjęcie notatki</h1>
             <p className="max-w-3xl text-center mt-4 text-md">
               Przekonaj się, jak łatwe i przyjemne jest korzystanie z webOCR. Przeciągnij i upuść lub
               wybierz plik do wrzucenia, a system z użyciem AI rozpozna i zapisze tekst, który się tam znajduje.
@@ -55,7 +55,7 @@ function UploadNoteFile() {
           <Dropzone handleDrop={setUploadedFiles}></Dropzone>
 
           <NextButton
-            className="mt-16 w-1/3"
+            className="mt-16 w-full lg:w-1/3"
             onClick={handleClick}
             disabled={uploadedFiles.length > 0 ? false : true}
           >

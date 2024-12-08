@@ -39,7 +39,7 @@ function Navbar() {
 
   return (
     <>
-      <nav className="flex flex-row items-center justify-between pl-32 pr-16 pt-8 pb-8 border border-slate-200">
+      <nav className="flex flex-row items-center justify-between pl-4 md:pl-16 lg:pl-32 pr-2 md:pr-8 lg:pr-16 pt-8 pb-8 border border-slate-200">
         <NavLink to="/">
           <img src="/logo_black.png" alt="" className="w-32" />
         </NavLink>
@@ -49,7 +49,7 @@ function Navbar() {
             <p className="email text-sm"> {userData.email}</p>
           </div>
           <button
-            className="flex flex-row items-center ml-10 gap-2"
+            className="flex flex-col lg:flex-row items-center ml-4 lg:ml-10 gap-2"
             onClick={handleLogout}
           >
             <img src="/log-out.svg" alt="" />

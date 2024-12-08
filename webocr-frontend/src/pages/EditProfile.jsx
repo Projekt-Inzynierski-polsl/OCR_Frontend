@@ -242,22 +242,22 @@ function EditProfile() {
   return (
     <>
       <Navbar></Navbar>
-      <main className="grid grid-cols-[385px_1fr]">
+      <main className="flex flex-col gap-4 lg:grid lg:grid-cols-[385px_1fr]">
         <Sidebar></Sidebar>
         <MainLayout>
-          <h1 className="font-bold text-3xl ml-40 mt-8">
+          <h1 className="font-bold text-3xl ml-8 lg:ml-40 mt-8">
             Profil użytkownika {currentUser.nickname}
           </h1>
-          <div className="dashboard-info gap-4 mt-8 mx-32">
-            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-3/5">
+          <div className="dashboard-info gap-4 mt-8 lg:mx-32">
+            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-full">
               <Form {...form}>
-                <CardContent className="pb-6 pl-16 pt-6 mr-64">
+                <CardContent className="pb-6 lg:pl-16 pt-6">
                   <form
                     onSubmit={form.handleSubmit(handleSubmit)}
                     className="space-y-8"
                   >
                     <p className="font-bold text-red-700 mb-4 mt-6"></p>
-                    <div className="text-inputs grid grid-cols-2 gap-16">
+                    <div className="text-inputs xl:grid xl:grid-cols-2 gap-16">
                       <div className="input-container">
                         <p className="font-bold text-lg mb-2">
                           Nazwa użytkownika
@@ -282,7 +282,7 @@ function EditProfile() {
                           }}
                         />
                       </div>
-                      <div className="input-container">
+                      <div className="input-container mt-6 xl:mt-0">
                         <p className="font-bold text-lg mb-2">Adres e-mail</p>
                         <FormField
                           control={form.control}
@@ -329,7 +329,7 @@ function EditProfile() {
                       />
                     </div>
                     <SaveChangesButton
-                      className="float-right mt-8"
+                      className="lg:float-right mt-8 w-full lg:w-auto"
                       type="submit"
                     >
                       Zapisz zmiany
@@ -338,8 +338,8 @@ function EditProfile() {
                 </CardContent>
               </Form>
             </Card>
-            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-3/5 mt-8">
-              <CardHeader className="text-left ml-2 space-y-0 pt-3 pb-5 pl-14">
+            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-full mt-8">
+              <CardHeader className="text-left ml-2 space-y-0 pt-3 pb-5 lg:pl-14">
                 <CardTitle className="text-2xl font-bold pb-2 text-[#760B0D]">
                   Usuń konto
                 </CardTitle>
@@ -348,7 +348,7 @@ function EditProfile() {
                   usunięte bezpowrotnie!
                 </CardDescription>
               </CardHeader>
-              <CardContent className="pb-6 pl-16 mr-64">
+              <CardContent className="pb-6 lg:pl-16">
                 <Dialog>
                   <DialogTrigger asChild>
                     <DeleteAccountButton className="mt-8">
@@ -374,14 +374,14 @@ function EditProfile() {
                 </Dialog>
               </CardContent>
             </Card>
-            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-3/5 mt-8">
+            <Card className="bg-white border border-slate-100 flex flex-col pt-4 w-full mt-8">
               <CardHeader className="text-left ml-2 space-y-0 pt-3 pb-5 pl-14">
                 <CardTitle className="text-2xl font-bold pb-2">
                   Aktywność użytkownika
                 </CardTitle>
                 <CardDescription>Tabela z logami użytkownika.</CardDescription>
               </CardHeader>
-              <CardContent className="pb-6 pl-16 mr-64">
+              <CardContent className="pb-6 pl-16 xl:mr-64">
                 <Table>
                   <TableHeader>
                     <TableRow>
