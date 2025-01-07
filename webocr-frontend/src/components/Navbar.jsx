@@ -19,7 +19,7 @@ function Navbar() {
 
   const handleLogout = () => {
     api
-      .post("http://localhost:8051/api/account/logout", {
+      .post(`http://localhost:8051/api/account/logout`, {}, {
         headers: {
           Authorization: `Bearer ${Cookies.get("authToken")}`,
         },
@@ -27,9 +27,6 @@ function Navbar() {
       .then((response) => {
         Cookies.remove("authToken", { path: "/" });
         window.location.href = "/";
-      })
-      .catch((error) => {
-        toast(error)
       });
   };
 
