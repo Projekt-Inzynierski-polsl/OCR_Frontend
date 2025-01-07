@@ -18,7 +18,6 @@ function Navbar() {
   const [userData, setUserData] = useState({});
 
   const handleLogout = () => {
-    Cookies.remove("authToken", { path: "/" });
     api
       .post("http://localhost:8051/api/account/logout", {
         headers: {
@@ -26,6 +25,7 @@ function Navbar() {
         },
       })
       .then((response) => {
+        Cookies.remove("authToken", { path: "/" });
         window.location.href = "/";
       })
       .catch((error) => {
