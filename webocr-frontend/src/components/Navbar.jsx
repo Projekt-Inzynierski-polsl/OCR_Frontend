@@ -19,7 +19,18 @@ function Navbar() {
 
   const handleLogout = () => {
     Cookies.remove("authToken", { path: "/" });
-    window.location.href = "/";
+    api
+      .post("http://localhost:8051/api/account/logout", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("authToken")}`,
+        },
+      })
+      .then((response) => {
+        window.location.href = "/";
+      })
+      .catch((error) => {
+        toast(error)
+      });
   };
 
   useEffect(() => {
